@@ -1,0 +1,10 @@
+[package]
+name = "lu_packets"
+version = "0.1.0"
+authors = ["lcdr"]
+edition = "2018"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/lcdr/lu_packets/"
+
+[dependencies]
+endio = "0.1.0"
