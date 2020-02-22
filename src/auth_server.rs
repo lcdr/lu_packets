@@ -159,21 +159,21 @@ impl<R: LERead> Deserialize<LE, R> for AuthMessage
 
 #[derive(Debug)]
 pub struct LoginRequest {
-	username: LuWStr33,
-	password: LuWStr41,
-	locale_id: u16,
-	os_id: u8,
-	memory_stats: LuWStr256,
-	video_card_info: LuWStr128,
-	number_of_processors: u32,
-	processor_type: u32,
-	processor_level: u16,
-	processor_revision: u16,
-	os_version_info_size: u32,
-	os_major_version: u32,
-	os_minor_version: u32,
-	os_build_number: u32,
-	os_platform_id: u32,
+	pub username: LuWStr33,
+	pub password: LuWStr41,
+	pub locale_id: u16,
+	pub os_id: u8,
+	pub memory_stats: LuWStr256,
+	pub video_card_info: LuWStr128,
+	pub number_of_processors: u32,
+	pub processor_type: u32,
+	pub processor_level: u16,
+	pub processor_revision: u16,
+	pub os_version_info_size: u32,
+	pub os_major_version: u32,
+	pub os_minor_version: u32,
+	pub os_build_number: u32,
+	pub os_platform_id: u32,
 }
 
 impl<R: LERead> Deserialize<LE, R> for LoginRequest

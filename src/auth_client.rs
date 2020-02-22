@@ -199,7 +199,10 @@ impl<W: LEWrite> Serialize<LE, W> for &LoginResponse
 		match self {
 			LoginResponse::Ok { session_key, redirect_address } => {
 				writer.write(LoginResponseId::Ok as u8)?;
-				writer.write(&[0; 270][..])?;
+				writer.write(&[0; 264][..])?;
+				writer.write(1u16)?;
+				writer.write(10u16)?;
+				writer.write(64u16)?;
 				writer.write(session_key)?;
 				writer.write(&redirect_address.0)?;
 				writer.write(&[0; 33][..])?;
