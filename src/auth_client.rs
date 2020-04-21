@@ -13,6 +13,7 @@ enum MessageId {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum Message {
 	ConnectedPong { ping_send_time: u32 },
 	ConnectionRequestAccepted { peer_ip: Ipv4Addr, peer_port: u16, local_ip: Ipv4Addr, local_port: u16 },
@@ -84,6 +85,7 @@ enum GeneralId {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum GeneralMessage {
 	Handshake(Handshake)
 }
@@ -140,6 +142,7 @@ enum ClientId {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum ClientMessage {
 	LoginResponse(LoginResponse),
 }
@@ -173,6 +176,7 @@ enum LoginResponseId {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum LoginResponse {
 	Ok {
 		session_key: LuWStr33,

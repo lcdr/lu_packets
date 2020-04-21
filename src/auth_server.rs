@@ -14,6 +14,7 @@ enum MessageId {
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum Message {
 	InternalPing(InternalPing),
 	ConnectionRequest(ConnectionRequest),
@@ -85,6 +86,7 @@ impl<R: LERead> Deserialize<LE, R> for NewIncomingConnection
 }
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum LUMessage {
 	General(GeneralMessage),
 	Auth(AuthMessage),
