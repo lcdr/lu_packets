@@ -1,11 +1,38 @@
 use std::io::{Error, ErrorKind::InvalidData};
 use std::io::Result as Res;
+use std::net::Ipv4Addr;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 
 pub(crate) fn err<T>(msg: &str) -> Res<T> {
 	Err(Error::new(InvalidData, msg))
+}
+
+#[derive(Debug)]
+pub struct SystemAddress {
+	ip: Ipv4Addr,
+	port: u16,
+}
+
+impl<R: LERead> Deserialize<LE, R> for SystemAddress
+	where u16: Deserialize<LE, R>,
+	      u32: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let ip: u32 = reader.read()?;
+		let ip = ip.into();
+		let port: u16 = reader.read()?;
+		Ok(Self { ip, port })
+	}
+}
+
+impl<'a, W: LEWrite> Serialize<LE, W> for &SystemAddress
+	where u16: Serialize<LE, W>,
+	      u32: Serialize<LE, W> {
+	fn serialize(self, writer: &mut W) -> Res<()>	{
+		writer.write(u32::from(self.ip))?;
+		writer.write(self.port)
+	}
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -21,8 +48,8 @@ impl<R: LERead> Deserialize<LE, R> for ServiceId
 		let id: u16 = reader.read()?;
 		Ok(match id {
 			x if x == ServiceId::General as u16 => ServiceId::General,
-			x if x == ServiceId::Auth as u16 => ServiceId::Auth,
-			x if x == ServiceId::Client as u16 => ServiceId::Client,
+			x if x == ServiceId::Auth    as u16 => ServiceId::Auth,
+			x if x == ServiceId::Client  as u16 => ServiceId::Client,
 			_ => {
 				return err("unknown service id");
 			}
@@ -30,7 +57,7 @@ impl<R: LERead> Deserialize<LE, R> for ServiceId
 	}
 }
 
-impl<'a, W: LEWrite> Serialize<LE, W> for ServiceId
+impl<W: LEWrite> Serialize<LE, W> for ServiceId
 	where u16: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
 		writer.write(self as u16)

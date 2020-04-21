@@ -4,11 +4,12 @@ use std::io::Result as Res;
 use endio::{Deserialize, LERead};
 use endio::LittleEndian as LE;
 
-use crate::common::{err, LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
+use crate::common::{err, LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId, SystemAddress};
 
 enum MessageId {
 	InternalPing = 0,
 	ConnectionRequest = 4,
+	NewIncomingConnection = 17,
 	UserMessage = 83,
 }
 
@@ -16,20 +17,24 @@ enum MessageId {
 pub enum Message {
 	InternalPing(InternalPing),
 	ConnectionRequest(ConnectionRequest),
+	NewIncomingConnection(NewIncomingConnection),
 	UserMessage(LUMessage),
 }
 
 impl<R: LERead> Deserialize<LE, R> for Message
-	where            u8: Deserialize<LE, R>,
-	       InternalPing: Deserialize<LE, R>,
-	  ConnectionRequest: Deserialize<LE, R>,
-	          LUMessage: Deserialize<LE, R> {
+	where                u8: Deserialize<LE, R>,
+	           InternalPing: Deserialize<LE, R>,
+	      ConnectionRequest: Deserialize<LE, R>,
+	  NewIncomingConnection: Deserialize<LE, R>,
+	              LUMessage: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let message_id: u8 = LERead::read(reader)?;
 		Ok(if message_id == MessageId::InternalPing as u8 {
 			Self::InternalPing(LERead::read(reader)?)
 		}	else if message_id == MessageId::ConnectionRequest as u8 {
 			Self::ConnectionRequest(LERead::read(reader)?)
+		}	else if message_id == MessageId::NewIncomingConnection as u8 {
+			Self::NewIncomingConnection(LERead::read(reader)?)
 		} else if message_id == MessageId::UserMessage as u8 {
 			Self::UserMessage(LERead::read(reader)?)
 		} else {
@@ -61,6 +66,21 @@ impl<R: Read> Deserialize<LE, R> for ConnectionRequest {
 		Read::read_to_end(reader, &mut password)?;
 		let password = password.into_boxed_slice();
 		Ok(Self { password })
+	}
+}
+
+#[derive(Debug)]
+pub struct NewIncomingConnection {
+	peer_addr: SystemAddress,
+	local_addr: SystemAddress,
+}
+
+impl<R: LERead> Deserialize<LE, R> for NewIncomingConnection
+	where SystemAddress: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let peer_addr = reader.read()?;
+		let local_addr = reader.read()?;
+		Ok(Self { peer_addr, local_addr })
 	}
 }
 
