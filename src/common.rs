@@ -15,23 +15,24 @@ pub struct SystemAddress {
 	port: u16,
 }
 
-impl<R: LERead> Deserialize<LE, R> for SystemAddress
+impl<R: std::io::Read+LERead> Deserialize<LE, R> for SystemAddress
 	where u16: Deserialize<LE, R>,
 	      u32: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
-		let ip: u32 = reader.read()?;
+		let mut ip = [0; 4];
+		std::io::Read::read(reader, &mut ip)?;
 		let ip = ip.into();
-		let port: u16 = reader.read()?;
+		let port: u16 = LERead::read(reader)?;
 		Ok(Self { ip, port })
 	}
 }
 
-impl<'a, W: LEWrite> Serialize<LE, W> for &SystemAddress
+impl<'a, W: std::io::Write+LEWrite> Serialize<LE, W> for &SystemAddress
 	where u16: Serialize<LE, W>,
 	      u32: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
-		writer.write(u32::from(self.ip))?;
-		writer.write(self.port)
+		std::io::Write::write(writer, &self.ip.octets()[..])?;
+		LEWrite::write(writer, self.port)
 	}
 }
 
