@@ -40,6 +40,7 @@ impl<'a, W: std::io::Write+LEWrite> Serialize<LE, W> for &SystemAddress
 pub enum ServiceId {
 	General = 0,
 	Auth = 1,
+	World = 4,
 	Client = 5,
 }
 
@@ -50,6 +51,7 @@ impl<R: LERead> Deserialize<LE, R> for ServiceId
 		Ok(match id {
 			x if x == ServiceId::General as u16 => ServiceId::General,
 			x if x == ServiceId::Auth    as u16 => ServiceId::Auth,
+			x if x == ServiceId::World   as u16 => ServiceId::World,
 			x if x == ServiceId::Client  as u16 => ServiceId::Client,
 			_ => {
 				return err("unknown service id");
