@@ -24,7 +24,7 @@ impl<R: LERead> Deserialize<LE, R> for GeneralMessage
 		if packet_id == GeneralId::Handshake as u32 {
 			Ok(GeneralMessage::Handshake(reader.read()?))
 		} else {
-			err("invalid general id")
+			err("general id", packet_id)
 		}
 	}
 }

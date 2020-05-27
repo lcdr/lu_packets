@@ -43,7 +43,7 @@ impl<R: endio::LERead> endio::Deserialize<LE, R> for Message
 		} else if message_id == $crate::raknet::server::MessageId::UserMessage as u8 {
 			Self::UserMessage(LERead::read(reader)?)
 		} else {
-			return err("invalid message id");
+			return err("message id", message_id);
 		})
 	}
 }

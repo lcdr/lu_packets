@@ -5,8 +5,8 @@ use std::net::Ipv4Addr;
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 
-pub(crate) fn err<T>(msg: &str) -> Res<T> {
-	Err(Error::new(InvalidData, msg))
+pub(crate) fn err<T, U: std::fmt::Debug>(name: &str, value: U) -> Res<T> {
+	Err(Error::new(InvalidData, &format!("unknown {} {:?}", name, value)[..]))
 }
 
 #[derive(Debug)]
@@ -53,8 +53,8 @@ impl<R: LERead> Deserialize<LE, R> for ServiceId
 			x if x == ServiceId::Auth    as u16 => ServiceId::Auth,
 			x if x == ServiceId::World   as u16 => ServiceId::World,
 			x if x == ServiceId::Client  as u16 => ServiceId::Client,
-			_ => {
-				return err("unknown service id");
+			x => {
+				return err("service id", x);
 			}
 		})
 	}
@@ -161,3 +161,5 @@ lu_wstr!(LuWStr33, 33);
 lu_wstr!(LuWStr41, 41);
 lu_wstr!(LuWStr128, 128);
 lu_wstr!(LuWStr256, 256);
+
+pub type ObjId = u64;

@@ -30,7 +30,7 @@ impl<R: LERead> Deserialize<LE, R> for LUMessage
 				LUMessage::Auth(reader.read()?)
 			}
 			_ => {
-				return err("invalid service id");
+				return err("service id", service_id);
 			}
 		})
 	}
@@ -55,7 +55,7 @@ impl<R: LERead> Deserialize<LE, R> for AuthMessage
 		if packet_id == AuthId::LoginRequest as u32 {
 			Ok(AuthMessage::LoginRequest(reader.read()?))
 		} else {
-			err("invalid auth id")
+			err("auth id", packet_id)
 		}
 	}
 }
