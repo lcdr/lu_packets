@@ -5,7 +5,8 @@ use std::io::Result as Res;
 use endio::{Deserialize, LERead};
 use endio::LittleEndian as LE;
 
-use crate::common::{err, ObjId, LuWStr33, LuStr33, ServiceId};
+use crate::common::{err, ObjId, LuWStr33, LuWStr42, LuStr33, ServiceId, ZoneId};
+use crate::chat::server::ChatMessage;
 pub use crate::general::server::GeneralMessage;
 
 rak_server_msg!(LUMessage);
@@ -20,15 +21,15 @@ pub enum LUMessage {
 impl<R: LERead> Deserialize<LE, R> for LUMessage
 	where        u16: Deserialize<LE, R>,
 	  GeneralMessage: Deserialize<LE, R>,
-	     WorldMessage: Deserialize<LE, R> {
+	    WorldMessage: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let service_id: ServiceId = reader.read()?;
 		Ok(match service_id {
 			ServiceId::General => {
-				LUMessage::General(reader.read()?)
+				Self::General(reader.read()?)
 			}
 			ServiceId::World => {
-				LUMessage::World(reader.read()?)
+				Self::World(reader.read()?)
 			}
 			_ => {
 				return err("service id", service_id);
@@ -43,6 +44,12 @@ enum WorldId {
 	CharacterCreateRequest = 3,
 	CharacterLoginRequest = 4,
 	CharacterDeleteRequest = 6,
+	GeneralChatMessage = 14,
+	LevelLoadComplete = 19,
+	RouteMessage = 21,
+	StringCheck = 25,
+	RequestFreeTrialRefresh = 32,
+	UgcDownloadFailed = 120,
 }
 
 #[derive(Debug)]
@@ -52,6 +59,12 @@ pub enum WorldMessage {
 	CharacterCreateRequest(CharacterCreateRequest),
 	CharacterLoginRequest(CharacterLoginRequest),
 	CharacterDeleteRequest(CharacterDeleteRequest),
+	GeneralChatMessage(GeneralChatMessage),
+	LevelLoadComplete(LevelLoadComplete),
+	RouteMessage(RouteMessage),
+	StringCheck(StringCheck),
+	RequestFreeTrialRefresh,
+	UgcDownloadFailed(UgcDownloadFailed),
 }
 
 impl<R: LERead> Deserialize<LE, R> for WorldMessage
@@ -59,21 +72,38 @@ impl<R: LERead> Deserialize<LE, R> for WorldMessage
 	                     u32: Deserialize<LE, R>,
 	        ClientValidation: Deserialize<LE, R>,
 	  CharacterCreateRequest: Deserialize<LE, R>,
-	  CharacterLoginRequest: Deserialize<LE, R>,
-	  CharacterDeleteRequest: Deserialize<LE, R> {
+	   CharacterLoginRequest: Deserialize<LE, R>,
+	  CharacterDeleteRequest: Deserialize<LE, R>,
+	      GeneralChatMessage: Deserialize<LE, R>,
+	       LevelLoadComplete: Deserialize<LE, R>,
+	            RouteMessage: Deserialize<LE, R>,
+	             StringCheck: Deserialize<LE, R>,
+	       UgcDownloadFailed: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let packet_id: u32 = reader.read()?;
 		let _padding: u8   = reader.read()?;
 		if packet_id == WorldId::ClientValidation as u32 {
-			Ok(WorldMessage::ClientValidation(reader.read()?))
+			Ok(Self::ClientValidation(reader.read()?))
 		} else if packet_id == WorldId::CharacterListRequest as u32 {
-			Ok(WorldMessage::CharacterListRequest)
+			Ok(Self::CharacterListRequest)
 		} else if packet_id == WorldId::CharacterCreateRequest as u32 {
-			Ok(WorldMessage::CharacterCreateRequest(reader.read()?))
+			Ok(Self::CharacterCreateRequest(reader.read()?))
 		} else if packet_id == WorldId::CharacterLoginRequest as u32 {
-			Ok(WorldMessage::CharacterLoginRequest(reader.read()?))
+			Ok(Self::CharacterLoginRequest(reader.read()?))
 		} else if packet_id == WorldId::CharacterDeleteRequest as u32 {
-			Ok(WorldMessage::CharacterDeleteRequest(reader.read()?))
+			Ok(Self::CharacterDeleteRequest(reader.read()?))
+		} else if packet_id == WorldId::GeneralChatMessage as u32 {
+			Ok(Self::GeneralChatMessage(reader.read()?))
+		} else if packet_id == WorldId::LevelLoadComplete as u32 {
+			Ok(Self::LevelLoadComplete(reader.read()?))
+		} else if packet_id == WorldId::RouteMessage as u32 {
+			Ok(Self::RouteMessage(reader.read()?))
+		} else if packet_id == WorldId::StringCheck as u32 {
+			Ok(Self::StringCheck(reader.read()?))
+		} else if packet_id == WorldId::RequestFreeTrialRefresh as u32 {
+			Ok(Self::RequestFreeTrialRefresh)
+		} else if packet_id == WorldId::UgcDownloadFailed as u32 {
+			Ok(Self::UgcDownloadFailed(reader.read()?))
 		} else {
 			err("world id", packet_id)
 		}
@@ -91,12 +121,12 @@ impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
 	where LuWStr33: Deserialize<LE, R>,
 	       LuStr33: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
-		let username             = LERead::read(reader)?;
-		let session_key          = LERead::read(reader)?;
+		let username         = LERead::read(reader)?;
+		let session_key      = LERead::read(reader)?;
 		let mut fdb_checksum = [0; 32];
 		std::io::Read::read(reader, &mut fdb_checksum)?;
 		// garbage byte because the devs messed up the null terminator
-		let _ : u8               =  LERead::read(reader)?;
+		let _ : u8           =  LERead::read(reader)?;
 		Ok(Self {
 			username,
 			session_key,
@@ -186,5 +216,142 @@ impl<R: LERead> Deserialize<LE, R> for CharacterDeleteRequest
 		Ok(Self {
 			char_id,
 		})
+	}
+}
+
+#[derive(Debug)]
+pub struct GeneralChatMessage {
+	pub chat_channel: u8, // todo: type?
+	pub source_id: u16,
+	pub message: String,
+}
+
+impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
+	where u8: Deserialize<LE, R>,
+	     u16: Deserialize<LE, R>,
+	     u32: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let chat_channel    = LERead::read(reader)?;
+		let source_id       = LERead::read(reader)?;
+		let string_len: u32 = LERead::read(reader)?;
+		let mut string = vec![0; (string_len*2) as usize];
+		let mut taken = Read::take(reader, (string_len*2) as u64);
+		Read::read(&mut taken, &mut string)?;
+		let string_slice: &[u16] = unsafe { std::slice::from_raw_parts(string.as_ptr() as *const u16, string_len as usize - 1) };
+		let message = String::from_utf16_lossy(string_slice);
+
+		Ok(Self { chat_channel, source_id, message })
+	}
+}
+
+#[derive(Debug)]
+pub struct LevelLoadComplete {
+	pub zone_id: ZoneId,
+}
+
+impl<R: LERead> Deserialize<LE, R> for LevelLoadComplete
+	where  ZoneId: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let zone_id = reader.read()?;
+
+		Ok(Self { zone_id })
+	}
+}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum RouteMessage {
+	Chat(ChatMessage),
+}
+
+impl<R: LERead> Deserialize<LE, R> for RouteMessage
+	where     u16: Deserialize<LE, R>,
+	          u32: Deserialize<LE, R>,
+	  ChatMessage: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let _packet_size: u32 = reader.read()?;
+		let service_id: ServiceId = reader.read()?;
+		Ok(match service_id {
+			ServiceId::Chat => {
+				Self::Chat(reader.read()?)
+			}
+			_ => {
+				return err("route service id", service_id);
+			}
+		})
+	}
+}
+
+#[derive(Debug)]
+pub struct StringCheck {
+	pub chat_mode: u8, // todo: type?
+	pub chat_channel: u8, // todo: type?
+	pub recipient_name: LuWStr42,
+	pub string: String,
+}
+
+impl<R: Read+LERead> Deserialize<LE, R> for StringCheck
+	where   u8: Deserialize<LE, R>,
+	       u16: Deserialize<LE, R>,
+	  LuWStr42: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let chat_mode       = LERead::read(reader)?;
+		let chat_channel    = LERead::read(reader)?;
+		let recipient_name  = LERead::read(reader)?;
+		let string_len: u16 = LERead::read(reader)?;
+		let mut string = vec![0; (string_len*2) as usize];
+		let mut taken = Read::take(reader, (string_len*2) as u64);
+		Read::read(&mut taken, &mut string)?;
+		let string_slice: &[u16] = unsafe { std::slice::from_raw_parts(string.as_ptr() as *const u16, string_len as usize) };
+		let string = String::from_utf16_lossy(string_slice);
+
+		Ok(Self { chat_mode, chat_channel, recipient_name, string })
+	}
+}
+
+#[derive(Debug)]
+pub enum UgcResType {
+	Lxfml = 0,
+	Nif = 1,
+	Hkx = 2,
+	Dds = 3,
+}
+
+impl<R: LERead> Deserialize<LE, R> for UgcResType
+	where u32: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let res_type: u32 = reader.read()?;
+		if res_type == Self::Lxfml as u32 {
+			Ok(Self::Lxfml)
+		} else if res_type == Self::Nif as u32 {
+			Ok(Self::Nif)
+		} else if res_type == Self::Hkx as u32 {
+			Ok(Self::Hkx)
+		} else if res_type == Self::Dds as u32 {
+			Ok(Self::Dds)
+		} else {
+			err("ugc res type", res_type)
+		}
+	}
+}
+
+#[derive(Debug)]
+pub struct UgcDownloadFailed {
+	pub res_type: UgcResType,
+	pub blueprint_id: ObjId,
+	pub status_code: u32,
+	pub char_id: ObjId,
+}
+
+impl<R: LERead> Deserialize<LE, R> for UgcDownloadFailed
+	where     u32: Deserialize<LE, R>,
+	   UgcResType: Deserialize<LE, R>,
+	        ObjId: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let res_type     = reader.read()?;
+		let blueprint_id = reader.read()?;
+		let status_code  = reader.read()?;
+		let char_id      = reader.read()?;
+		Ok(Self { res_type, blueprint_id, status_code, char_id })
 	}
 }

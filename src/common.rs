@@ -40,6 +40,7 @@ impl<'a, W: std::io::Write+LEWrite> Serialize<LE, W> for &SystemAddress
 pub enum ServiceId {
 	General = 0,
 	Auth = 1,
+	Chat = 2,
 	World = 4,
 	Client = 5,
 }
@@ -51,6 +52,7 @@ impl<R: LERead> Deserialize<LE, R> for ServiceId
 		Ok(match id {
 			x if x == ServiceId::General as u16 => ServiceId::General,
 			x if x == ServiceId::Auth    as u16 => ServiceId::Auth,
+			x if x == ServiceId::Chat    as u16 => ServiceId::Chat,
 			x if x == ServiceId::World   as u16 => ServiceId::World,
 			x if x == ServiceId::Client  as u16 => ServiceId::Client,
 			x => {
@@ -159,7 +161,36 @@ macro_rules! lu_wstr {
 lu_str!(LuStr33, 33);
 lu_wstr!(LuWStr33, 33);
 lu_wstr!(LuWStr41, 41);
+lu_wstr!(LuWStr42, 42);
 lu_wstr!(LuWStr128, 128);
 lu_wstr!(LuWStr256, 256);
 
 pub type ObjId = u64;
+
+#[derive(Debug)]
+pub struct ZoneId {
+	pub map_id: u16,
+	pub instance_id: u16,
+	pub clone_id: u32,
+}
+
+impl<R: LERead> Deserialize<LE, R> for ZoneId
+	where u16: Deserialize<LE, R>,
+	      u32: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let map_id     = reader.read()?;
+		let instance_id = reader.read()?;
+		let clone_id    = reader.read()?;
+		Ok(Self { map_id, instance_id, clone_id })
+	}
+}
+
+impl<W: LEWrite> Serialize<LE, W> for &ZoneId
+	where u16: Serialize<LE, W>,
+	      u32: Serialize<LE, W> {
+	fn serialize(self, writer: &mut W) -> Res<()>	{
+		writer.write(self.map_id)?;
+		writer.write(self.instance_id)?;
+		writer.write(self.clone_id)
+	}
+}

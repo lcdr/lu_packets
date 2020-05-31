@@ -3,7 +3,7 @@ use std::io::Result as Res;
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
 
-use crate::common::{ObjId, LuWStr33, ServiceId};
+use crate::common::{ObjId, LuWStr33, ServiceId, ZoneId};
 use crate::general::client::{DisconnectNotify, GeneralMessage, Handshake};
 
 rak_client_msg!(LUMessage);
@@ -144,7 +144,7 @@ pub struct CharListChar {
 	pub eyebrow_style: u32,
 	pub eye_style: u32,
 	pub mouth_style: u32,
-	pub world: (u16, u16, u32),
+	pub last_location: ZoneId,
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
@@ -177,9 +177,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 		writer.write(self.mouth_style)?;
 		writer.write(&[0; 4][..])?;
 
-		writer.write(self.world.0)?;
-		writer.write(self.world.1)?;
-		writer.write(self.world.2)?;
+		writer.write(&self.last_location)?;
 		writer.write(&[0; 8][..])?;
 
 		writer.write(0u16)?;
@@ -202,7 +200,7 @@ impl From<CharacterCreateResponse> for Message {
 	}
 }
 
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterCreateResponse
+impl<W: LEWrite> Serialize<LE, W> for &CharacterCreateResponse
 	where u8: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
 		writer.write(*self as u8)?;
@@ -221,7 +219,7 @@ impl From<CharacterDeleteResponse> for Message {
 	}
 }
 
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterDeleteResponse
+impl<W: LEWrite> Serialize<LE, W> for &CharacterDeleteResponse
 	where bool: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
 		writer.write(self.success)?;
