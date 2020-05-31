@@ -65,60 +65,130 @@ pub struct LoginRequest {
 	pub username: LuWStr33,
 	pub password: LuWStr41,
 	pub locale_id: u16,
-	pub os_id: u8,
-	pub memory_stats: LuWStr256,
-	pub video_card_info: LuWStr128,
-	pub number_of_processors: u32,
-	pub processor_type: u32,
-	pub processor_level: u16,
-	pub processor_revision: u16,
-	pub os_version_info_size: u32,
-	pub os_major_version: u32,
-	pub os_minor_version: u32,
-	pub os_build_number: u32,
-	pub os_platform_id: u32,
+	pub client_os: ClientOs,
+	pub computer_stats: ComputerStats,
 }
 
 impl<R: LERead> Deserialize<LE, R> for LoginRequest
-	where    u8: Deserialize<LE, R>,
-	        u16: Deserialize<LE, R>,
-	        u32: Deserialize<LE, R>,
-	   LuWStr33: Deserialize<LE, R>,
-	   LuWStr41: Deserialize<LE, R>,
-	  LuWStr128: Deserialize<LE, R>,
-	  LuWStr256: Deserialize<LE, R> {
+	where  ClientOs: Deserialize<LE, R>,
+	            u16: Deserialize<LE, R>,
+	       LuWStr33: Deserialize<LE, R>,
+	       LuWStr41: Deserialize<LE, R>,
+	  ComputerStats: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
-		let username             = reader.read()?;
-		let password             = reader.read()?;
-		let locale_id            = reader.read()?;
-		let os_id                = reader.read()?;
-		let memory_stats         = reader.read()?;
-		let video_card_info      = reader.read()?;
-		let number_of_processors = reader.read()?;
-		let processor_type       = reader.read()?;
-		let processor_level      = reader.read()?;
-		let processor_revision   = reader.read()?;
-		let os_version_info_size = reader.read()?;
-		let os_major_version     = reader.read()?;
-		let os_minor_version     = reader.read()?;
-		let os_build_number      = reader.read()?;
-		let os_platform_id       = reader.read()?;
+		let username       = reader.read()?;
+		let password       = reader.read()?;
+		let locale_id      = reader.read()?;
+		let client_os      = reader.read()?;
+		let computer_stats = reader.read()?;
 		Ok(Self {
 			username,
 			password,
 			locale_id,
-			os_id,
+			client_os,
+			computer_stats,
+		})
+	}
+}
+
+#[derive(Debug)]
+pub enum ClientOs {
+	Unknown = 0,
+	Windows = 1,
+	MacOsX = 2
+}
+
+impl<R: LERead> Deserialize<LE, R> for ClientOs
+	where u8: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let client_os: u8 = reader.read()?;
+		Ok(if client_os == ClientOs::Unknown as u8 {
+			ClientOs::Unknown
+		} else if client_os == ClientOs::Windows as u8 {
+			ClientOs::Windows
+		} else if client_os == ClientOs::MacOsX as u8 {
+			ClientOs::MacOsX
+		} else {
+			return err("client os", client_os);
+		})
+	}
+}
+
+#[derive(Debug)]
+pub struct ComputerStats {
+	pub memory_stats: LuWStr256,
+	pub video_card_info: LuWStr128,
+	pub processor_info: ProcessorInfo,
+	pub os_info: OsInfo,
+}
+
+impl<R: LERead> Deserialize<LE, R> for ComputerStats
+	where LuWStr128: Deserialize<LE, R>,
+	      LuWStr256: Deserialize<LE, R>,
+	  ProcessorInfo: Deserialize<LE, R>,
+	         OsInfo: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let memory_stats    = reader.read()?;
+		let video_card_info = reader.read()?;
+		let processor_info  = reader.read()?;
+		let os_info         = reader.read()?;
+		Ok(Self {
 			memory_stats,
 			video_card_info,
+			processor_info,
+			os_info,
+		})
+	}
+}
+
+#[derive(Debug)]
+pub struct ProcessorInfo {
+	pub number_of_processors: u32,
+	pub processor_type: u32,
+	pub processor_level: u16,
+	pub processor_revision: u16,
+}
+
+impl<R: LERead> Deserialize<LE, R> for ProcessorInfo
+	where   u16: Deserialize<LE, R>,
+	        u32: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let number_of_processors = reader.read()?;
+		let processor_type       = reader.read()?;
+		let processor_level      = reader.read()?;
+		let processor_revision   = reader.read()?;
+		Ok(Self {
 			number_of_processors,
 			processor_type,
 			processor_level,
 			processor_revision,
+		})
+	}
+}
+
+#[derive(Debug)]
+pub struct OsInfo {
+	pub os_version_info_size: u32,
+	pub major_version: u32,
+	pub minor_version: u32,
+	pub build_number: u32,
+	pub platform_id: u32,
+}
+
+impl<R: LERead> Deserialize<LE, R> for OsInfo
+	where u32: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let os_version_info_size = reader.read()?;
+		let major_version     = reader.read()?;
+		let minor_version     = reader.read()?;
+		let build_number      = reader.read()?;
+		let platform_id       = reader.read()?;
+		Ok(Self {
 			os_version_info_size,
-			os_major_version,
-			os_minor_version,
-			os_build_number,
-			os_platform_id,
+			major_version,
+			minor_version,
+			build_number,
+			platform_id,
 		})
 	}
 }
