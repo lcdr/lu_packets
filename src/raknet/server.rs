@@ -11,6 +11,7 @@ pub enum MessageId {
 	InternalPing = 0,
 	ConnectionRequest = 4,
 	NewIncomingConnection = 17,
+	DisconnectionNotification = 19,
 	UserMessage = 83,
 }
 
@@ -23,6 +24,7 @@ pub enum Message {
 	InternalPing($crate::raknet::server::InternalPing),
 	ConnectionRequest($crate::raknet::server::ConnectionRequest),
 	NewIncomingConnection($crate::raknet::server::NewIncomingConnection),
+	DisconnectionNotification,
 	UserMessage($T),
 }
 
@@ -40,6 +42,8 @@ impl<R: endio::LERead> endio::Deserialize<LE, R> for Message
 			Self::ConnectionRequest(LERead::read(reader)?)
 		}	else if message_id == $crate::raknet::server::MessageId::NewIncomingConnection as u8 {
 			Self::NewIncomingConnection(LERead::read(reader)?)
+		} else if message_id == $crate::raknet::server::MessageId::DisconnectionNotification as u8 {
+			Self::DisconnectionNotification
 		} else if message_id == $crate::raknet::server::MessageId::UserMessage as u8 {
 			Self::UserMessage(LERead::read(reader)?)
 		} else {

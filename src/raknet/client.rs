@@ -7,6 +7,7 @@ use endio::LittleEndian as LE;
 pub enum MessageId {
 	ConnectedPong = 3,
 	ConnectionRequestAccepted = 14,
+	DisconnectionNotification = 19,
 	UserMessage = 83,
 }
 
@@ -18,6 +19,7 @@ macro_rules! rak_client_msg {
 pub enum Message {
 	ConnectedPong($crate::raknet::client::ConnectedPong),
 	ConnectionRequestAccepted($crate::raknet::client::ConnectionRequestAccepted),
+	DisconnectionNotification,
 	UserMessage($T),
 }
 
@@ -35,6 +37,9 @@ impl<W: LEWrite> endio::Serialize<LE, W> for &Message
 			Message::ConnectionRequestAccepted(msg) => {
 				writer.write($crate::raknet::client::MessageId::ConnectionRequestAccepted as u8)?;
 				writer.write(msg)?;
+			}
+			Message::DisconnectionNotification => {
+				writer.write($crate::raknet::client::MessageId::DisconnectionNotification as u8)?;
 			}
 			Message::UserMessage(msg) => {
 				writer.write($crate::raknet::client::MessageId::UserMessage as u8)?;
