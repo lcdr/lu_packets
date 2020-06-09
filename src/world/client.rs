@@ -6,11 +6,11 @@ use endio::LittleEndian as LE;
 use crate::common::{ObjId, LuWStr33, ServiceId, ZoneId};
 use crate::general::client::{DisconnectNotify, GeneralMessage, Handshake};
 
-rak_client_msg!(LUMessage);
+rak_client_msg!(LuMessage);
 
 impl From<GeneralMessage> for Message {
 	fn from(msg: GeneralMessage) -> Self {
-		LUMessage::General(msg).into()
+		LuMessage::General(msg).into()
 	}
 }
 
@@ -26,55 +26,31 @@ impl From<DisconnectNotify> for Message {
 	}
 }
 
-#[derive(Debug)]
-pub enum LUMessage {
-	General(GeneralMessage),
-	Client(ClientMessage),
+#[derive(Debug, Serialize)]
+#[repr(u16)]
+pub enum LuMessage {
+	General(GeneralMessage) = ServiceId::General as u16,
+	Client(ClientMessage) = ServiceId::Client as u16,
 }
 
-impl From<LUMessage> for Message {
-	fn from(msg: LUMessage) -> Self {
+impl From<LuMessage> for Message {
+	fn from(msg: LuMessage) -> Self {
 		Message::UserMessage(msg)
 	}
 }
 
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a LUMessage
-	where          u16: Serialize<LE, W>,
-	&'a GeneralMessage: Serialize<LE, W>,
-	 &'a ClientMessage: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		match self {
-			LUMessage::General(message) => {
-				writer.write(ServiceId::General as u16)?;
-				writer.write(message)?;
-			}
-			LUMessage::Client(message) => {
-				writer.write(ServiceId::Client as u16)?;
-				writer.write(message)?;
-			}
-		}
-		Ok(())
-	}
-}
-
-
-enum ClientId {
-	CharacterListResponse = 6,
-	CharacterCreateResponse = 7,
-	CharacterDeleteResponse = 11,
-}
-
 #[derive(Debug)]
 #[non_exhaustive]
+#[repr(u32)]
 pub enum ClientMessage {
-	CharacterListResponse(CharacterListResponse),
-	CharacterCreateResponse(CharacterCreateResponse),
-	CharacterDeleteResponse(CharacterDeleteResponse),
+	CharacterListResponse(CharacterListResponse) = 6,
+	CharacterCreateResponse(CharacterCreateResponse) = 7,
+	CharacterDeleteResponse(CharacterDeleteResponse) = 11,
 }
 
 impl From<ClientMessage> for Message {
 	fn from(msg: ClientMessage) -> Self {
-		LUMessage::Client(msg).into()
+		LuMessage::Client(msg).into()
 	}
 }
 
@@ -82,22 +58,20 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a ClientMessage
 	where                      u8: Serialize<LE, W>,
 	                          u32: Serialize<LE, W>,
 	    &'a CharacterListResponse: Serialize<LE, W>,
+	  &'a CharacterCreateResponse: Serialize<LE, W>,
 	  &'a CharacterDeleteResponse: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
+		let disc = unsafe { *(self as *const ClientMessage as *const u32) };
+		writer.write(disc)?;
+		writer.write(0u8)?;
 		match self {
 			ClientMessage::CharacterListResponse(msg) => {
-				writer.write(ClientId::CharacterListResponse as u32)?;
-				writer.write(0u8)?;
 				writer.write(msg)?;
 			}
 			ClientMessage::CharacterCreateResponse(msg) => {
-				writer.write(ClientId::CharacterCreateResponse as u32)?;
-				writer.write(0u8)?;
 				writer.write(msg)?;
 			}
 			ClientMessage::CharacterDeleteResponse(msg) => {
-				writer.write(ClientId::CharacterDeleteResponse as u32)?;
-				writer.write(0u8)?;
 				writer.write(msg)?;
 			}
 		}
@@ -154,6 +128,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 	         ObjId: Serialize<LE, W>,
 	      &'a [u8]: Serialize<LE, W>,
 	  &'a LuWStr33: Serialize<LE, W>,
+	    &'a ZoneId: Serialize<LE, W>,
 	          bool: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
 		writer.write(self.obj_id)?;
@@ -185,7 +160,8 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 	}
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug, Serialize)]
+#[repr(u8)]
 pub enum CharacterCreateResponse {
 	Success = 0,
 	GeneralFailure = 1,
@@ -200,15 +176,7 @@ impl From<CharacterCreateResponse> for Message {
 	}
 }
 
-impl<W: LEWrite> Serialize<LE, W> for &CharacterCreateResponse
-	where u8: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		writer.write(*self as u8)?;
-		Ok(())
-	}
-}
-
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct CharacterDeleteResponse {
 	pub success: bool,
 }
@@ -216,13 +184,5 @@ pub struct CharacterDeleteResponse {
 impl From<CharacterDeleteResponse> for Message {
 	fn from(msg: CharacterDeleteResponse) -> Self {
 		ClientMessage::CharacterDeleteResponse(msg).into()
-	}
-}
-
-impl<W: LEWrite> Serialize<LE, W> for &CharacterDeleteResponse
-	where bool: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		writer.write(self.success)?;
-		Ok(())
 	}
 }

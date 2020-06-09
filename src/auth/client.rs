@@ -6,11 +6,11 @@ use endio::LittleEndian as LE;
 use crate::common::{LuStr33, LuWStr33, ServiceId};
 use crate::general::client::{GeneralMessage, Handshake};
 
-rak_client_msg!(LUMessage);
+rak_client_msg!(LuMessage);
 
 impl From<GeneralMessage> for Message {
 	fn from(msg: GeneralMessage) -> Self {
-		LUMessage::General(msg).into()
+		LuMessage::General(msg).into()
 	}
 }
 
@@ -20,38 +20,18 @@ impl From<Handshake> for Message {
 	}
 }
 
-
-#[derive(Debug)]
-pub enum LUMessage {
-	General(GeneralMessage),
-	Client(ClientMessage),
+#[derive(Debug, Serialize)]
+#[repr(u16)]
+pub enum LuMessage {
+	General(GeneralMessage) = ServiceId::General as u16,
+	Client(ClientMessage) = ServiceId::Client as u16,
 }
 
-impl From<LUMessage> for Message {
-	fn from(msg: LUMessage) -> Self {
+impl From<LuMessage> for Message {
+	fn from(msg: LuMessage) -> Self {
 		Message::UserMessage(msg)
 	}
 }
-
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a LUMessage
-	where          u16: Serialize<LE, W>,
-	&'a GeneralMessage: Serialize<LE, W>,
-	 &'a ClientMessage: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		match self {
-			LUMessage::General(message) => {
-				writer.write(ServiceId::General as u16)?;
-				writer.write(message)?;
-			}
-			LUMessage::Client(message) => {
-				writer.write(ServiceId::Client as u16)?;
-				writer.write(message)?;
-			}
-		}
-		Ok(())
-	}
-}
-
 
 enum ClientId {
 	LoginResponse = 0,
@@ -65,7 +45,7 @@ pub enum ClientMessage {
 
 impl From<ClientMessage> for Message {
 	fn from(msg: ClientMessage) -> Self {
-		LUMessage::Client(msg).into()
+		LuMessage::Client(msg).into()
 	}
 }
 
@@ -85,21 +65,16 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a ClientMessage
 	}
 }
 
-enum LoginResponseId {
-	Ok = 1,
-	CustomMessage = 5,
-	InvalidUsernamePassword = 6,
-}
-
 #[derive(Debug)]
 #[non_exhaustive]
+#[repr(u8)]
 pub enum LoginResponse {
 	Ok {
 		session_key: LuWStr33,
 		redirect_address: (LuStr33, u16),
-	},
-	CustomMessage(String),
-	InvalidUsernamePassword,
+	} = 1,
+	CustomMessage(String) = 5,
+	InvalidUsernamePassword = 6,
 }
 
 impl From<LoginResponse> for Message {
@@ -108,17 +83,18 @@ impl From<LoginResponse> for Message {
 	}
 }
 
-impl<W: LEWrite> Serialize<LE, W> for &LoginResponse
-	where               u8: Serialize<LE, W>,
-	                   u16: Serialize<LE, W>,
-	                   u32: Serialize<LE, W>,
-	      for<'a> &'a [u8]: Serialize<LE, W>,
-	 for<'c> &'c LuStr33: Serialize<LE, W>,
-	for<'c> &'c LuWStr33: Serialize<LE, W> {
+impl<'a, W: LEWrite> Serialize<LE, W> for &'a LoginResponse
+	where       u8: Serialize<LE, W>,
+	           u16: Serialize<LE, W>,
+	           u32: Serialize<LE, W>,
+	      &'a [u8]: Serialize<LE, W>,
+	   &'a LuStr33: Serialize<LE, W>,
+	  &'a LuWStr33: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
+		let disc = unsafe { *(self as *const LoginResponse as *const u8) };
+		writer.write(disc)?;
 		match self {
 			LoginResponse::Ok { session_key, redirect_address } => {
-				writer.write(LoginResponseId::Ok as u8)?;
 				writer.write(&[0; 264][..])?;
 				writer.write(1u16)?;
 				writer.write(10u16)?;
@@ -131,7 +107,6 @@ impl<W: LEWrite> Serialize<LE, W> for &LoginResponse
 				writer.write(4u32)?;
 			}
 			LoginResponse::CustomMessage(msg) => {
-				writer.write(LoginResponseId::CustomMessage as u8)?;
 				writer.write(&[0; 493][..])?;
 				let bytes: Vec<u16> = msg.encode_utf16().collect();
 				writer.write(bytes.len() as u16)?;
@@ -141,7 +116,6 @@ impl<W: LEWrite> Serialize<LE, W> for &LoginResponse
 				writer.write(4u32)?;
 			}
 			LoginResponse::InvalidUsernamePassword => {
-				writer.write(LoginResponseId::InvalidUsernamePassword as u8)?;
 				writer.write(&[0; 495][..])?;
 				writer.write(4u32)?;
 			}

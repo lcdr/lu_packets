@@ -36,9 +36,10 @@ pub struct Handshake {
 }
 
 impl<R: LERead> Deserialize<LE, R> for Handshake
-	where u8: Deserialize<LE, R>,
-	     u16: Deserialize<LE, R>,
-	     u32: Deserialize<LE, R> {
+	where    u8: Deserialize<LE, R>,
+	        u16: Deserialize<LE, R>,
+	  ServiceId: Deserialize<LE, R>,
+	        u32: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let network_version = reader.read()?;
 		let _: u32          = reader.read()?;

@@ -2,68 +2,29 @@
 use std::io::Read;
 use std::io::Result as Res;
 
-use endio::{Deserialize, LERead};
+use endio::Deserialize;
 use endio::LittleEndian as LE;
 
-use crate::common::{SystemAddress};
-
-pub enum MessageId {
-	InternalPing = 0,
-	ConnectionRequest = 4,
-	NewIncomingConnection = 17,
-	DisconnectionNotification = 19,
-	UserMessage = 83,
-}
+use crate::common::SystemAddress;
 
 macro_rules! rak_server_msg {
  ($T:ty) => {
-
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 #[non_exhaustive]
+#[repr(u8)]
 pub enum Message {
-	InternalPing($crate::raknet::server::InternalPing),
-	ConnectionRequest($crate::raknet::server::ConnectionRequest),
-	NewIncomingConnection($crate::raknet::server::NewIncomingConnection),
-	DisconnectionNotification,
-	UserMessage($T),
-}
-
-impl<R: endio::LERead> endio::Deserialize<LE, R> for Message
-	where                u8: endio::Deserialize<LE, R>,
-	           $crate::raknet::server::InternalPing: endio::Deserialize<LE, R>,
-	      $crate::raknet::server::ConnectionRequest: endio::Deserialize<LE, R>,
-	  $crate::raknet::server::NewIncomingConnection: endio::Deserialize<LE, R>,
-	              $T: endio::Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let message_id: u8 = LERead::read(reader)?;
-		Ok(if message_id == $crate::raknet::server::MessageId::InternalPing as u8 {
-			Self::InternalPing(LERead::read(reader)?)
-		}	else if message_id == $crate::raknet::server::MessageId::ConnectionRequest as u8 {
-			Self::ConnectionRequest(LERead::read(reader)?)
-		}	else if message_id == $crate::raknet::server::MessageId::NewIncomingConnection as u8 {
-			Self::NewIncomingConnection(LERead::read(reader)?)
-		} else if message_id == $crate::raknet::server::MessageId::DisconnectionNotification as u8 {
-			Self::DisconnectionNotification
-		} else if message_id == $crate::raknet::server::MessageId::UserMessage as u8 {
-			Self::UserMessage(LERead::read(reader)?)
-		} else {
-			return err("message id", message_id);
-		})
-	}
+	InternalPing($crate::raknet::server::InternalPing) = 0,
+	ConnectionRequest($crate::raknet::server::ConnectionRequest) = 4,
+	NewIncomingConnection($crate::raknet::server::NewIncomingConnection) = 17,
+	DisconnectionNotification = 19,
+	UserMessage($T) = 83,
 }
 }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct InternalPing {
 	pub send_time: u32
-}
-
-impl<R: LERead> Deserialize<LE, R> for InternalPing
-	where u32: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		Ok(Self { send_time: reader.read()? })
-	}
 }
 
 #[derive(Debug)]
@@ -80,17 +41,8 @@ impl<R: Read> Deserialize<LE, R> for ConnectionRequest {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct NewIncomingConnection {
 	peer_addr: SystemAddress,
 	local_addr: SystemAddress,
-}
-
-impl<R: LERead> Deserialize<LE, R> for NewIncomingConnection
-	where SystemAddress: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let peer_addr = reader.read()?;
-		let local_addr = reader.read()?;
-		Ok(Self { peer_addr, local_addr })
-	}
 }

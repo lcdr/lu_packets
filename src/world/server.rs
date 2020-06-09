@@ -9,33 +9,14 @@ use crate::common::{err, ObjId, LuWStr33, LuWStr42, LuStr33, ServiceId, ZoneId};
 use crate::chat::server::ChatMessage;
 pub use crate::general::server::GeneralMessage;
 
-rak_server_msg!(LUMessage);
+rak_server_msg!(LuMessage);
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 #[non_exhaustive]
-pub enum LUMessage {
-	General(GeneralMessage),
-	World(WorldMessage),
-}
-
-impl<R: LERead> Deserialize<LE, R> for LUMessage
-	where        u16: Deserialize<LE, R>,
-	  GeneralMessage: Deserialize<LE, R>,
-	    WorldMessage: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let service_id: ServiceId = reader.read()?;
-		Ok(match service_id {
-			ServiceId::General => {
-				Self::General(reader.read()?)
-			}
-			ServiceId::World => {
-				Self::World(reader.read()?)
-			}
-			_ => {
-				return err("service id", service_id);
-			}
-		})
-	}
+#[repr(u16)]
+pub enum LuMessage {
+	General(GeneralMessage) = ServiceId::General as u16,
+	World(WorldMessage) = ServiceId::World as u16,
 }
 
 enum WorldId {
@@ -187,36 +168,14 @@ impl<R: LERead> Deserialize<LE, R> for CharacterCreateRequest
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct CharacterLoginRequest {
 	pub char_id: ObjId,
 }
 
-impl<R: LERead> Deserialize<LE, R> for CharacterLoginRequest
-	where  ObjId: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let char_id = reader.read()?;
-
-		Ok(Self {
-			char_id,
-		})
-	}
-}
-
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct CharacterDeleteRequest {
 	pub char_id: ObjId,
-}
-
-impl<R: LERead> Deserialize<LE, R> for CharacterDeleteRequest
-	where  ObjId: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let char_id = reader.read()?;
-
-		Ok(Self {
-			char_id,
-		})
-	}
 }
 
 #[derive(Debug)]
@@ -244,18 +203,9 @@ impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct LevelLoadComplete {
 	pub zone_id: ZoneId,
-}
-
-impl<R: LERead> Deserialize<LE, R> for LevelLoadComplete
-	where  ZoneId: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let zone_id = reader.read()?;
-
-		Ok(Self { zone_id })
-	}
 }
 
 #[derive(Debug)]
@@ -265,8 +215,8 @@ pub enum RouteMessage {
 }
 
 impl<R: LERead> Deserialize<LE, R> for RouteMessage
-	where     u16: Deserialize<LE, R>,
-	          u32: Deserialize<LE, R>,
+	where     u32: Deserialize<LE, R>,
+	    ServiceId: Deserialize<LE, R>,
 	  ChatMessage: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let _packet_size: u32 = reader.read()?;
@@ -309,7 +259,8 @@ impl<R: Read+LERead> Deserialize<LE, R> for StringCheck
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[repr(u32)]
 pub enum UgcResType {
 	Lxfml = 0,
 	Nif = 1,
@@ -317,41 +268,10 @@ pub enum UgcResType {
 	Dds = 3,
 }
 
-impl<R: LERead> Deserialize<LE, R> for UgcResType
-	where u32: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let res_type: u32 = reader.read()?;
-		if res_type == Self::Lxfml as u32 {
-			Ok(Self::Lxfml)
-		} else if res_type == Self::Nif as u32 {
-			Ok(Self::Nif)
-		} else if res_type == Self::Hkx as u32 {
-			Ok(Self::Hkx)
-		} else if res_type == Self::Dds as u32 {
-			Ok(Self::Dds)
-		} else {
-			err("ugc res type", res_type)
-		}
-	}
-}
-
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct UgcDownloadFailed {
 	pub res_type: UgcResType,
 	pub blueprint_id: ObjId,
 	pub status_code: u32,
 	pub char_id: ObjId,
-}
-
-impl<R: LERead> Deserialize<LE, R> for UgcDownloadFailed
-	where     u32: Deserialize<LE, R>,
-	   UgcResType: Deserialize<LE, R>,
-	        ObjId: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let res_type     = reader.read()?;
-		let blueprint_id = reader.read()?;
-		let status_code  = reader.read()?;
-		let char_id      = reader.read()?;
-		Ok(Self { res_type, blueprint_id, status_code, char_id })
-	}
 }

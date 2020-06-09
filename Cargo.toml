@@ -7,4 +7,4 @@ license = "AGPL-3.0-or-later"
 repository = "https://github.com/lcdr/lu_packets/"
 
 [dependencies]
-endio = "0.1.0"
+endio = { git = "https://github.com/lcdr/endio", rev = "cb5020f6749a301ae925592f9ad1920919894ddb" }

@@ -108,7 +108,8 @@ impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
 		Ok(Self { chat_channel, sender_name, sender, source_id, sender_gm_level, message })
 	}
 }
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[repr(u8)]
 pub enum PrivateChatMessageResponseCode {
 	Sent = 0,
 	NotOnline = 1,
@@ -137,7 +138,8 @@ impl<R: Read+LERead> Deserialize<LE, R> for PrivateChatMessage
 	       u16: Deserialize<LE, R>,
 	       u32: Deserialize<LE, R>,
 	  LuWStr33: Deserialize<LE, R>,
-	     ObjId: Deserialize<LE, R> {
+	     ObjId: Deserialize<LE, R>,
+	  PrivateChatMessageResponseCode: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let chat_channel       = LERead::read(reader)?;
 		let string_len: u32    = LERead::read(reader)?;
@@ -147,24 +149,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for PrivateChatMessage
 		let sender_gm_level    = LERead::read(reader)?;
 		let recipient_name     = LERead::read(reader)?;
 		let recipient_gm_level = LERead::read(reader)?;
-		let response_code: u8  = LERead::read(reader)?;
-		let response_code = if response_code == PrivateChatMessageResponseCode::Sent as u8 {
-			PrivateChatMessageResponseCode::Sent
-		} else if response_code == PrivateChatMessageResponseCode::NotOnline as u8 {
-			PrivateChatMessageResponseCode::NotOnline
-		} else if response_code == PrivateChatMessageResponseCode::GeneralError as u8 {
-			PrivateChatMessageResponseCode::GeneralError
-		} else if response_code == PrivateChatMessageResponseCode::ReceivedNewWhisper as u8 {
-			PrivateChatMessageResponseCode::ReceivedNewWhisper
-		} else if response_code == PrivateChatMessageResponseCode::NotFriends as u8 {
-			PrivateChatMessageResponseCode::NotFriends
-		} else if response_code == PrivateChatMessageResponseCode::SenderFreeTrial as u8 {
-			PrivateChatMessageResponseCode::SenderFreeTrial
-		} else if response_code == PrivateChatMessageResponseCode::ReceiverFreeTrial as u8 {
-			PrivateChatMessageResponseCode::ReceiverFreeTrial
-		} else {
-			return err("private chat message response code", response_code);
-		};
+		let response_code      = LERead::read(reader)?;
 		let mut string = vec![0; (string_len*2) as usize];
 		let mut taken = Read::take(reader, (string_len*2) as u64);
 		Read::read(&mut taken, &mut string)?;
@@ -175,7 +160,8 @@ impl<R: Read+LERead> Deserialize<LE, R> for PrivateChatMessage
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[repr(u8)]
 pub enum AddFriendResponseCode {
 	Accepted = 0,
 	Rejected = 1,
@@ -183,91 +169,33 @@ pub enum AddFriendResponseCode {
 	Cancelled = 3,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct AddFriendResponse {
 	pub response_code: AddFriendResponseCode,
 	pub friend_name: LuWStr33,
 }
 
-impl<R: LERead> Deserialize<LE, R> for AddFriendResponse
-	where   u8: Deserialize<LE, R>,
-	  LuWStr33: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let response_code: u8 = reader.read()?;
-		let response_code = if response_code == AddFriendResponseCode::Accepted as u8 {
-			AddFriendResponseCode::Accepted
-		} else if response_code == AddFriendResponseCode::Rejected as u8 {
-			AddFriendResponseCode::Rejected
-		} else if response_code == AddFriendResponseCode::Busy as u8 {
-			AddFriendResponseCode::Busy
-		} else if response_code == AddFriendResponseCode::Cancelled as u8 {
-			AddFriendResponseCode::Cancelled
-		} else {
-			return err("add friend response code", response_code);
-		};
-		let friend_name = reader.read()?;
-
-		Ok(Self { response_code, friend_name })
-	}
-}
-
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[repr(u8)]
 pub enum TeamInviteResponseCode {
 	Accepted = 0,
 	Rejected = 1,
 	GeneralError = 2,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct TeamInviteResponse {
 	pub response_code: TeamInviteResponseCode,
 	pub sender: ObjId,
 }
 
-impl<R: LERead> Deserialize<LE, R> for TeamInviteResponse
-	where u8: Deserialize<LE, R>,
-	   ObjId: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let response_code: u8 = reader.read()?;
-		let response_code = if response_code == TeamInviteResponseCode::Accepted as u8 {
-			TeamInviteResponseCode::Accepted
-		} else if response_code == TeamInviteResponseCode::Rejected as u8 {
-			TeamInviteResponseCode::Rejected
-		} else if response_code == TeamInviteResponseCode::GeneralError as u8 {
-			TeamInviteResponseCode::GeneralError
-		} else {
-			return err("team invite response code", response_code);
-		};
-		let sender = reader.read()?;
-		Ok(Self { response_code, sender })
-	}
-}
-
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct RequestMinimumChatMode {
 	pub chat_channel: u8, // todo: separate type?
 }
 
-impl<R: LERead> Deserialize<LE, R> for RequestMinimumChatMode
-	where u8: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let chat_channel = reader.read()?;
-		Ok(Self { chat_channel })
-	}
-}
-
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct RequestMinimumChatModePrivate {
 	pub chat_channel: u8, // todo: separate type?
 	pub recipient_name: LuWStr33,
-}
-
-impl<R: LERead> Deserialize<LE, R> for RequestMinimumChatModePrivate
-	where   u8: Deserialize<LE, R>,
-	  LuWStr33: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let chat_channel   = reader.read()?;
-		let recipient_name = reader.read()?;
-		Ok(Self { chat_channel, recipient_name })
-	}
 }

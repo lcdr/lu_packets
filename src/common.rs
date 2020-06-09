@@ -2,71 +2,27 @@ use std::io::{Error, ErrorKind::InvalidData};
 use std::io::Result as Res;
 use std::net::Ipv4Addr;
 
-use endio::{Deserialize, LERead, LEWrite, Serialize};
+use endio::{Deserialize, Serialize};
 use endio::LittleEndian as LE;
 
 pub(crate) fn err<T, U: std::fmt::Debug>(name: &str, value: U) -> Res<T> {
 	Err(Error::new(InvalidData, &format!("unknown {} {:?}", name, value)[..]))
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SystemAddress {
 	ip: Ipv4Addr,
 	port: u16,
 }
 
-impl<R: std::io::Read+LERead> Deserialize<LE, R> for SystemAddress
-	where u16: Deserialize<LE, R>,
-	      u32: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let mut ip = [0; 4];
-		std::io::Read::read(reader, &mut ip)?;
-		let ip = ip.into();
-		let port: u16 = LERead::read(reader)?;
-		Ok(Self { ip, port })
-	}
-}
-
-impl<'a, W: std::io::Write+LEWrite> Serialize<LE, W> for &SystemAddress
-	where u16: Serialize<LE, W>,
-	      u32: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		std::io::Write::write(writer, &self.ip.octets()[..])?;
-		LEWrite::write(writer, self.port)
-	}
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[repr(u16)]
 pub enum ServiceId {
 	General = 0,
 	Auth = 1,
 	Chat = 2,
 	World = 4,
 	Client = 5,
-}
-
-impl<R: LERead> Deserialize<LE, R> for ServiceId
-	where u16: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let id: u16 = reader.read()?;
-		Ok(match id {
-			x if x == ServiceId::General as u16 => ServiceId::General,
-			x if x == ServiceId::Auth    as u16 => ServiceId::Auth,
-			x if x == ServiceId::Chat    as u16 => ServiceId::Chat,
-			x if x == ServiceId::World   as u16 => ServiceId::World,
-			x if x == ServiceId::Client  as u16 => ServiceId::Client,
-			x => {
-				return err("service id", x);
-			}
-		})
-	}
-}
-
-impl<W: LEWrite> Serialize<LE, W> for ServiceId
-	where u16: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		writer.write(self as u16)
-	}
 }
 
 macro_rules! lu_str {
@@ -167,30 +123,9 @@ lu_wstr!(LuWStr256, 256);
 
 pub type ObjId = u64;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ZoneId {
 	pub map_id: u16,
 	pub instance_id: u16,
 	pub clone_id: u32,
-}
-
-impl<R: LERead> Deserialize<LE, R> for ZoneId
-	where u16: Deserialize<LE, R>,
-	      u32: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let map_id     = reader.read()?;
-		let instance_id = reader.read()?;
-		let clone_id    = reader.read()?;
-		Ok(Self { map_id, instance_id, clone_id })
-	}
-}
-
-impl<W: LEWrite> Serialize<LE, W> for &ZoneId
-	where u16: Serialize<LE, W>,
-	      u32: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		writer.write(self.map_id)?;
-		writer.write(self.instance_id)?;
-		writer.write(self.clone_id)
-	}
 }
