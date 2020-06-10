@@ -163,11 +163,11 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 #[derive(Debug, Serialize)]
 #[repr(u8)]
 pub enum CharacterCreateResponse {
-	Success = 0,
-	GeneralFailure = 1,
-	NameNotAllowed = 2,
-	PredefinedNameInUse = 3,
-	CustomNameInUse = 4,
+	Success,
+	GeneralFailure,
+	NameNotAllowed,
+	PredefinedNameInUse,
+	CustomNameInUse,
 }
 
 impl From<CharacterCreateResponse> for Message {

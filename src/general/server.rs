@@ -6,7 +6,7 @@ use endio::LittleEndian as LE;
 use crate::common::{err, ServiceId};
 
 enum GeneralId {
-	Handshake = 0,
+	Handshake,
 }
 
 #[derive(Debug)]

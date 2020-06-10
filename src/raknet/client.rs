@@ -4,6 +4,7 @@ use std::net::Ipv4Addr;
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
 
+// todo[chalk]: generic type instead of macro
 macro_rules! rak_client_msg {
  ($T:ty) => {
 #[derive(Debug, Serialize)]

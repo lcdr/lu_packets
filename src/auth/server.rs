@@ -18,7 +18,7 @@ pub enum LuMessage {
 }
 
 enum AuthId {
-	LoginRequest = 0,
+	LoginRequest,
 }
 
 #[derive(Debug)]
@@ -53,9 +53,9 @@ pub struct LoginRequest {
 #[derive(Debug, Deserialize)]
 #[repr(u8)]
 pub enum ClientOs {
-	Unknown = 0,
-	Windows = 1,
-	MacOsX = 2
+	Unknown,
+	Windows,
+	MacOs,
 }
 
 #[derive(Debug, Deserialize)]

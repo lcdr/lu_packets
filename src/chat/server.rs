@@ -111,13 +111,13 @@ impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
 #[derive(Debug, Deserialize)]
 #[repr(u8)]
 pub enum PrivateChatMessageResponseCode {
-	Sent = 0,
-	NotOnline = 1,
-	GeneralError = 2,
-	ReceivedNewWhisper = 3,
-	NotFriends = 4,
-	SenderFreeTrial = 5,
-	ReceiverFreeTrial = 6,
+	Sent,
+	NotOnline,
+	GeneralError,
+	ReceivedNewWhisper,
+	NotFriends,
+	SenderFreeTrial,
+	ReceiverFreeTrial,
 }
 
 #[derive(Debug)]
@@ -163,10 +163,10 @@ impl<R: Read+LERead> Deserialize<LE, R> for PrivateChatMessage
 #[derive(Debug, Deserialize)]
 #[repr(u8)]
 pub enum AddFriendResponseCode {
-	Accepted = 0,
-	Rejected = 1,
-	Busy = 2,
-	Cancelled = 3,
+	Accepted,
+	Rejected,
+	Busy,
+	Cancelled,
 }
 
 #[derive(Debug, Deserialize)]
@@ -178,9 +178,9 @@ pub struct AddFriendResponse {
 #[derive(Debug, Deserialize)]
 #[repr(u8)]
 pub enum TeamInviteResponseCode {
-	Accepted = 0,
-	Rejected = 1,
-	GeneralError = 2,
+	Accepted,
+	Rejected,
+	GeneralError,
 }
 
 #[derive(Debug, Deserialize)]

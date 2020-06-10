@@ -262,10 +262,10 @@ impl<R: Read+LERead> Deserialize<LE, R> for StringCheck
 #[derive(Debug, Deserialize)]
 #[repr(u32)]
 pub enum UgcResType {
-	Lxfml = 0,
-	Nif = 1,
-	Hkx = 2,
-	Dds = 3,
+	Lxfml,
+	Nif,
+	Hkx,
+	Dds,
 }
 
 #[derive(Debug, Deserialize)]

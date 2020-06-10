@@ -7,6 +7,7 @@ use endio::LittleEndian as LE;
 
 use crate::common::SystemAddress;
 
+// todo[chalk]: generic type instead of macro
 macro_rules! rak_server_msg {
  ($T:ty) => {
 #[derive(Debug, Deserialize)]
