@@ -2,48 +2,24 @@ use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
+use lu_packets_derive::FromVariants;
 
-use crate::common::{LuStr33, LuWStr33, ServiceId};
-use crate::general::client::{GeneralMessage, Handshake};
+use crate::common::{LuStr33, LuWStr33};
 
+pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 pub type Message = crate::raknet::client::Message<LuMessage>;
-
-impl From<GeneralMessage> for Message {
-	fn from(msg: GeneralMessage) -> Self {
-		LuMessage::General(msg).into()
-	}
-}
-
-impl From<Handshake> for Message {
-	fn from(msg: Handshake) -> Self {
-		GeneralMessage::Handshake(msg).into()
-	}
-}
-
-#[derive(Debug, Serialize)]
-#[repr(u16)]
-pub enum LuMessage {
-	General(GeneralMessage) = ServiceId::General as u16,
-	Client(ClientMessage) = ServiceId::Client as u16,
-}
-
-impl From<LuMessage> for Message {
-	fn from(msg: LuMessage) -> Self {
-		Message::UserMessage(msg)
-	}
-}
-
-#[derive(Debug)]
-#[non_exhaustive]
-#[repr(u32)]
-pub enum ClientMessage {
-	LoginResponse(LoginResponse),
-}
 
 impl From<ClientMessage> for Message {
 	fn from(msg: ClientMessage) -> Self {
 		LuMessage::Client(msg).into()
 	}
+}
+
+#[derive(Debug, FromVariants)]
+#[non_exhaustive]
+#[repr(u32)]
+pub enum ClientMessage {
+	LoginResponse(LoginResponse),
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a ClientMessage
@@ -73,12 +49,6 @@ pub enum LoginResponse {
 	} = 1,
 	CustomMessage(String) = 5,
 	InvalidUsernamePassword = 6,
-}
-
-impl From<LoginResponse> for Message {
-	fn from(msg: LoginResponse) -> Self {
-		ClientMessage::LoginResponse(msg).into()
-	}
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a LoginResponse

@@ -2,56 +2,26 @@ use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
+use lu_packets_derive::FromVariants;
 
-use crate::common::{ObjId, LuWStr33, ServiceId, ZoneId};
-use crate::general::client::{DisconnectNotify, GeneralMessage, Handshake};
+use crate::common::{ObjId, LuWStr33, ZoneId};
 
+pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 pub type Message = crate::raknet::client::Message<LuMessage>;
 
-impl From<GeneralMessage> for Message {
-	fn from(msg: GeneralMessage) -> Self {
-		LuMessage::General(msg).into()
+impl From<ClientMessage> for Message {
+	fn from(msg: ClientMessage) -> Self {
+		LuMessage::Client(msg).into()
 	}
 }
 
-impl From<Handshake> for Message {
-	fn from(msg: Handshake) -> Self {
-		GeneralMessage::Handshake(msg).into()
-	}
-}
-
-impl From<DisconnectNotify> for Message {
-	fn from(msg: DisconnectNotify) -> Self {
-		GeneralMessage::DisconnectNotify(msg).into()
-	}
-}
-
-#[derive(Debug, Serialize)]
-#[repr(u16)]
-pub enum LuMessage {
-	General(GeneralMessage) = ServiceId::General as u16,
-	Client(ClientMessage) = ServiceId::Client as u16,
-}
-
-impl From<LuMessage> for Message {
-	fn from(msg: LuMessage) -> Self {
-		Message::UserMessage(msg)
-	}
-}
-
-#[derive(Debug)]
+#[derive(Debug, FromVariants)]
 #[non_exhaustive]
 #[repr(u32)]
 pub enum ClientMessage {
 	CharacterListResponse(CharacterListResponse) = 6,
 	CharacterCreateResponse(CharacterCreateResponse) = 7,
 	CharacterDeleteResponse(CharacterDeleteResponse) = 11,
-}
-
-impl From<ClientMessage> for Message {
-	fn from(msg: ClientMessage) -> Self {
-		LuMessage::Client(msg).into()
-	}
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a ClientMessage
@@ -83,12 +53,6 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a ClientMessage
 pub struct CharacterListResponse {
 	pub selected_char: u8,
 	pub chars: Vec<CharListChar>,
-}
-
-impl From<CharacterListResponse> for Message {
-	fn from(msg: CharacterListResponse) -> Self {
-		ClientMessage::CharacterListResponse(msg).into()
-	}
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
@@ -170,19 +134,7 @@ pub enum CharacterCreateResponse {
 	CustomNameInUse,
 }
 
-impl From<CharacterCreateResponse> for Message {
-	fn from(msg: CharacterCreateResponse) -> Self {
-		ClientMessage::CharacterCreateResponse(msg).into()
-	}
-}
-
 #[derive(Debug, Serialize)]
 pub struct CharacterDeleteResponse {
 	pub success: bool,
-}
-
-impl From<CharacterDeleteResponse> for Message {
-	fn from(msg: CharacterDeleteResponse) -> Self {
-		ClientMessage::CharacterDeleteResponse(msg).into()
-	}
 }
