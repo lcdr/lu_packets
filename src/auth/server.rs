@@ -7,7 +7,7 @@ use endio::LittleEndian as LE;
 use crate::common::{err, LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
 pub use crate::general::server::GeneralMessage;
 
-rak_server_msg!(LuMessage);
+pub type Message = crate::raknet::server::Message<LuMessage>;
 
 #[derive(Debug, Deserialize)]
 #[non_exhaustive]

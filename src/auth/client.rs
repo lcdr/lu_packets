@@ -6,7 +6,7 @@ use endio::LittleEndian as LE;
 use crate::common::{LuStr33, LuWStr33, ServiceId};
 use crate::general::client::{GeneralMessage, Handshake};
 
-rak_client_msg!(LuMessage);
+pub type Message = crate::raknet::client::Message<LuMessage>;
 
 impl From<GeneralMessage> for Message {
 	fn from(msg: GeneralMessage) -> Self {

@@ -9,7 +9,7 @@ use crate::common::{err, ObjId, LuWStr33, LuWStr42, LuStr33, ServiceId, ZoneId};
 use crate::chat::server::ChatMessage;
 pub use crate::general::server::GeneralMessage;
 
-rak_server_msg!(LuMessage);
+pub type Message = crate::raknet::server::Message<LuMessage>;
 
 #[derive(Debug, Deserialize)]
 #[non_exhaustive]
@@ -152,7 +152,7 @@ impl<R: LERead> Deserialize<LE, R> for CharacterCreateRequest
 		let eyebrow_style = reader.read()?;
 		let eye_style     = reader.read()?;
 		let mouth_style   = reader.read()?;
-		let _unused: u8  = reader.read()?;
+		let _unused: u8   = reader.read()?;
 
 		Ok(Self {
 			char_name,

@@ -7,20 +7,15 @@ use endio::LittleEndian as LE;
 
 use crate::common::SystemAddress;
 
-// todo[chalk]: generic type instead of macro
-macro_rules! rak_server_msg {
- ($T:ty) => {
 #[derive(Debug, Deserialize)]
 #[non_exhaustive]
 #[repr(u8)]
-pub enum Message {
-	InternalPing($crate::raknet::server::InternalPing) = 0,
-	ConnectionRequest($crate::raknet::server::ConnectionRequest) = 4,
-	NewIncomingConnection($crate::raknet::server::NewIncomingConnection) = 17,
+pub enum Message<U> {
+	InternalPing(InternalPing) = 0,
+	ConnectionRequest(ConnectionRequest) = 4,
+	NewIncomingConnection(NewIncomingConnection) = 17,
 	DisconnectionNotification = 19,
-	UserMessage($T) = 83,
-}
-}
+	UserMessage(U) = 83,
 }
 
 #[derive(Debug, Deserialize)]
