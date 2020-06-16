@@ -1,4 +1,6 @@
 //! All packets a world server can receive.
+mod gm;
+
 use std::io::Read;
 use std::io::Result as Res;
 
@@ -7,6 +9,8 @@ use endio::LittleEndian as LE;
 
 use crate::common::{err, ObjId, LuWStr33, LuWStr42, LuStr33, ServiceId, ZoneId};
 use crate::chat::server::ChatMessage;
+use self::gm::SubjectGameMessage;
+
 pub use crate::general::server::GeneralMessage;
 
 pub type Message = crate::raknet::server::Message<LuMessage>;
@@ -24,6 +28,7 @@ enum WorldId {
 	CharacterListRequest = 2,
 	CharacterCreateRequest = 3,
 	CharacterLoginRequest = 4,
+	SubjectGameMessage = 5,
 	CharacterDeleteRequest = 6,
 	GeneralChatMessage = 14,
 	LevelLoadComplete = 19,
@@ -39,6 +44,7 @@ pub enum WorldMessage {
 	CharacterListRequest,
 	CharacterCreateRequest(CharacterCreateRequest),
 	CharacterLoginRequest(CharacterLoginRequest),
+	SubjectGameMessage(SubjectGameMessage),
 	CharacterDeleteRequest(CharacterDeleteRequest),
 	GeneralChatMessage(GeneralChatMessage),
 	LevelLoadComplete(LevelLoadComplete),
@@ -54,6 +60,7 @@ impl<R: LERead> Deserialize<LE, R> for WorldMessage
 	        ClientValidation: Deserialize<LE, R>,
 	  CharacterCreateRequest: Deserialize<LE, R>,
 	   CharacterLoginRequest: Deserialize<LE, R>,
+	      SubjectGameMessage: Deserialize<LE, R>,
 	  CharacterDeleteRequest: Deserialize<LE, R>,
 	      GeneralChatMessage: Deserialize<LE, R>,
 	       LevelLoadComplete: Deserialize<LE, R>,
@@ -71,6 +78,8 @@ impl<R: LERead> Deserialize<LE, R> for WorldMessage
 			Ok(Self::CharacterCreateRequest(reader.read()?))
 		} else if packet_id == WorldId::CharacterLoginRequest as u32 {
 			Ok(Self::CharacterLoginRequest(reader.read()?))
+		} else if packet_id == WorldId::SubjectGameMessage as u32 {
+			Ok(Self::SubjectGameMessage(reader.read()?))
 		} else if packet_id == WorldId::CharacterDeleteRequest as u32 {
 			Ok(Self::CharacterDeleteRequest(reader.read()?))
 		} else if packet_id == WorldId::GeneralChatMessage as u32 {

@@ -1,42 +1,20 @@
-use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields};
+mod from_variants;
+mod game_message;
+mod gm_deserialize;
+
+use proc_macro::TokenStream;
 
 #[proc_macro_derive(FromVariants)]
-pub fn derive_deserialize(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let input = parse_macro_input!(input as DeriveInput);
+pub fn derive_from_variants(input: TokenStream) -> TokenStream {
+	from_variants::derive(input)
+}
 
-	let data = match &input.data {
-		Data::Enum(data) => data,
-		_ => panic!("only enums are supported"),
-	};
+#[proc_macro_derive(GameMessage, attributes(default))]
+pub fn derive_game_message_deserialize(input: TokenStream) -> TokenStream {
+	game_message::derive(input)
+}
 
-	let name = &input.ident;
-
-	let mut impls = vec![];
-	for v in &data.variants {
-		let variant = &v.ident;
-		let fields = match &v.fields {
-			Fields::Named(_) => panic!("use a tuple or unit variant"),
-			Fields::Unit => { continue }
-			Fields::Unnamed(fields) => fields,
-		};
-
-		if fields.unnamed.len() != 1 {
-			panic!("use exactly one tuple argument");
-		}
-		let first = fields.unnamed.first().unwrap();
-		let variant_ty = &first.ty;
-
-		let impl_ = quote! {
-			impl ::std::convert::From<#variant_ty> for Message {
-				fn from(msg: #variant_ty) -> Self {
-					#name::#variant(msg).into()
-				}
-			}
-		};
-		impls.push(impl_);
-	}
-	(quote! {
-		#(#impls)*
-	}).into()
+#[proc_macro_derive(GmDeserialize)]
+pub fn derive_gm_deserialize(input: TokenStream) -> TokenStream {
+	gm_deserialize::derive(input)
 }

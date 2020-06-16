@@ -122,6 +122,7 @@ lu_wstr!(LuWStr128, 128);
 lu_wstr!(LuWStr256, 256);
 
 pub type ObjId = u64;
+pub const OBJID_EMPTY: u64 = 0;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ZoneId {
