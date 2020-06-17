@@ -9,14 +9,16 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		_ => unimplemented!(),
 	};
 	let name = &input.ident;
+
 	let deser_code = gen_deser_code_enum(data, &name);
-	let impl_generics = &mut input.generics.clone();
-	impl_generics.params.push(parse_quote!(__READER: ::std::io::Read));
-	let (impl_generics,	_, _) = impl_generics.split_for_impl();
+	let deser_impl = &mut input.generics.clone();
+	deser_impl.params.push(parse_quote!(__READER: ::std::io::Read));
+	let (deser_impl,	_, _) = deser_impl.split_for_impl();
+
 	let (_, ty_generics, where_clause) = input.generics.split_for_impl();
 
 	(quote! {
-		impl #impl_generics ::endio::Deserialize<::endio::LE, __READER> for #name #ty_generics #where_clause {
+		impl #deser_impl ::endio::Deserialize<::endio::LE, __READER> for #name #ty_generics #where_clause {
 			fn deserialize(reader: &mut __READER) -> ::std::io::Result<Self> {
 				#deser_code
 			}

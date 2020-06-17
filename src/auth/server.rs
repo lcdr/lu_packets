@@ -1,6 +1,6 @@
 //! All packets an auth server can receive.
 use endio::{Deserialize, Serialize};
-use lu_packets_derive::ServiceMessage;
+use lu_packets_derive::ServiceMessageD;
 
 use crate::common::{LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
 pub use crate::general::server::GeneralMessage;
@@ -15,7 +15,7 @@ pub enum LuMessage {
 	Auth(AuthMessage) = ServiceId::Auth as u16,
 }
 
-#[derive(Debug, ServiceMessage)]
+#[derive(Debug, ServiceMessageD)]
 #[repr(u32)]
 pub enum AuthMessage {
 	LoginRequest(LoginRequest)

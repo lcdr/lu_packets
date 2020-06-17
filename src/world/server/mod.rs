@@ -6,7 +6,7 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::ServiceMessage;
+use lu_packets_derive::ServiceMessageD;
 
 use crate::common::{err, ObjId, LuWStr33, LuWStr42, ServiceId, ZoneId};
 use crate::chat::server::ChatMessage;
@@ -24,7 +24,7 @@ pub enum LuMessage {
 	World(WorldMessage) = ServiceId::World as u16,
 }
 
-#[derive(Debug, ServiceMessage)]
+#[derive(Debug, ServiceMessageD)]
 #[repr(u32)]
 pub enum WorldMessage {
 	ClientValidation(ClientValidation) = 1,
