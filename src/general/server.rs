@@ -1,6 +1,6 @@
 use std::io::Result as Res;
 
-use endio::{Deserialize, LERead};
+use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::ServiceMessage;
 
@@ -29,5 +29,18 @@ impl<R: LERead> Deserialize<LE, R> for Handshake
 		let service_id      = reader.read()?;
 		let _: u16          = reader.read()?;
 		Ok(Self { network_version, service_id })
+	}
+}
+
+impl<'a, W: LEWrite> Serialize<LE, W> for &'a Handshake
+	where       u8: Serialize<LE, W>,
+	            u16: Serialize<LE, W>,
+	  &'a ServiceId: Serialize<LE, W>,
+	            u32: Serialize<LE, W> {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		writer.write(self.network_version)?;
+		writer.write(0u32)?;
+		writer.write(&self.service_id)?;
+		writer.write(0u16)
 	}
 }

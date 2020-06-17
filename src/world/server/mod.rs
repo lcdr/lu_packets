@@ -1,14 +1,14 @@
 //! All packets a world server can receive.
 mod gm;
 
-use std::io::Read;
+use std::io::{Read, Write};
 use std::io::Result as Res;
 
-use endio::{Deserialize, LERead};
+use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::ServiceMessage;
 
-use crate::common::{err, ObjId, LuWStr33, LuWStr42, LuStr33, ServiceId, ZoneId};
+use crate::common::{err, ObjId, LuWStr33, LuWStr42, ServiceId, ZoneId};
 use crate::chat::server::ChatMessage;
 use self::gm::SubjectGameMessage;
 
@@ -49,8 +49,8 @@ pub struct ClientValidation {
 }
 
 impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
-	where LuWStr33: Deserialize<LE, R>,
-	       LuStr33: Deserialize<LE, R> {
+	where   u8: Deserialize<LE, R>,
+	  LuWStr33: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let username         = LERead::read(reader)?;
 		let session_key      = LERead::read(reader)?;
@@ -63,6 +63,18 @@ impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
 			session_key,
 			fdb_checksum,
 		})
+	}
+}
+
+impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ClientValidation
+	where       u8: Serialize<LE, W>,
+	  &'a LuWStr33: Serialize<LE, W> {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		LEWrite::write(writer, &self.username)?;
+		LEWrite::write(writer, &self.session_key)?;
+		Write::write(writer, &self.fdb_checksum)?;
+		// garbage byte because the devs messed up the null terminator
+		LEWrite::write(writer, 0u8)
 	}
 }
 
@@ -80,9 +92,9 @@ pub struct CharacterCreateRequest {
 }
 
 impl<R: LERead> Deserialize<LE, R> for CharacterCreateRequest
-	where  u8: Deserialize<LE, R>,
-	      u32: Deserialize<LE, R>,
-	 LuWStr33: Deserialize<LE, R> {
+	where   u8: Deserialize<LE, R>,
+	       u32: Deserialize<LE, R>,
+	  LuWStr33: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let char_name = reader.read()?;
 		let name_id_1 = reader.read()?;
@@ -118,12 +130,38 @@ impl<R: LERead> Deserialize<LE, R> for CharacterCreateRequest
 	}
 }
 
-#[derive(Debug, Deserialize)]
+impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterCreateRequest
+	where      u8: Serialize<LE, W>,
+	          u32: Serialize<LE, W>,
+	 &'a LuWStr33: Serialize<LE, W> {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		writer.write(&self.char_name)?;
+		writer.write(self.predef_name_ids.0)?;
+		writer.write(self.predef_name_ids.1)?;
+		writer.write(self.predef_name_ids.2)?;
+		writer.write(0u8)?;
+		writer.write(0u32)?;
+		writer.write(0u32)?;
+		writer.write(self.shirt_color)?;
+		writer.write(0u32)?;
+		writer.write(self.pants_color)?;
+		writer.write(self.hair_style)?;
+		writer.write(self.hair_color)?;
+		writer.write(0u32)?;
+		writer.write(0u32)?;
+		writer.write(self.eyebrow_style)?;
+		writer.write(self.eye_style)?;
+		writer.write(self.mouth_style)?;
+		writer.write(0u8)
+	}
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CharacterLoginRequest {
 	pub char_id: ObjId,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CharacterDeleteRequest {
 	pub char_id: ObjId,
 }
@@ -153,7 +191,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
 	}
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct LevelLoadComplete {
 	pub zone_id: ZoneId,
 }
@@ -179,6 +217,20 @@ impl<R: LERead> Deserialize<LE, R> for RouteMessage
 				return err("route service id", service_id);
 			}
 		})
+	}
+}
+
+impl<'a, W: LEWrite> Serialize<LE, W> for &'a RouteMessage
+	where         u32: Serialize<LE, W>,
+	    &'a ServiceId: Serialize<LE, W>,
+	  &'a ChatMessage: Serialize<LE, W> {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		writer.write(0u32)?; // packet size, unused in this server's impl
+		writer.write(&ServiceId::Chat)?;
+		match self {
+			RouteMessage::Chat(msg) => { writer.write(msg)?; }
+		}
+		Ok(())
 	}
 }
 
@@ -209,7 +261,23 @@ impl<R: Read+LERead> Deserialize<LE, R> for StringCheck
 	}
 }
 
-#[derive(Debug, Deserialize)]
+impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a StringCheck
+	where   u8: Serialize<LE, W>,
+	       u16: Serialize<LE, W>,
+	  &'a LuWStr42: Serialize<LE, W> {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		LEWrite::write(writer, self.chat_mode)?;
+		LEWrite::write(writer, self.chat_channel)?;
+		LEWrite::write(writer, &self.recipient_name)?;
+		let utf16_str: Vec<u16> = self.string.encode_utf16().collect();
+		LEWrite::write(writer, utf16_str.len() as u16)?;
+		let utf16_str_slice: &[u8] = unsafe { std::slice::from_raw_parts(utf16_str.as_ptr() as *const u8, utf16_str.len()*2) };
+		Write::write(writer, utf16_str_slice)?;
+		Ok(())
+	}
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[repr(u32)]
 pub enum UgcResType {
 	Lxfml,
@@ -218,7 +286,7 @@ pub enum UgcResType {
 	Dds,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UgcDownloadFailed {
 	pub res_type: UgcResType,
 	pub blueprint_id: ObjId,

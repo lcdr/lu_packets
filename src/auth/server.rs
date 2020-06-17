@@ -1,5 +1,5 @@
 //! All packets an auth server can receive.
-use endio::Deserialize;
+use endio::{Deserialize, Serialize};
 use lu_packets_derive::ServiceMessage;
 
 use crate::common::{LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
@@ -21,7 +21,7 @@ pub enum AuthMessage {
 	LoginRequest(LoginRequest)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct LoginRequest {
 	pub username: LuWStr33,
 	pub password: LuWStr41,
@@ -30,7 +30,7 @@ pub struct LoginRequest {
 	pub computer_stats: ComputerStats,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[repr(u8)]
 pub enum ClientOs {
 	Unknown,
@@ -38,7 +38,7 @@ pub enum ClientOs {
 	MacOs,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ComputerStats {
 	pub memory_stats: LuWStr256,
 	pub video_card_info: LuWStr128,
@@ -46,7 +46,7 @@ pub struct ComputerStats {
 	pub os_info: OsInfo,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ProcessorInfo {
 	pub number_of_processors: u32,
 	pub processor_type: u32,
@@ -54,7 +54,7 @@ pub struct ProcessorInfo {
 	pub processor_revision: u16,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct OsInfo {
 	pub os_version_info_size: u32,
 	pub major_version: u32,
