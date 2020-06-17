@@ -2,7 +2,7 @@ use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::FromVariants;
+use lu_packets_derive::{FromVariants, ServiceMessageS};
 
 use crate::common::{ObjId, LuWStr33, ZoneId};
 
@@ -15,38 +15,13 @@ impl From<ClientMessage> for Message {
 	}
 }
 
-#[derive(Debug, FromVariants)]
+#[derive(Debug, FromVariants, ServiceMessageS)]
 #[non_exhaustive]
 #[repr(u32)]
 pub enum ClientMessage {
 	CharacterListResponse(CharacterListResponse) = 6,
 	CharacterCreateResponse(CharacterCreateResponse) = 7,
 	CharacterDeleteResponse(CharacterDeleteResponse) = 11,
-}
-
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a ClientMessage
-	where                      u8: Serialize<LE, W>,
-	                          u32: Serialize<LE, W>,
-	    &'a CharacterListResponse: Serialize<LE, W>,
-	  &'a CharacterCreateResponse: Serialize<LE, W>,
-	  &'a CharacterDeleteResponse: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		let disc = unsafe { *(self as *const ClientMessage as *const u32) };
-		writer.write(disc)?;
-		writer.write(0u8)?;
-		match self {
-			ClientMessage::CharacterListResponse(msg) => {
-				writer.write(msg)?;
-			}
-			ClientMessage::CharacterCreateResponse(msg) => {
-				writer.write(msg)?;
-			}
-			ClientMessage::CharacterDeleteResponse(msg) => {
-				writer.write(msg)?;
-			}
-		}
-		Ok(())
-	}
 }
 
 #[derive(Debug)]

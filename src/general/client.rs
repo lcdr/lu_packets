@@ -2,6 +2,7 @@ use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
+use lu_packets_derive::ServiceMessageS;
 
 use crate::common::ServiceId;
 
@@ -26,7 +27,7 @@ impl<C> From<GeneralMessage> for Message<C> {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, ServiceMessageS)]
 #[non_exhaustive]
 #[repr(u32)]
 pub enum GeneralMessage {
@@ -43,27 +44,6 @@ impl<C> From<Handshake> for Message<C> {
 impl<C> From<DisconnectNotify> for Message<C> {
 	fn from(msg: DisconnectNotify) -> Self {
 		GeneralMessage::DisconnectNotify(msg).into()
-	}
-}
-
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a GeneralMessage
-	where u8: Serialize<LE, W>,
-	     u32: Serialize<LE, W>,
-	     &'a Handshake: Serialize<LE, W>,
-	     &'a DisconnectNotify: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		let disc = unsafe { *(self as *const GeneralMessage as *const u32) };
-		writer.write(disc)?;
-		writer.write(0u8)?;
-		match self {
-			GeneralMessage::Handshake(msg) => {
-				writer.write(msg)?;
-			}
-			GeneralMessage::DisconnectNotify(msg) => {
-				writer.write(msg)?;
-			}
-		}
-		Ok(())
 	}
 }
 

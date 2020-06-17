@@ -2,7 +2,7 @@ use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::FromVariants;
+use lu_packets_derive::{FromVariants, ServiceMessageS};
 
 use crate::common::{LuStr33, LuWStr33};
 
@@ -15,28 +15,11 @@ impl From<ClientMessage> for Message {
 	}
 }
 
-#[derive(Debug, FromVariants)]
+#[derive(Debug, FromVariants, ServiceMessageS)]
 #[non_exhaustive]
 #[repr(u32)]
 pub enum ClientMessage {
 	LoginResponse(LoginResponse),
-}
-
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a ClientMessage
-	where            u8: Serialize<LE, W>,
-	                u32: Serialize<LE, W>,
-	  &'a LoginResponse: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		let disc = unsafe { *(self as *const ClientMessage as *const u32) };
-		writer.write(disc)?;
-		writer.write(0u8)?;
-		match self {
-			ClientMessage::LoginResponse(message) => {
-				writer.write(message)?;
-			}
-		}
-		Ok(())
-	}
 }
 
 #[derive(Debug)]
