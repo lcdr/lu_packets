@@ -2,31 +2,14 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead};
 use endio::LittleEndian as LE;
+use lu_packets_derive::ServiceMessage;
 
-use crate::common::{err, ServiceId};
+use crate::common::ServiceId;
 
-enum GeneralId {
-	Handshake,
-}
-
-#[derive(Debug)]
+#[derive(Debug, ServiceMessage)]
+#[repr(u32)]
 pub enum GeneralMessage {
 	Handshake(Handshake)
-}
-
-impl<R: LERead> Deserialize<LE, R> for GeneralMessage
-	where    u8: Deserialize<LE, R>,
-	        u32: Deserialize<LE, R>,
-	  Handshake: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let packet_id: u32 = reader.read()?;
-		let _padding: u8   = reader.read()?;
-		if packet_id == GeneralId::Handshake as u32 {
-			Ok(GeneralMessage::Handshake(reader.read()?))
-		} else {
-			err("general id", packet_id)
-		}
-	}
 }
 
 #[derive(Debug)]

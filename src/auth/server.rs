@@ -1,10 +1,8 @@
 //! All packets an auth server can receive.
-use std::io::Result as Res;
+use endio::Deserialize;
+use lu_packets_derive::ServiceMessage;
 
-use endio::{Deserialize, LERead};
-use endio::LittleEndian as LE;
-
-use crate::common::{err, LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
+use crate::common::{LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
 pub use crate::general::server::GeneralMessage;
 
 pub type Message = crate::raknet::server::Message<LuMessage>;
@@ -17,28 +15,10 @@ pub enum LuMessage {
 	Auth(AuthMessage) = ServiceId::Auth as u16,
 }
 
-enum AuthId {
-	LoginRequest,
-}
-
-#[derive(Debug)]
+#[derive(Debug, ServiceMessage)]
+#[repr(u32)]
 pub enum AuthMessage {
 	LoginRequest(LoginRequest)
-}
-
-impl<R: LERead> Deserialize<LE, R> for AuthMessage
-	where       u8: Deserialize<LE, R>,
-	           u32: Deserialize<LE, R>,
-	  LoginRequest: Deserialize<LE, R>, {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let packet_id: u32 = reader.read()?;
-		let _padding: u8   = reader.read()?;
-		if packet_id == AuthId::LoginRequest as u32 {
-			Ok(AuthMessage::LoginRequest(reader.read()?))
-		} else {
-			err("auth id", packet_id)
-		}
-	}
 }
 
 #[derive(Debug, Deserialize)]

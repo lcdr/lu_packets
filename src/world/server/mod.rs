@@ -6,6 +6,7 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead};
 use endio::LittleEndian as LE;
+use lu_packets_derive::ServiceMessage;
 
 use crate::common::{err, ObjId, LuWStr33, LuWStr42, LuStr33, ServiceId, ZoneId};
 use crate::chat::server::ChatMessage;
@@ -23,81 +24,21 @@ pub enum LuMessage {
 	World(WorldMessage) = ServiceId::World as u16,
 }
 
-enum WorldId {
-	ClientValidation = 1,
-	CharacterListRequest = 2,
-	CharacterCreateRequest = 3,
-	CharacterLoginRequest = 4,
-	SubjectGameMessage = 5,
-	CharacterDeleteRequest = 6,
-	GeneralChatMessage = 14,
-	LevelLoadComplete = 19,
-	RouteMessage = 21,
-	StringCheck = 25,
-	RequestFreeTrialRefresh = 32,
-	UgcDownloadFailed = 120,
-}
-
-#[derive(Debug)]
+#[derive(Debug, ServiceMessage)]
+#[repr(u32)]
 pub enum WorldMessage {
-	ClientValidation(ClientValidation),
-	CharacterListRequest,
-	CharacterCreateRequest(CharacterCreateRequest),
-	CharacterLoginRequest(CharacterLoginRequest),
-	SubjectGameMessage(SubjectGameMessage),
-	CharacterDeleteRequest(CharacterDeleteRequest),
-	GeneralChatMessage(GeneralChatMessage),
-	LevelLoadComplete(LevelLoadComplete),
-	RouteMessage(RouteMessage),
-	StringCheck(StringCheck),
-	RequestFreeTrialRefresh,
-	UgcDownloadFailed(UgcDownloadFailed),
-}
-
-impl<R: LERead> Deserialize<LE, R> for WorldMessage
-	where                 u8: Deserialize<LE, R>,
-	                     u32: Deserialize<LE, R>,
-	        ClientValidation: Deserialize<LE, R>,
-	  CharacterCreateRequest: Deserialize<LE, R>,
-	   CharacterLoginRequest: Deserialize<LE, R>,
-	      SubjectGameMessage: Deserialize<LE, R>,
-	  CharacterDeleteRequest: Deserialize<LE, R>,
-	      GeneralChatMessage: Deserialize<LE, R>,
-	       LevelLoadComplete: Deserialize<LE, R>,
-	            RouteMessage: Deserialize<LE, R>,
-	             StringCheck: Deserialize<LE, R>,
-	       UgcDownloadFailed: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let packet_id: u32 = reader.read()?;
-		let _padding: u8   = reader.read()?;
-		if packet_id == WorldId::ClientValidation as u32 {
-			Ok(Self::ClientValidation(reader.read()?))
-		} else if packet_id == WorldId::CharacterListRequest as u32 {
-			Ok(Self::CharacterListRequest)
-		} else if packet_id == WorldId::CharacterCreateRequest as u32 {
-			Ok(Self::CharacterCreateRequest(reader.read()?))
-		} else if packet_id == WorldId::CharacterLoginRequest as u32 {
-			Ok(Self::CharacterLoginRequest(reader.read()?))
-		} else if packet_id == WorldId::SubjectGameMessage as u32 {
-			Ok(Self::SubjectGameMessage(reader.read()?))
-		} else if packet_id == WorldId::CharacterDeleteRequest as u32 {
-			Ok(Self::CharacterDeleteRequest(reader.read()?))
-		} else if packet_id == WorldId::GeneralChatMessage as u32 {
-			Ok(Self::GeneralChatMessage(reader.read()?))
-		} else if packet_id == WorldId::LevelLoadComplete as u32 {
-			Ok(Self::LevelLoadComplete(reader.read()?))
-		} else if packet_id == WorldId::RouteMessage as u32 {
-			Ok(Self::RouteMessage(reader.read()?))
-		} else if packet_id == WorldId::StringCheck as u32 {
-			Ok(Self::StringCheck(reader.read()?))
-		} else if packet_id == WorldId::RequestFreeTrialRefresh as u32 {
-			Ok(Self::RequestFreeTrialRefresh)
-		} else if packet_id == WorldId::UgcDownloadFailed as u32 {
-			Ok(Self::UgcDownloadFailed(reader.read()?))
-		} else {
-			err("world id", packet_id)
-		}
-	}
+	ClientValidation(ClientValidation) = 1,
+	CharacterListRequest = 2,
+	CharacterCreateRequest(CharacterCreateRequest) = 3,
+	CharacterLoginRequest(CharacterLoginRequest) = 4,
+	SubjectGameMessage(SubjectGameMessage) = 5,
+	CharacterDeleteRequest(CharacterDeleteRequest) = 6,
+	GeneralChatMessage(GeneralChatMessage) = 14,
+	LevelLoadComplete(LevelLoadComplete) = 19,
+	RouteMessage(RouteMessage) = 21,
+	StringCheck(StringCheck) = 25,
+	RequestFreeTrialRefresh = 32,
+	UgcDownloadFailed(UgcDownloadFailed) = 120,
 }
 
 #[derive(Debug)]
