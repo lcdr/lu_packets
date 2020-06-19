@@ -123,10 +123,3 @@ lu_wstr!(LuWStr256, 256);
 
 pub type ObjId = u64;
 pub const OBJID_EMPTY: u64 = 0;
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct ZoneId {
-	pub map_id: u16,
-	pub instance_id: u16,
-	pub clone_id: u32,
-}

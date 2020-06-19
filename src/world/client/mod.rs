@@ -4,7 +4,8 @@ use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::{FromVariants, ServiceMessageS};
 
-use crate::common::{ObjId, LuWStr33, ZoneId};
+use crate::common::{ObjId, LuWStr33};
+use super::ZoneId;
 
 pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 pub type Message = crate::raknet::client::Message<LuMessage>;

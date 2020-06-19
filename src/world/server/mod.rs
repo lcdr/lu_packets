@@ -8,8 +8,9 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::ServiceMessageD;
 
-use crate::common::{err, ObjId, LuWStr33, LuWStr42, ServiceId, ZoneId};
+use crate::common::{err, ObjId, LuWStr33, LuWStr42, ServiceId};
 use crate::chat::server::ChatMessage;
+use super::ZoneId;
 use self::gm::SubjectGameMessage;
 
 pub use crate::general::server::GeneralMessage;

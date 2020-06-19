@@ -11,6 +11,13 @@ use lu_packets_derive::GmParam;
 type Lot = u32;
 const LOT_NULL: Lot = -1i32 as Lot;
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ZoneId {
+	pub map_id: u16,
+	pub instance_id: u16,
+	pub clone_id: u32,
+}
+
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 pub struct Vector3 {
 	pub x: f32,
