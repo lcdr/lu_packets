@@ -2,11 +2,16 @@ pub mod client;
 pub mod server;
 
 use std::cmp::PartialEq;
-use std::io::{Error, ErrorKind::InvalidData, Read, Write};
+use std::io::{Read, Write};
 use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use lu_packets_derive::GmParam;
+
+use crate::common::{LuVarStr, LuVarWStr};
+
+type GmString = LuVarStr<u32>;
+type GmWString = LuVarWStr<u32>;
 
 type Lot = u32;
 const LOT_NULL: Lot = -1i32 as Lot;
@@ -64,14 +69,13 @@ impl_gm!(u32);
 impl_gm!(u64);
 impl_gm!(i32);
 impl_gm!(f32);
+impl_gm!(GmString);
+impl_gm!(GmWString);
 
 impl GmParam for Vec<u8> {
 	fn deserialize<R: Read>(reader: &mut R) -> Res<Self> {
 		let str_len: u32 = LERead::read(reader)?;
 		let str_len = str_len as usize;
-		if str_len == 0 {
-			return Ok(Vec::new());
-		}
 		let mut vec = Vec::with_capacity(str_len);
 		unsafe { vec.set_len(str_len); }
 		Read::read(reader, &mut vec)?;
@@ -81,30 +85,5 @@ impl GmParam for Vec<u8> {
 	fn serialize<W: Write>(&self, writer: &mut W) -> Res<()> {
 		LEWrite::write(writer, self.len() as u32)?;
 		Write::write_all(writer, self)
-	}
-}
-
-impl GmParam for String {
-	fn deserialize<R: Read>(reader: &mut R) -> Res<Self> {
-		let str_len: u32 = LERead::read(reader)?;
-		let str_len = str_len as usize;
-		if str_len == 0 {
-			return Ok(String::new());
-		}
-		let mut ucs2_str = Vec::<u16>::with_capacity(str_len);
-		unsafe {
-			ucs2_str.set_len(str_len);
-			let mut ucs2_str_slice = std::slice::from_raw_parts_mut(ucs2_str.as_mut_ptr() as *mut u8, str_len*2);
-			Read::read(reader, &mut ucs2_str_slice)?;
-		}
-		String::from_utf16(&ucs2_str[..]).map_err(|_| Error::new(InvalidData, "invalid utf16 str"))
-	}
-
-	fn serialize<W: Write>(&self, writer: &mut W) -> Res<()> {
-		let bytes: Vec<u16> = self.encode_utf16().collect();
-		let str_len = bytes.len();
-		LEWrite::write(writer, str_len as u32)?;
-		let u8_slice = unsafe { std::slice::from_raw_parts(bytes.as_ptr() as *const u8, str_len*2) };
-		Write::write_all(writer, u8_slice)
 	}
 }

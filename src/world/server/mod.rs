@@ -8,7 +8,7 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::ServiceMessageD;
 
-use crate::common::{err, ObjId, LuWStr33, LuWStr42, ServiceId};
+use crate::common::{err, ObjId, LuVarWStr, LuWStr33, LuWStr42, ServiceId};
 use crate::chat::server::ChatMessage;
 use super::ZoneId;
 use self::gm::SubjectGameMessage;
@@ -167,29 +167,11 @@ pub struct CharacterDeleteRequest {
 	pub char_id: ObjId,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GeneralChatMessage {
 	pub chat_channel: u8, // todo: type?
 	pub source_id: u16,
-	pub message: String,
-}
-
-impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
-	where u8: Deserialize<LE, R>,
-	     u16: Deserialize<LE, R>,
-	     u32: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let chat_channel    = LERead::read(reader)?;
-		let source_id       = LERead::read(reader)?;
-		let string_len: u32 = LERead::read(reader)?;
-		let mut string = vec![0; (string_len*2) as usize];
-		let mut taken = Read::take(reader, (string_len*2) as u64);
-		Read::read(&mut taken, &mut string)?;
-		let string_slice: &[u16] = unsafe { std::slice::from_raw_parts(string.as_ptr() as *const u16, string_len as usize - 1) };
-		let message = String::from_utf16_lossy(string_slice);
-
-		Ok(Self { chat_channel, source_id, message })
-	}
+	pub message: LuVarWStr<u32>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -235,47 +217,12 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a RouteMessage
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct StringCheck {
 	pub chat_mode: u8, // todo: type?
 	pub chat_channel: u8, // todo: type?
 	pub recipient_name: LuWStr42,
-	pub string: String,
-}
-
-impl<R: Read+LERead> Deserialize<LE, R> for StringCheck
-	where   u8: Deserialize<LE, R>,
-	       u16: Deserialize<LE, R>,
-	  LuWStr42: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let chat_mode       = LERead::read(reader)?;
-		let chat_channel    = LERead::read(reader)?;
-		let recipient_name  = LERead::read(reader)?;
-		let string_len: u16 = LERead::read(reader)?;
-		let mut string = vec![0; (string_len*2) as usize];
-		let mut taken = Read::take(reader, (string_len*2) as u64);
-		Read::read(&mut taken, &mut string)?;
-		let string_slice: &[u16] = unsafe { std::slice::from_raw_parts(string.as_ptr() as *const u16, string_len as usize) };
-		let string = String::from_utf16_lossy(string_slice);
-
-		Ok(Self { chat_mode, chat_channel, recipient_name, string })
-	}
-}
-
-impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a StringCheck
-	where   u8: Serialize<LE, W>,
-	       u16: Serialize<LE, W>,
-	  &'a LuWStr42: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()> {
-		LEWrite::write(writer, self.chat_mode)?;
-		LEWrite::write(writer, self.chat_channel)?;
-		LEWrite::write(writer, &self.recipient_name)?;
-		let utf16_str: Vec<u16> = self.string.encode_utf16().collect();
-		LEWrite::write(writer, utf16_str.len() as u16)?;
-		let utf16_str_slice: &[u8] = unsafe { std::slice::from_raw_parts(utf16_str.as_ptr() as *const u8, utf16_str.len()*2) };
-		Write::write(writer, utf16_str_slice)?;
-		Ok(())
-	}
+	pub string: LuVarWStr<u16>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

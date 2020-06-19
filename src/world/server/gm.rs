@@ -5,7 +5,7 @@ use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use super::super::{Lot, LOT_NULL, Quaternion, Vector3};
+use super::super::{GmString, GmWString, Lot, LOT_NULL, Quaternion, Vector3};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SubjectGameMessage {
@@ -134,7 +134,7 @@ pub enum GameMessage {
 #[derive(Debug, GameMessage)]
 pub struct RequestDie {
 	pub unknown: bool,
-	pub death_type: String,
+	pub death_type: GmWString,
 	pub direction_relative_angle_xz: f32,
 	pub direction_relative_angle_y: f32,
 	pub direction_relative_force: f32,
@@ -358,15 +358,15 @@ pub struct MissionDialogueOk {
 #[derive(Debug, GameMessage)]
 pub struct MessageBoxRespond {
 	pub button: i32,
-	pub identifier: String,
-	pub user_data: String,
+	pub identifier: GmWString,
+	pub user_data: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
 pub struct ChoiceBoxRespond {
-	pub button_identifier: String,
+	pub button_identifier: GmWString,
 	pub button: i32,
-	pub identifier: String,
+	pub identifier: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
@@ -439,7 +439,7 @@ pub struct NotifyTamingBuildSuccess {
 
 #[derive(Debug, GameMessage)]
 pub struct RequestSetPetName {
-	pub name: String,
+	pub name: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
@@ -448,7 +448,7 @@ pub struct CinematicUpdate {
 	pub event: CinematicEvent,
 	#[default(-1.0)]
 	pub overall_time: f32,
-	pub path_name: String,
+	pub path_name: GmWString,
 	#[default(-1.0)]
 	pub path_time: f32,
 	#[default(-1)]
@@ -465,7 +465,7 @@ pub enum CinematicEvent {
 
 #[derive(Debug, GameMessage)]
 pub struct FireEventServerSide {
-	pub args: String,
+	pub args: GmWString,
 	#[default(-1)]
 	pub param1: i32,
 	#[default(-1)]
@@ -539,21 +539,21 @@ pub struct PropertyEntranceSync {
 	pub reputation_time: i32,
 	pub sort_method: i32,
 	pub start_index: i32,
-	pub filter_text: Vec<u8>,
+	pub filter_text: GmString,
 }
 
 #[derive(Debug, GameMessage)]
 pub struct ParseChatMessage {
 	pub client_state: i32,
-	pub string: String,
+	pub string: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
 pub struct SetMissionTypeState {
 	#[default(MissionLockState::New)]
 	pub state: MissionLockState,
-	pub mission_subtype: Vec<u8>,
-	pub mission_type: Vec<u8>,
+	pub mission_subtype: GmString,
+	pub mission_type: GmString,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
@@ -584,7 +584,7 @@ pub struct ReadyForUpdates {
 
 #[derive(Debug, GameMessage)]
 pub struct SetLastCustomBuild {
-	pub tokenized_lot_list: String,
+	pub tokenized_lot_list: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
@@ -597,7 +597,7 @@ pub struct SetIgnoreProjectileCollision {
 pub struct PropertyModerationAction {
 	#[default(0)]
 	pub character_id: ObjId,
-	pub info: String,
+	pub info: GmWString,
 	#[default(-1)]
 	pub new_moderation_status: i32,
 }
@@ -658,7 +658,7 @@ pub struct ActivityStateChangeRequest {
 	pub obj_id: ObjId,
 	pub num_value_1: i32,
 	pub num_value_2: i32,
-	pub string_value: String,
+	pub string_value: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
@@ -869,7 +869,7 @@ pub struct CancelRailMovement {
 
 #[derive(Debug, GameMessage)]
 pub struct PlayerRailArrivedNotification {
-	pub path_name: String,
+	pub path_name: GmWString,
 	pub waypoint_number: i32,
 }
 

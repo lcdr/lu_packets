@@ -4,7 +4,7 @@ use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::{FromVariants, ServiceMessageS};
 
-use crate::common::{LuStr33, LuWStr33};
+use crate::common::{LuStr33, LuVarWStr, LuWStr33};
 
 pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 pub type Message = crate::raknet::client::Message<LuMessage>;
@@ -30,7 +30,7 @@ pub enum LoginResponse {
 		session_key: LuWStr33,
 		redirect_address: (LuStr33, u16),
 	} = 1,
-	CustomMessage(String) = 5,
+	CustomMessage(LuVarWStr<u16>) = 5,
 	InvalidUsernamePassword = 6,
 }
 
@@ -40,7 +40,8 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a LoginResponse
 	           u32: Serialize<LE, W>,
 	      &'a [u8]: Serialize<LE, W>,
 	   &'a LuStr33: Serialize<LE, W>,
-	  &'a LuWStr33: Serialize<LE, W> {
+	  &'a LuWStr33: Serialize<LE, W>,
+	  &'a LuVarWStr<u16>: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
 		let disc = unsafe { *(self as *const LoginResponse as *const u8) };
 		writer.write(disc)?;
@@ -55,22 +56,16 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a LoginResponse
 				writer.write(&[0; 33][..])?;
 				writer.write(redirect_address.1)?;
 				writer.write(&[0; 91][..])?;
-				writer.write(4u32)?;
 			}
 			LoginResponse::CustomMessage(msg) => {
 				writer.write(&[0; 493][..])?;
-				let bytes: Vec<u16> = msg.encode_utf16().collect();
-				writer.write(bytes.len() as u16)?;
-				for wchar in bytes {
-					writer.write(wchar)?;
-				}
-				writer.write(4u32)?;
+				writer.write(msg)?;
 			}
 			LoginResponse::InvalidUsernamePassword => {
 				writer.write(&[0; 495][..])?;
-				writer.write(4u32)?;
 			}
 		}
+		writer.write(4u32)?;
 		Ok(())
 	}
 }
