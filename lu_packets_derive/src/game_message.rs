@@ -6,9 +6,15 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 
 	let name = &input.ident;
-	let impl_generics = &mut input.generics.clone();
-	impl_generics.params.push(parse_quote!(__READER: ::std::io::Read));
-	let (impl_generics,	_, _) = impl_generics.split_for_impl();
+	let des_impl_generics = &mut input.generics.clone();
+	des_impl_generics.params.push(parse_quote!(__READER: ::std::io::Read));
+	let (des_impl_generics, _, _) = des_impl_generics.split_for_impl();
+
+	let ser_impl_generics = &mut input.generics.clone();
+	ser_impl_generics.params.push(parse_quote!('__LIFETIME));
+	ser_impl_generics.params.push(parse_quote!(__WRITER: ::std::io::Write));
+	let (ser_impl_generics, _, _) = ser_impl_generics.split_for_impl();
+
 	let (_, ty_generics, where_clause) = input.generics.split_for_impl();
 
 	let data = match &input.data {
@@ -17,10 +23,17 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	};
 
 	let deser_code = gen_deser_code(&data.fields);
+	let ser_code = gen_ser_code(&data.fields);
 	(quote! {
-		impl #impl_generics ::endio::Deserialize<::endio::LE, __READER> for #name #ty_generics #where_clause {
+		impl #des_impl_generics ::endio::Deserialize<::endio::LE, __READER> for #name #ty_generics #where_clause {
 			fn deserialize(reader: &mut __READER) -> ::std::io::Result<Self> {
 				#deser_code
+			}
+		}
+
+		impl #ser_impl_generics ::endio::Serialize<::endio::LE, __WRITER> for &'__LIFETIME #name #ty_generics #where_clause {
+			fn serialize(self, writer: &mut __WRITER) -> ::std::io::Result<()> {
+				#ser_code
 			}
 		}
 	}).into()
@@ -53,7 +66,7 @@ fn gen_deser_code(fields: &Fields) -> TokenStream {
 		let val = if is_bool {
 			quote! { reader.read_bit()? }
 		} else {
-			let parse = quote! { crate::world::GmDeserialize::deserialize(reader)? };
+			let parse = quote! { crate::world::GmParam::deserialize(reader)? };
 			match default {
 				None => quote! { #parse },
 				Some(default) => quote! {
@@ -73,6 +86,54 @@ fn gen_deser_code(fields: &Fields) -> TokenStream {
 	quote! {
 		#(#deser)*
 		Ok(Self {#(#idents)* })
+	}
+}
+
+fn gen_ser_code(fields: &Fields) -> TokenStream {
+	let fields = match fields {
+		Fields::Named(fields) => fields,
+		_ => unimplemented!(),
+	};
+	let mut msg_needs_bitwriter = false;
+	let mut ser = vec![];
+	for f in &fields.named {
+		let ident = &f.ident;
+
+		let is_bool = match &f.ty {
+			Type::Path(path) => path.path.is_ident("bool"),
+			_ => false,
+		};
+		let default = get_gm_default(&f);
+		let field_needs_bitwriter = is_bool || default.is_some();
+		let create_bitwriter = if !msg_needs_bitwriter && field_needs_bitwriter {
+			msg_needs_bitwriter = true;
+			quote! { let mut writer = &mut ::endio_bit::BEBitWriter::new(writer); }
+		} else {
+			quote! { }
+		};
+		let write = if is_bool {
+			quote! { writer.write_bit(self.#ident)?; }
+		} else {
+			let write_field = quote! { crate::world::GmParam::serialize(&self.#ident, writer)? };
+			match default {
+				None => quote! { #write_field; },
+				Some(default) => quote! {
+					let is_not_default = self.#ident != #default;
+					writer.write_bit(is_not_default)?;
+					if is_not_default {
+						#write_field;
+					}
+				},
+			}
+		};
+		ser.push(quote! {
+			#create_bitwriter
+			#write
+		});
+	}
+	quote! {
+		#(#ser)*
+		Ok(())
 	}
 }
 

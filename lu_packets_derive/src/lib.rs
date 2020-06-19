@@ -1,6 +1,6 @@
 mod from_variants;
 mod game_message;
-mod gm_deserialize;
+mod gm_type;
 mod service_message_d;
 mod service_message_s;
 
@@ -16,9 +16,9 @@ pub fn derive_game_message_deserialize(input: TokenStream) -> TokenStream {
 	game_message::derive(input)
 }
 
-#[proc_macro_derive(GmDeserialize)]
-pub fn derive_gm_deserialize(input: TokenStream) -> TokenStream {
-	gm_deserialize::derive(input)
+#[proc_macro_derive(GmParam)]
+pub fn derive_gm_type(input: TokenStream) -> TokenStream {
+	gm_type::derive(input)
 }
 
 #[proc_macro_derive(ServiceMessageD)]

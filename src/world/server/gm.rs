@@ -1,17 +1,19 @@
-use endio::Deserialize;
-use lu_packets_derive::{GameMessage, GmDeserialize};
+use std::cmp::PartialEq;
+
+use endio::{Deserialize, Serialize};
+use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
 use super::super::{Lot, LOT_NULL, Quaternion, Vector3};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SubjectGameMessage {
 	pub subject_id: ObjId,
 	pub message: GameMessage,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[repr(u16)]
 pub enum GameMessage {
 	RequestDie(RequestDie) = 38,
@@ -142,7 +144,7 @@ pub struct RequestDie {
 	pub loot_owner_id: ObjId,
 }
 
-#[derive(Debug, Deserialize, GmDeserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum KillType {
 	Violent,
@@ -244,7 +246,7 @@ pub struct ServerTerminateInteraction {
 	pub terminate_type: TerminateType,
 }
 
-#[derive(Debug, Deserialize, GmDeserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum TerminateType {
 	Range,
@@ -411,7 +413,7 @@ pub struct NotifyPet {
 	pub pet_notification_type: i32,
 }
 
-#[derive(Debug, Deserialize, GmDeserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum QueryType {
 	TopAll,
@@ -453,7 +455,7 @@ pub struct CinematicUpdate {
 	pub waypoint: i32,
 }
 
-#[derive(Debug, Deserialize, GmDeserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum CinematicEvent {
 	Started,
@@ -512,7 +514,7 @@ pub struct DeleteModelFromClient {
 	pub reason: DeleteReason,
 }
 
-#[derive(Debug, Deserialize, GmDeserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum DeleteReason {
 	PickingModelUp,
@@ -554,7 +556,7 @@ pub struct SetMissionTypeState {
 	pub mission_type: Vec<u8>,
 }
 
-#[derive(Debug, Deserialize, GmDeserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum MissionLockState {
 	Locked,
@@ -851,7 +853,7 @@ pub struct ActivateBrickMode {
 	pub enter_flag: bool,
 }
 
-#[derive(Debug, Deserialize, GmDeserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum BuildType {
 	Nowhere,
