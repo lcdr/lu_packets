@@ -3,77 +3,24 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead};
 use endio::LittleEndian as LE;
+use lu_packets_derive::ServiceMessageD;
 
-use crate::common::{err, LuWStr33, ObjId};
+use crate::common::{LuWStr33, ObjId};
 
-enum ChatId {
-	GeneralChatMessage = 1,
-	PrivateChatMessage = 2,
-	AddFriendResponse = 8,
+#[derive(Debug, ServiceMessageD)]
+#[disc_padding=9]
+#[repr(u32)]
+pub enum ChatMessage {
+	GeneralChatMessage(GeneralChatMessage) = 1,
+	PrivateChatMessage(PrivateChatMessage) = 2,
+	AddFriendResponse(AddFriendResponse) = 8,
 	GetFriendsList = 10,
 	GetIgnoreList = 13,
-	TeamInviteResponse = 16,
-	TeamLeave = 18,
+	TeamInviteResponse(TeamInviteResponse) = 16,
+	TeamLeave(TeamLeave) = 18,
 	TeamGetStatus = 21,
-	RequestMinimumChatMode = 50,
-	RequestMinimumChatModePrivate = 51,
-}
-
-#[derive(Debug)]
-pub enum ChatMessage {
-	GeneralChatMessage(GeneralChatMessage),
-	PrivateChatMessage(PrivateChatMessage),
-	AddFriendResponse(AddFriendResponse),
-	GetFriendsList,
-	GetIgnoreList,
-	TeamInviteResponse(TeamInviteResponse),
-	TeamLeave,
-	TeamGetStatus,
-	RequestMinimumChatMode(RequestMinimumChatMode),
-	RequestMinimumChatModePrivate(RequestMinimumChatModePrivate),
-}
-
-impl<R: Read+LERead> Deserialize<LE, R> for ChatMessage
-	where                        u8: Deserialize<LE, R>,
-	                            u32: Deserialize<LE, R>,
-	                            u64: Deserialize<LE, R>,
-	             GeneralChatMessage: Deserialize<LE, R>,
-	             PrivateChatMessage: Deserialize<LE, R>,
-	              AddFriendResponse: Deserialize<LE, R>,
-	             TeamInviteResponse: Deserialize<LE, R>,
-	         RequestMinimumChatMode: Deserialize<LE, R>,
-	  RequestMinimumChatModePrivate: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let packet_id: u32       = LERead::read(reader)?;
-		let _padding: u8         = LERead::read(reader)?;
-		let routed_obj_id: u64   = LERead::read(reader)?;
-		assert_eq!(routed_obj_id, 0);
-		Ok(if packet_id == ChatId::GeneralChatMessage as u32 {
-			Self::GeneralChatMessage(LERead::read(reader)?)
-		} else if packet_id == ChatId::PrivateChatMessage as u32 {
-			Self::PrivateChatMessage(LERead::read(reader)?)
-		} else if packet_id == ChatId::AddFriendResponse as u32 {
-			Self::AddFriendResponse(LERead::read(reader)?)
-		} else if packet_id == ChatId::GetFriendsList as u32 {
-			Self::GetFriendsList
-		} else if packet_id == ChatId::GetIgnoreList as u32 {
-			Self::GetIgnoreList
-		} else if packet_id == ChatId::TeamGetStatus as u32 {
-			Self::TeamGetStatus
-		} else if packet_id == ChatId::TeamInviteResponse as u32 {
-			Self::TeamInviteResponse(LERead::read(reader)?)
-		} else if packet_id == ChatId::TeamLeave as u32 {
-			let mut unused = [0; 66];
-			Read::read(reader, &mut unused)?;
-			Self::TeamLeave
-		} else if packet_id == ChatId::RequestMinimumChatMode as u32 {
-			Self::RequestMinimumChatMode(LERead::read(reader)?)
-		} else if packet_id == ChatId::RequestMinimumChatModePrivate as u32 {
-			Self::RequestMinimumChatModePrivate(LERead::read(reader)?)
-		} else {
-			return err("chat id", packet_id);
-		})
-	}
+	RequestMinimumChatMode(RequestMinimumChatMode) = 50,
+	RequestMinimumChatModePrivate(RequestMinimumChatModePrivate) = 51,
 }
 
 #[derive(Debug)]
@@ -187,6 +134,11 @@ pub enum TeamInviteResponseCode {
 pub struct TeamInviteResponse {
 	pub response_code: TeamInviteResponseCode,
 	pub sender: ObjId,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TeamLeave {
+	pub unused: LuWStr33,
 }
 
 #[derive(Debug, Deserialize)]

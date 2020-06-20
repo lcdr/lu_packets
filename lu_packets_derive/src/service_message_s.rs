@@ -1,6 +1,8 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use syn::{parse_macro_input, parse_quote, Data, DataEnum, DeriveInput, Fields, Generics};
+use syn::{parse_macro_input, parse_quote, Data, DataEnum, DeriveInput, Fields, LitInt, Generics};
+
+use crate::get_disc_padding;
 
 pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
@@ -10,7 +12,8 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	};
 	let name = &input.ident;
 
-	let ser_code = gen_ser_code_enum(data, &name, &input.generics);
+	let disc_padding = get_disc_padding(&input);
+	let ser_code = gen_ser_code_enum(data, &name, disc_padding, &input.generics);
 	let ser_impl = &mut input.generics.clone();
 	ser_impl.params.push(parse_quote!('__LIFETIME));
 	ser_impl.params.push(parse_quote!(__WRITER: ::std::io::Write));
@@ -48,7 +51,7 @@ fn gen_ser_code_fields(fields: &Fields) -> TokenStream {
 	}
 }
 
-fn gen_ser_code_enum(data: &DataEnum, name: &Ident, generics: &Generics) -> TokenStream {
+fn gen_ser_code_enum(data: &DataEnum, name: &Ident, padding: Option<LitInt>, generics: &Generics) -> TokenStream {
 	let mut arms = vec![];
 	for f in &data.variants {
 		let ident = &f.ident;
@@ -56,10 +59,17 @@ fn gen_ser_code_enum(data: &DataEnum, name: &Ident, generics: &Generics) -> Toke
 		let expanded = quote! { #name::#ident #ser_fields };
 		arms.push(expanded);
 	}
+	let write_padding = match padding {
+		Some(x) => quote! {
+			let mut padding = [0; #x];
+			::std::io::Write::write_all(writer, &padding)?;
+		},
+		None => quote! { },
+	};
 	quote! {
 		let disc = unsafe { *(self as *const #name #generics as *const u32) };
 		::endio::LEWrite::write(writer, disc)?;
-		::endio::LEWrite::write(writer, 0u8)?;
+		#write_padding
 		match self {
 			#(#arms)*
 		}

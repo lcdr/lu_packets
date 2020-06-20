@@ -1,6 +1,8 @@
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::{parse_macro_input, parse_quote, Data, DataEnum, DeriveInput, Fields};
+use syn::{parse_macro_input, parse_quote, Data, DataEnum, DeriveInput, Fields, LitInt};
+
+use crate::get_disc_padding;
 
 pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
@@ -10,7 +12,8 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	};
 	let name = &input.ident;
 
-	let deser_code = gen_deser_code_enum(data, &name);
+	let disc_padding = get_disc_padding(&input);
+	let deser_code = gen_deser_code_enum(data, &name, disc_padding);
 	let deser_impl = &mut input.generics.clone();
 	deser_impl.params.push(parse_quote!(__READER: ::std::io::Read));
 	let (deser_impl,	_, _) = deser_impl.split_for_impl();
@@ -42,7 +45,7 @@ fn gen_deser_code_fields(fields: &Fields) -> TokenStream {
 	}
 }
 
-fn gen_deser_code_enum(data: &DataEnum, name: &Ident) -> TokenStream {
+fn gen_deser_code_enum(data: &DataEnum, name: &Ident, padding: Option<LitInt>) -> TokenStream {
 	let last_disc: syn::ExprLit = parse_quote! { 0 };
 	let mut last_disc = &last_disc.into();
 	let mut disc_offset = 0;
@@ -58,9 +61,16 @@ fn gen_deser_code_enum(data: &DataEnum, name: &Ident) -> TokenStream {
 		disc_offset += 1;
 		arms.push(arm);
 	}
+	let read_padding = match padding {
+		Some(x) => quote! {
+			let mut padding = [0; #x];
+			::std::io::Read::read_exact(reader, &mut padding)?;
+		},
+		None => quote! { },
+	};
 	quote! {
 		let disc: u32 = ::endio::LERead::read(reader)?;
-		let _padding: u8 = ::endio::LERead::read(reader)?;
+		#read_padding
 		Ok(match disc {
 			#(#arms)*
 			_ => return ::std::result::Result::Err(::std::io::Error::new(::std::io::ErrorKind::InvalidData, format!("invalid discriminant value for {}: {}", stringify!(#name), disc)))

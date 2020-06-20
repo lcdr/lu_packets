@@ -28,7 +28,7 @@ impl<C> From<GeneralMessage> for Message<C> {
 }
 
 #[derive(Debug, ServiceMessageS)]
-#[non_exhaustive]
+#[disc_padding=1]
 #[repr(u32)]
 pub enum GeneralMessage {
 	Handshake(Handshake),

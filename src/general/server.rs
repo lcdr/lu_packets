@@ -7,6 +7,7 @@ use lu_packets_derive::ServiceMessageD;
 use crate::common::ServiceId;
 
 #[derive(Debug, ServiceMessageD)]
+#[disc_padding=1]
 #[repr(u32)]
 pub enum GeneralMessage {
 	Handshake(Handshake)
