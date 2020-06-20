@@ -6,7 +6,7 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::ServiceMessageD;
+use lu_packets_derive::{ServiceMessageD, ServiceMessageS};
 
 use crate::common::{err, ObjId, LuVarWStr, LuWStr33, LuWStr42, ServiceId};
 use crate::chat::server::ChatMessage;
@@ -17,7 +17,7 @@ pub use crate::general::server::GeneralMessage;
 
 pub type Message = crate::raknet::server::Message<LuMessage>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[non_exhaustive]
 #[repr(u16)]
 pub enum LuMessage {
@@ -25,7 +25,7 @@ pub enum LuMessage {
 	World(WorldMessage) = ServiceId::World as u16,
 }
 
-#[derive(Debug, ServiceMessageD)]
+#[derive(Debug, ServiceMessageD, ServiceMessageS)]
 #[disc_padding=1]
 #[repr(u32)]
 pub enum WorldMessage {

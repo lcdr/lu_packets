@@ -164,6 +164,36 @@ impl<'a, L, W: Write> Serialize<LE, W> for &'a LuVarStr<L>
 
 pub struct LuVarWStr<L>(Vec<u16>, PhantomData<L>);
 
+impl<L> LuVarWStr<L> {
+	pub(crate) fn deser_content<R: Read>(reader: &mut R, str_len: L) -> Res<Self> where L: TryInto<usize> {
+		let str_len = match str_len.try_into() {
+			Ok(x) => x,
+			_ => panic!(),
+		};
+		let mut ucs2_str = Vec::<u16>::with_capacity(str_len);
+		unsafe {
+			ucs2_str.set_len(str_len);
+			let mut ucs2_str_slice = std::slice::from_raw_parts_mut(ucs2_str.as_mut_ptr() as *mut u8, str_len*2);
+			Read::read(reader, &mut ucs2_str_slice)?;
+		}
+		Ok(Self(ucs2_str, PhantomData))
+	}
+
+	pub(crate) fn ser_len<W: LEWrite>(&self, writer: &mut W) -> Res<()> where L: TryFrom<usize> + Serialize<LE, W> {
+		let str_len = self.0.len();
+		let l_len = match L::try_from(str_len) {
+			Ok(x) => x,
+			_ => panic!(),
+		};
+		writer.write(l_len)
+	}
+
+	pub(crate) fn ser_content<W: Write>(&self, writer: &mut W) -> Res<()> {
+		let u8_slice = unsafe { std::slice::from_raw_parts(self.0.as_ptr() as *const u8, self.0.len()*2) };
+		writer.write_all(u8_slice)
+	}
+}
+
 impl<L> std::fmt::Debug for LuVarWStr<L> {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
 		write!(f, "{:?}", String::from(self))
@@ -181,17 +211,7 @@ impl<L, R: Read> Deserialize<LE, R> for LuVarWStr<L>
 
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let str_len: L = LERead::read(reader)?;
-		let str_len = match str_len.try_into() {
-			Ok(x) => x,
-			_ => panic!(),
-		};
-		let mut ucs2_str = Vec::<u16>::with_capacity(str_len);
-		unsafe {
-			ucs2_str.set_len(str_len);
-			let mut ucs2_str_slice = std::slice::from_raw_parts_mut(ucs2_str.as_mut_ptr() as *mut u8, str_len*2);
-			Read::read(reader, &mut ucs2_str_slice)?;
-		}
-		Ok(Self(ucs2_str, PhantomData))
+		Self::deser_content(reader, str_len)
 	}
 }
 
@@ -199,14 +219,8 @@ impl<'a, L, W: Write> Serialize<LE, W> for &'a LuVarWStr<L>
 	where L: TryFrom<usize> + Serialize<LE, W> {
 
 	fn serialize(self, writer: &mut W) -> Res<()> {
-		let str_len = self.0.len();
-		let l_len = match L::try_from(str_len) {
-			Ok(x) => x,
-			_ => panic!(),
-		};
-		LEWrite::write(writer, l_len)?;
-		let u8_slice = unsafe { std::slice::from_raw_parts(self.0.as_ptr() as *const u8, str_len*2) };
-		Write::write_all(writer, u8_slice)
+		self.ser_len(writer)?;
+		self.ser_content(writer)
 	}
 }
 

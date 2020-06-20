@@ -2,11 +2,11 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::ServiceMessageD;
+use lu_packets_derive::{ServiceMessageD, ServiceMessageS};
 
 use crate::common::ServiceId;
 
-#[derive(Debug, ServiceMessageD)]
+#[derive(Debug, ServiceMessageD, ServiceMessageS)]
 #[disc_padding=1]
 #[repr(u32)]
 pub enum GeneralMessage {

@@ -1,13 +1,13 @@
 //! All packets an auth server can receive.
 use endio::{Deserialize, Serialize};
-use lu_packets_derive::ServiceMessageD;
+use lu_packets_derive::{ServiceMessageD, ServiceMessageS};
 
 use crate::common::{LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
 pub use crate::general::server::GeneralMessage;
 
 pub type Message = crate::raknet::server::Message<LuMessage>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[non_exhaustive]
 #[repr(u16)]
 pub enum LuMessage {
@@ -15,7 +15,7 @@ pub enum LuMessage {
 	Auth(AuthMessage) = ServiceId::Auth as u16,
 }
 
-#[derive(Debug, ServiceMessageD)]
+#[derive(Debug, ServiceMessageD, ServiceMessageS)]
 #[disc_padding=1]
 #[repr(u32)]
 pub enum AuthMessage {
