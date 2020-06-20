@@ -1,8 +1,9 @@
+use std::io::Read;
 use std::io::Result as Res;
 
-use endio::{LEWrite, Serialize};
+use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::{FromVariants, ServiceMessageS};
+use lu_packets_derive::{FromVariants, ServiceMessageD, ServiceMessageS};
 
 use crate::common::{ObjId, LuWStr33};
 use super::ZoneId;
@@ -16,7 +17,7 @@ impl From<ClientMessage> for Message {
 	}
 }
 
-#[derive(Debug, FromVariants, ServiceMessageS)]
+#[derive(Debug, FromVariants, ServiceMessageD, ServiceMessageS)]
 #[non_exhaustive]
 #[disc_padding=1]
 #[repr(u32)]
@@ -32,9 +33,23 @@ pub struct CharacterListResponse {
 	pub chars: Vec<CharListChar>,
 }
 
+impl<R: LERead> Deserialize<LE, R> for CharacterListResponse
+	where       u8: Deserialize<LE, R>,
+	  CharListChar: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self>	{
+		let len: u8 = reader.read()?;
+		let selected_char = reader.read()?;
+		let mut chars = Vec::with_capacity(len as usize);
+		for _ in 0..len {
+			chars.push(reader.read()?);
+		}
+		Ok(Self { selected_char, chars } )
+	}
+}
+
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
-	where u8: Serialize<LE, W>,
-	     &'a CharListChar: Serialize<LE, W> {
+	where           u8: Serialize<LE, W>,
+	  &'a CharListChar: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
 		writer.write(self.chars.len() as u8)?;
 		writer.write(self.selected_char)?;
@@ -60,6 +75,42 @@ pub struct CharListChar {
 	pub eye_style: u32,
 	pub mouth_style: u32,
 	pub last_location: ZoneId,
+}
+
+impl<R: Read+LERead> Deserialize<LE, R> for CharListChar {
+	fn deserialize(reader: &mut R) -> Res<Self>	{
+		let obj_id          = LERead::read(reader)?;
+		let _: u32          = LERead::read(reader)?;
+		let char_name       = LERead::read(reader)?;
+		let pending_name    = LERead::read(reader)?;
+		let requires_rename = LERead::read(reader)?;
+		let is_ftp          = LERead::read(reader)?;
+		let mut unused = [0; 10];
+		Read::read(reader, &mut unused)?;
+		let shirt_color     = LERead::read(reader)?;
+		let mut unused = [0; 4];
+		Read::read(reader, &mut unused)?;
+		let pants_color = LERead::read(reader)?;
+		let hair_style = LERead::read(reader)?;
+		let hair_color = LERead::read(reader)?;
+		let mut unused = [0; 8];
+		Read::read(reader, &mut unused)?;
+		let eyebrow_style = LERead::read(reader)?;
+		let eye_style = LERead::read(reader)?;
+		let mouth_style = LERead::read(reader)?;
+		let mut unused = [0; 4];
+		Read::read(reader, &mut unused)?;
+		let last_location = LERead::read(reader)?;
+		let mut unused = [0; 8];
+		Read::read(reader, &mut unused)?;
+		let items_len: u16 = LERead::read(reader)?;
+		assert_eq!(items_len, 0); // todo
+		Ok(Self {
+			obj_id, char_name, pending_name, requires_rename,
+			is_ftp, shirt_color, pants_color, hair_style, hair_color,
+			eyebrow_style, eye_style, mouth_style, last_location,
+		})
+	}
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
@@ -101,7 +152,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 	}
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[repr(u8)]
 pub enum CharacterCreateResponse {
 	Success,
@@ -111,7 +162,7 @@ pub enum CharacterCreateResponse {
 	CustomNameInUse,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CharacterDeleteResponse {
 	pub success: bool,
 }
