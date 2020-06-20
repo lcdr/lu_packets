@@ -3,7 +3,7 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::{FromVariants, ServiceMessageD, ServiceMessageS};
+use lu_packets_derive::FromVariants;
 
 use crate::common::{ObjId, LuWStr33};
 use super::ZoneId;
@@ -17,7 +17,7 @@ impl From<ClientMessage> for Message {
 	}
 }
 
-#[derive(Debug, FromVariants, ServiceMessageD, ServiceMessageS)]
+#[derive(Debug, Deserialize, Serialize, FromVariants)]
 #[non_exhaustive]
 #[disc_padding=1]
 #[repr(u32)]

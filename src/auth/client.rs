@@ -2,7 +2,7 @@ use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::{FromVariants, ServiceMessageS};
+use lu_packets_derive::FromVariants;
 
 use crate::common::{LuStr33, LuVarWStr, LuWStr33};
 
@@ -15,7 +15,7 @@ impl From<ClientMessage> for Message {
 	}
 }
 
-#[derive(Debug, FromVariants, ServiceMessageS)]
+#[derive(Debug, FromVariants, Serialize)]
 #[disc_padding=1]
 #[repr(u32)]
 pub enum ClientMessage {

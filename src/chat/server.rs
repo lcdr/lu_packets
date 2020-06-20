@@ -3,11 +3,10 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::{ServiceMessageD, ServiceMessageS};
 
 use crate::common::{LuVarWStr, LuWStr33, ObjId};
 
-#[derive(Debug, ServiceMessageD, ServiceMessageS)]
+#[derive(Debug, Deserialize, Serialize)]
 #[disc_padding=9]
 #[repr(u32)]
 pub enum ChatMessage {

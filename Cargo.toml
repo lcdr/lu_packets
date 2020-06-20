@@ -7,6 +7,6 @@ license = "AGPL-3.0-or-later"
 repository = "https://github.com/lcdr/lu_packets/"
 
 [dependencies]
-endio = { git = "https://github.com/lcdr/endio", rev = "cb5020f6749a301ae925592f9ad1920919894ddb" }
+endio = { git = "https://github.com/lcdr/endio", rev = "27be75e9883fb9250addf0ec46ee8a8abe4a1442" }
 endio_bit = { git = "https://github.com/lcdr/endio_bit", rev = "46b1b0eda359dd85b5eabf9714e839c3728c75af" }
 lu_packets_derive = { path = "lu_packets_derive" }
