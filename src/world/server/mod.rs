@@ -25,7 +25,7 @@ pub enum LuMessage {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-#[disc_padding=1]
+#[post_disc_padding=1]
 #[repr(u32)]
 pub enum WorldMessage {
 	ClientValidation(ClientValidation) = 1,

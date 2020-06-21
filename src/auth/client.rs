@@ -16,7 +16,7 @@ impl From<ClientMessage> for Message {
 }
 
 #[derive(Debug, FromVariants, Serialize)]
-#[disc_padding=1]
+#[post_disc_padding=1]
 #[repr(u32)]
 pub enum ClientMessage {
 	LoginResponse(LoginResponse),

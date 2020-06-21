@@ -6,7 +6,7 @@ use endio::LittleEndian as LE;
 use crate::common::ServiceId;
 
 #[derive(Debug, Deserialize, Serialize)]
-#[disc_padding=1]
+#[post_disc_padding=1]
 #[repr(u32)]
 pub enum GeneralMessage {
 	Handshake(Handshake)

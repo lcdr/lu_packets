@@ -7,7 +7,7 @@ use endio::LittleEndian as LE;
 use crate::common::{LuVarWStr, LuWStr33, ObjId};
 
 #[derive(Debug, Deserialize, Serialize)]
-#[disc_padding=9]
+#[post_disc_padding=9]
 #[repr(u32)]
 pub enum ChatMessage {
 	GeneralChatMessage(GeneralChatMessage) = 1,

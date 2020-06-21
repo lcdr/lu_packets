@@ -19,7 +19,7 @@ impl From<ClientMessage> for Message {
 
 #[derive(Debug, Deserialize, Serialize, FromVariants)]
 #[non_exhaustive]
-#[disc_padding=1]
+#[post_disc_padding=1]
 #[repr(u32)]
 pub enum ClientMessage {
 	CharacterListResponse(CharacterListResponse) = 6,
