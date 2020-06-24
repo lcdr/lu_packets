@@ -5,8 +5,8 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::FromVariants;
 
-use crate::common::{ObjId, LuWStr33};
-use super::ZoneId;
+use crate::common::{ObjId, LuStr33, LuWStr33};
+use super::{Vector3, ZoneId};
 
 pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 pub type Message = crate::raknet::client::Message<LuMessage>;
@@ -22,9 +22,37 @@ impl From<ClientMessage> for Message {
 #[post_disc_padding=1]
 #[repr(u32)]
 pub enum ClientMessage {
+	LoadStaticZone(LoadStaticZone) = 2,
 	CharacterListResponse(CharacterListResponse) = 6,
 	CharacterCreateResponse(CharacterCreateResponse) = 7,
 	CharacterDeleteResponse(CharacterDeleteResponse) = 11,
+	TransferToWorld(TransferToWorld) = 14,
+	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
+	FriendRequest(FriendRequest) = 27,
+	TeamInvite(TeamInvite) = 35,
+	MinimumChatModeResponse(MinimumChatModeResponse) = 57,
+	MinimumChatModeResponsePrivate(MinimumChatModeResponsePrivate) = 58,
+	UpdateFreeTrialStatus(UpdateFreeTrialStatus) = 62,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[repr(u32)]
+pub enum InstanceType {
+	Public,
+	Single,
+	Team,
+	Guild,
+	Match,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct LoadStaticZone {
+	pub zone_id: ZoneId,
+	pub map_checksum: u32,
+	// editor enabled and editor level, unused
+	#[padding=2]
+	pub player_position: Vector3,
+	pub instance_type: InstanceType,
 }
 
 #[derive(Debug)]
@@ -66,7 +94,7 @@ pub struct CharListChar {
 	pub char_name: LuWStr33,
 	pub pending_name: LuWStr33,
 	pub requires_rename: bool,
-	pub is_ftp: bool,
+	pub is_free_trial: bool,
 	pub shirt_color: u32,
 	pub pants_color: u32,
 	pub hair_style: u32,
@@ -84,7 +112,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for CharListChar {
 		let char_name       = LERead::read(reader)?;
 		let pending_name    = LERead::read(reader)?;
 		let requires_rename = LERead::read(reader)?;
-		let is_ftp          = LERead::read(reader)?;
+		let is_free_trial   = LERead::read(reader)?;
 		let mut unused = [0; 10];
 		Read::read(reader, &mut unused)?;
 		let shirt_color     = LERead::read(reader)?;
@@ -107,7 +135,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for CharListChar {
 		assert_eq!(items_len, 0); // todo
 		Ok(Self {
 			obj_id, char_name, pending_name, requires_rename,
-			is_ftp, shirt_color, pants_color, hair_style, hair_color,
+			is_free_trial, shirt_color, pants_color, hair_style, hair_color,
 			eyebrow_style, eye_style, mouth_style, last_location,
 		})
 	}
@@ -128,7 +156,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 		writer.write(&self.char_name)?;
 		writer.write(&self.pending_name)?;
 		writer.write(self.requires_rename)?;
-		writer.write(self.is_ftp)?;
+		writer.write(self.is_free_trial)?;
 		writer.write(&[0; 10][..])?;
 
 		writer.write(self.shirt_color)?;
@@ -165,4 +193,49 @@ pub enum CharacterCreateResponse {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CharacterDeleteResponse {
 	pub success: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TransferToWorld {
+	pub redirect_ip: LuStr33,
+	pub redirect_port: u16,
+	pub is_maintenance_transfer: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BlueprintLoadItemResponse {
+	pub success: bool,
+	pub item_id: ObjId,
+	pub dest_item_id: ObjId,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FriendRequest {
+	pub sender_name: LuWStr33,
+	pub is_best_friend_request: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TeamInvite {
+	pub sender_name: LuWStr33,
+	pub sender_id: ObjId,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MinimumChatModeResponse {
+	pub chat_mode: u8, // todo: type?
+	pub chat_channel: u8, // todo: type?
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MinimumChatModeResponsePrivate {
+	pub chat_mode: u8, // todo: type?
+	pub chat_channel: u8, // todo: type?
+	pub recipient_name: LuWStr33,
+	pub recipient_gm_level: u8,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UpdateFreeTrialStatus {
+	pub is_free_trial: bool,
 }
