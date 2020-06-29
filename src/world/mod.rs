@@ -1,5 +1,6 @@
 pub mod client;
 pub mod server;
+pub mod gm;
 
 use std::cmp::PartialEq;
 use std::io::{Read, Write};
@@ -13,14 +14,68 @@ use crate::common::{LuVarStr, LuVarWStr};
 type GmString = LuVarStr<u32>;
 type GmWString = LuVarWStr<u32>;
 
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum InventoryType {
+	Default,
+	Bank,
+	Brick,
+	ModelsInBbb,
+	TempEquip,
+	Model,
+	ModuleInUse,
+	Behavior,
+	Property,
+	BrickInBbb,
+	Vendor,
+	Buyback,
+	Quest,
+	Donation,
+	BankModel,
+	BankBehavior,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum KillType {
+	Violent,
+	Silent,
+}
+
 type Lot = u32;
 const LOT_NULL: Lot = -1i32 as Lot;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum MissionState {
+	Unavailable = 0,
+	Available = 1,
+	Active = 2,
+	ReadyToComplete = 4,
+	Completed = 8,
+	CompleteAndAvailable = 9,
+	CompleteAndActive = 10,
+	CompleteAndReadyToComplete = 12,
+	Fail = 16,
+	ReadyToCompleteReported = 32,
+}
+
+// todo: better modeling with NonNull and Option
+type MapId = u16;
+const MAP_ID_INVALID: MapId = 0;
+
+type CloneId = u32;
+const CLONE_ID_INVALID: CloneId = 0;
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 pub struct ZoneId {
-	pub map_id: u16,
+	pub map_id: MapId,
 	pub instance_id: u16,
-	pub clone_id: u32,
+	pub clone_id: CloneId,
+}
+
+impl ZoneId {
+	const INVALID: Self = Self { map_id: 0, instance_id: 0, clone_id: 0 };
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
@@ -65,9 +120,12 @@ macro_rules! impl_gm {
 	}
 }
 
+impl_gm!(u8);
+impl_gm!(u16);
 impl_gm!(u32);
 impl_gm!(u64);
 impl_gm!(i32);
+impl_gm!(i64);
 impl_gm!(f32);
 impl_gm!(GmString);
 impl_gm!(GmWString);

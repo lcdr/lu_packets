@@ -1,3 +1,5 @@
+mod gm;
+
 use std::io::Read;
 use std::io::Result as Res;
 
@@ -7,6 +9,7 @@ use lu_packets_derive::FromVariants;
 
 use crate::common::{ObjId, LuStr33, LuWStr33};
 use super::{Vector3, ZoneId};
+use self::gm::SubjectGameMessage;
 
 pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 pub type Message = crate::raknet::client::Message<LuMessage>;
@@ -26,6 +29,7 @@ pub enum ClientMessage {
 	CharacterListResponse(CharacterListResponse) = 6,
 	CharacterCreateResponse(CharacterCreateResponse) = 7,
 	CharacterDeleteResponse(CharacterDeleteResponse) = 11,
+	SubjectGameMessage(SubjectGameMessage) = 12,
 	TransferToWorld(TransferToWorld) = 14,
 	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
 	FriendRequest(FriendRequest) = 27,
