@@ -6,7 +6,7 @@ use lu_packets_derive::{GameMessage, GmParam};
 use crate::common::{ObjId, OBJID_EMPTY};
 
 use super::super::{GmString, GmWString, KillType, MissionState, Lot, LOT_NULL, Quaternion, Vector3};
-use super::super::gm::{EquipInventory, UnEquipInventory, MoveInventoryBatch};
+use super::super::gm::{EquipInventory, UnEquipInventory, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SubjectGameMessage {
@@ -191,18 +191,6 @@ pub struct PickupItem {
 pub struct RebuildCancel {
 	pub early_release: bool,
 	pub user_id: ObjId,
-}
-
-const INVENTORY_INVALID: i32 = -1;
-
-#[derive(Debug, GameMessage)]
-pub struct MoveItemInInventory {
-	#[default(INVENTORY_INVALID)]
-	pub dest_inv_type: i32,
-	pub obj_id: ObjId,
-	pub inventory_type: i32,
-	pub response_code: i32,
-	pub slot: i32,
 }
 
 #[derive(Debug, GameMessage)]
@@ -559,12 +547,6 @@ pub struct ReadyForUpdates {
 #[derive(Debug, GameMessage)]
 pub struct SetLastCustomBuild {
 	pub tokenized_lot_list: GmWString,
-}
-
-#[derive(Debug, GameMessage)]
-pub struct SetIgnoreProjectileCollision {
-	#[default(false)]
-	pub should_ignore: bool,
 }
 
 #[derive(Debug, GameMessage)]

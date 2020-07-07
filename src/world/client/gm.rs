@@ -6,7 +6,7 @@ use lu_packets_derive::{GameMessage, GmParam};
 use crate::common::{ObjId, OBJID_EMPTY};
 
 use super::super::{CloneId, CLONE_ID_INVALID, GmString, GmWString, InventoryType, KillType, Lot, LOT_NULL, MapId, MAP_ID_INVALID, MissionState, Quaternion, Vector3, ZoneId};
-use super::super::gm::{EquipInventory, UnEquipInventory, MoveInventoryBatch};
+use super::super::gm::{EquipInventory, UnEquipInventory, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SubjectGameMessage {
@@ -21,6 +21,7 @@ pub enum GameMessage {
 	DropClientLoot(DropClientLoot) = 30,
 	Die(Die) = 37,
 	PlayAnimation(PlayAnimation) = 43,
+	SetName(SetName) = 72,
 	SetCurrency(SetCurrency) = 133,
 	TeamPickupItem(TeamPickupItem) = 140,
 	PlayFxEffect(PlayFxEffect) = 154,
@@ -30,16 +31,25 @@ pub enum GameMessage {
 	SetStunImmunity(SetStunImmunity) = 200,
 	Knockback(Knockback) = 202,
 	EnableRebuild(EnableRebuild) = 213,
+	MoveItemInInventory(MoveItemInInventory) = 224,
 	EquipInventory(EquipInventory) = 231,
 	UnEquipInventory(UnEquipInventory) = 233,
 	OfferMission(OfferMission) = 248,
 	NotifyMission(NotifyMission) = 254,
 	RebuildNotifyState(RebuildNotifyState) = 336,
+	ToggleInteractionUpdates(ToggleInteractionUpdates) = 356,
 	TerminateInteraction(TerminateInteraction) = 357,
 	VendorOpenWindow = 369,
 	EmotePlayed(EmotePlayed) = 371,
+	TeamSetOffWorldFlag(TeamSetOffWorldFlag) = 383,
 	SetInventorySize(SetInventorySize) = 389,
+	ActivityEnter = 405,
+	ActivityExit = 406,
 	ActivityStart = 407,
+	ActivityStop(ActivityStop) = 408,
+	CancelMission(CancelMission) = 418,
+	ResetMissions(ResetMissions) = 419,
+	NotifyClientShootingGalleryScore(NotifyClientShootingGalleryScore) = 425,
 	SetUserCtrlCompPause(SetUserCtrlCompPause) = 466,
 	NotifyClientFlagChange(NotifyClientFlagChange) = 472,
 	Help(Help) = 475,
@@ -51,52 +61,104 @@ pub enum GameMessage {
 	InvalidZoneTransferList(InvalidZoneTransferList) = 519,
 	TransferToLastNonInstance(TransferToLastNonInstance) = 527,
 	DisplayMessageBox(DisplayMessageBox) = 529,
+	Smash(Smash) = 537,
+	UnSmash(UnSmash) = 538,
+	SetGravityScale(SetGravityScale) = 541,
+	PlaceModelResponse(PlaceModelResponse) = 547,
 	SetJetPackMode(SetJetPackMode) = 561,
+	RegisterPetId(RegisterPetId) = 565,
+	RegisterPetDbId(RegisterPetDbId) = 566,
+	ShowActivityCountdown(ShowActivityCountdown) = 568,
+	StartActivityTime(StartActivityTime) = 576,
+	ActivityPause(ActivityPause) = 602,
 	UseItemResult(UseItemResult) = 607,
+	PetResponse(PetResponse) = 641,
+	ClientNotifyPet(ClientNotifyPet) = 659,
+	NotifyPetTamingMinigame(NotifyPetTamingMinigame) = 661,
+	PetTamingTryBuildResult(PetTamingTryBuildResult) = 668,
+	NotifyTamingModelLoadedOnServer = 674,
+	AddPetToPlayer(AddPetToPlayer) = 681,
+	SetPetName(SetPetName) = 684,
+	PetNameChanged(PetNameChanged) = 686,
+	ShowPetActionButton(ShowPetActionButton) = 692,
 	SetEmoteLockState(SetEmoteLockState) = 693,
 	UseItemRequirementsResponse(UseItemRequirementsResponse) = 703,
 	PlayEmbeddedEffectOnAllClientsNearObject(PlayEmbeddedEffectOnAllClientsNearObject) = 713,
 	NotifyClientZoneObject(NotifyClientZoneObject) = 737,
+	UpdateReputation(UpdateReputation) = 746,
 	PropertyRentalResponse(PropertyRentalResponse) = 750,
 	PlatformResync(PlatformResync) = 761,
 	PlayCinematic(PlayCinematic) = 762,
+	EndCinematic(EndCinematic) = 763,
 	OpenPropertyVendor = 861,
 	ServerTradeInvite(ServerTradeInvite) = 870,
 	ServerTradeInitialReply(ServerTradeInitialReply) = 873,
 	ServerTradeFinalReply(ServerTradeFinalReply) = 874,
 	ServerTradeAccept(ServerTradeAccept) = 884,
+	GetLastCustomBuild(GetLastCustomBuild) = 891,
+	SetIgnoreProjectileCollision(SetIgnoreProjectileCollision) = 903,
+	OrientToObject(OrientToObject) = 905,
+	OrientToPosition(OrientToPosition) = 906,
+	OrientToAngle(OrientToAngle) = 907,
+	PropertyModerationStatusUpdate(PropertyModerationStatusUpdate) = 917,
 	RequestClientBounce(RequestClientBounce) = 934,
+	BouncerActiveStatus(BouncerActiveStatus) = 942,
 	MoveInventoryBatch(MoveInventoryBatch) = 957,
 	ObjectActivatedClient(ObjectActivatedClient) = 980,
 	NotifyClientObject(NotifyClientObject) = 1042,
+	DisplayZoneSummary(DisplayZoneSummary) = 1043,
 	ModifyPlayerZoneStatistic(ModifyPlayerZoneStatistic) = 1046,
 	StartArrangingWithItem(StartArrangingWithItem) = 1061,
 	FinishArrangingWithItem(FinishArrangingWithItem) = 1062,
 	SetBuildModeConfirmed(SetBuildModeConfirmed) = 1073,
+	BuildModeNotificationReport(BuildModeNotificationReport) = 1075,
+	SetModelToBuild(SetModelToBuild) = 1077,
+	SpawnModelBricks(SpawnModelBricks) = 1078,
 	NotifyClientFailedPrecondition(NotifyClientFailedPrecondition) = 1081,
+	ModuleAssemblyDbDataForClient(ModuleAssemblyDbDataForClient) = 1131,
 	EchoSyncSkill(EchoSyncSkill) = 1144,
 	DoClientProjectileImpact(DoClientProjectileImpact) = 1151,
 	SetPlayerAllowedRespawn(SetPlayerAllowedRespawn) = 1165,
 	UncastSkill(UncastSkill) = 1206,
 	FireEventClientSide(FireEventClientSide) = 1213,
 	ChangeObjectWorldState(ChangeObjectWorldState) = 1223,
+	VehicleLockInput(VehicleLockInput) = 1230,
+	VehicleUnlockInput(VehicleUnlockInput) = 1231,
+	RacingResetPlayerToLastReset(RacingResetPlayerToLastReset) = 1252,
+	RacingSetPlayerResetInfo(RacingSetPlayerResetInfo) = 1254,
 	LockNodeRotation(LockNodeRotation) = 1260,
+	NotifyVehicleOfRacingObject(NotifyVehicleOfRacingObject) = 1276,
 	PlayerReachedRespawnCheckpoint(PlayerReachedRespawnCheckpoint) = 1296,
+	HandleUgcEquipPostDeleteBasedOnEditMode(HandleUgcEquipPostDeleteBasedOnEditMode) = 1300,
+	HandleUgcEquipPreCreateBasedOnEditMode(HandleUgcEquipPreCreateBasedOnEditMode) = 1301,
 	MatchResponse(MatchResponse) = 1309,
+	ChangeIdleFlags(ChangeIdleFlags) = 1338,
+	VehicleAddPassiveBoostAction = 1340,
+	VehicleRemovePassiveBoostAction = 1341,
+	NotifyRacingClient(NotifyRacingClient) = 1390,
+	RacingPlayerLoaded(RacingPlayerLoaded) = 1392,
 	SetStatusImmunity(SetStatusImmunity) = 1435,
+	SetPetNameModerated(SetPetNameModerated) = 1448,
 	CancelSkillCast = 1451,
 	ModifyLegoScore(ModifyLegoScore) = 1459,
 	RestoreToPostLoadStats = 1468,
 	SetRailMovement(SetRailMovement) = 1471,
 	StartRailMovement(StartRailMovement) = 1472,
 	NotifyRailActivatorStateChange(NotifyRailActivatorStateChange) = 1478,
+	NotifyRewardMailed(NotifyRewardMailed) = 1480,
 	UpdatePlayerStatistic(UpdatePlayerStatistic) = 1481,
+	RequeryPropertyModels = 1491,
 	NotifyNotEnoughInvSpace(NotifyNotEnoughInvSpace) = 1516,
 	NotifyPropertyOfEditMode(NotifyPropertyOfEditMode) = 1546,
 	PropertyEntranceBegin = 1553,
+	TeamSetLeader(TeamSetLeader) = 1557,
+	TeamGetStatusResponse(TeamGetStatusResponse) = 1559,
 	TeamAddPlayer(TeamAddPlayer) = 1562,
 	TeamRemovePlayer(TeamRemovePlayer) = 1563,
+	SetResurrectRestoreValues(SetResurrectRestoreValues) = 1591,
+	SetPropertyModerationStatus(SetPropertyModerationStatus) = 1594,
 	UpdatePropertyModelCount(UpdatePropertyModelCount) = 1595,
+	VehicleStopBoost(VehicleStopBoost) = 1617,
 	StartCelebrationEffect(StartCelebrationEffect) = 1618,
 	SetLocalTeam(SetLocalTeam) = 1636,
 	ServerDoneLoadingAllObjects = 1642,
@@ -104,6 +166,7 @@ pub enum GameMessage {
 	SetMountInventoryId(SetMountInventoryId) = 1726,
 	NotifyLevelRewards(NotifyLevelRewards) = 1735,
 	ClientCancelMoveSkill = 1747,
+	MarkInventoryItemAsActive(MarkInventoryItemAsActive) = 1767,
 }
 
 #[derive(Debug, GameMessage)]
@@ -171,6 +234,11 @@ pub struct PlayAnimation {
 }
 
 const SECONDARY_PRIORITY: f32 = 0.4;
+
+#[derive(Debug, GameMessage)]
+pub struct SetName {
+	pub name: GmWString,
+}
 
 #[derive(Debug, GameMessage)]
 pub struct SetCurrency {
@@ -373,6 +441,12 @@ pub enum RebuildChallengeState {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct ToggleInteractionUpdates {
+	#[default(false)]
+	pub enable: bool,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct TerminateInteraction {
 	pub terminator_id: ObjId,
 	pub terminate_type: TerminateType,
@@ -393,9 +467,41 @@ pub struct EmotePlayed {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct TeamSetOffWorldFlag {
+	pub player_id: ObjId,
+	pub zone_id: ZoneId,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct SetInventorySize {
-	pub inventory_type: i32, // todo: type
+	pub inventory_type: InventoryType,
 	pub size: i32, // todo: check if can be made unsigned
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ActivityStop {
+	pub exit: bool,
+	pub user_cancel: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct CancelMission {
+	pub mission_id: i32,
+	pub reset_completed: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ResetMissions {
+	#[default(-1)]
+	pub mission_id: i32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct NotifyClientShootingGalleryScore {
+	pub add_time: f32,
+	pub score: i32,
+	pub target: ObjId,
+	pub target_pos: Vector3,
 }
 
 #[derive(Debug, GameMessage)]
@@ -516,6 +622,40 @@ pub struct DisplayMessageBox {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct Smash {
+	#[default(false)]
+	pub ignore_object_visibility: bool,
+	pub force: f32,
+	pub ghost_opacity: f32,
+	pub killer_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct UnSmash {
+	#[default(OBJID_EMPTY)]
+	pub builder_id: ObjId,
+	#[default(3.0)]
+	pub duration: f32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct SetGravityScale {
+	pub scale: f32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct PlaceModelResponse {
+	#[default(Vector3::ZERO)]
+	pub position: Vector3,
+	#[default(OBJID_EMPTY)]
+	pub property_plaque_id: ObjId,
+	#[default(0)]
+	pub response: i32, // todo: type
+	#[default(Quaternion::IDENTITY)]
+	pub rotation: Quaternion,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct SetJetPackMode {
 	#[default(false)]
 	pub bypass_checks: bool,
@@ -535,10 +675,152 @@ pub struct SetJetPackMode {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct RegisterPetId {
+	pub obj_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct RegisterPetDbId {
+	pub pet_db_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ShowActivityCountdown {
+	pub play_additional_sound: bool,
+	pub play_countdown_sound: bool,
+	pub sound_name: GmWString,
+	pub state_to_play_sound_on: i32, // todo: type
+}
+
+#[derive(Debug, GameMessage)]
+pub struct StartActivityTime {
+	pub start_time: f32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ActivityPause {
+	pub pause: bool,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct UseItemResult {
 	pub item_template_id: Lot,
 	#[default(false)]
 	pub use_item_result: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct PetResponse {
+	pub obj_id_pet: ObjId,
+	pub pet_command_type: i32, // todo: type
+	pub response: i32, // todo: type
+	pub type_id: i32, // todo: type
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ClientNotifyPet {
+	pub obj_id_source: ObjId,
+	pub pet_notification_type: PetNotificationType,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum PetNotificationType {
+	Invalid,
+	OwnerDied,
+	OwnerOnPetBouncer,
+	OwnerUsedBouncer,
+	PetOnJumpActivatedObj,
+	PetOffSwitch,
+	PetAtDigLocation,
+	PetLeftDigLocation,
+	EndSignal,
+	PetToDespawn,
+	GoToObject,
+	OwnerResurrected,
+	OwnerOnDig,
+	Released,
+	OwnerOffPetBouncer,
+	OwnerOffDig,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct NotifyPetTamingMinigame {
+	pub pet_id: ObjId,
+	pub player_taming_id: ObjId,
+	pub force_teleport: bool,
+	pub notify_type: PetTamingNotifyType,
+	pub pet_dest_pos: Vector3,
+	pub tele_pos: Vector3,
+	#[default(Quaternion::IDENTITY)]
+	pub tele_rot: Quaternion,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum PetTamingNotifyType {
+	Success,
+	Quit,
+	Failed,
+	Begin,
+	Ready,
+	NamingPet,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct PetTamingTryBuildResult {
+	#[default(true)]
+	pub success: bool,
+	#[default(0)]
+	pub num_correct: i32, // todo: check if unsigned
+}
+
+#[derive(Debug, GameMessage)]
+pub struct AddPetToPlayer {
+	pub elemental_type: i32,
+	pub name: GmWString,
+	pub pet_db_id: ObjId,
+	pub pet_lot: Lot,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct SetPetName {
+	pub name: GmWString,
+	#[default(OBJID_EMPTY)]
+	pub pet_db_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct PetNameChanged {
+	pub moderation_status: PetModerationStatus,
+	pub name: GmWString,
+	pub owner_name: GmWString,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum PetModerationStatus {
+	Unnamed,
+	Unmoderated,
+	Accepted,
+	Rejected,
+	NeedsRename,
+	DoesntMatter,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ShowPetActionButton {
+	pub button_label: PetAbilityType,
+	pub show: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum PetAbilityType {
+	Invalid,
+	GoToObject,
+	JumpOnObject,
+	DigAtPosition,
 }
 
 #[derive(Debug, GameMessage)]
@@ -575,6 +857,11 @@ pub struct NotifyClientZoneObject {
 	pub param2: i32,
 	pub param_obj: ObjId,
 	pub param_str: GmString,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct UpdateReputation {
+	pub reputation: i64, // todo: check if unsigned
 }
 
 #[derive(Debug, GameMessage)]
@@ -637,6 +924,15 @@ pub enum EndBehavior {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct EndCinematic {
+	#[default(-1.0)]
+	pub lead_out: f32,
+	#[default(false)]
+	pub leave_player_locked: bool,
+	pub path_name: GmWString,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct ServerTradeInvite {
 	#[default(false)]
 	pub need_invite_pop_up: bool,
@@ -675,6 +971,34 @@ pub struct ServerTradeAccept {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct GetLastCustomBuild {
+	pub tokenized_lot_list: GmWString,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct OrientToObject {
+	pub obj_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct OrientToPosition {
+	pub position: Vector3,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct OrientToAngle {
+	pub relative_to_current: bool,
+	pub angle: f32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct PropertyModerationStatusUpdate {
+	#[default(-1)]
+	pub new_moderation_status: i32, // todo: type
+	pub rejection_reason: GmWString,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct RequestClientBounce {
 	pub bounce_target_id: ObjId,
 	pub bounce_target_pos_on_server: Vector3,
@@ -682,6 +1006,11 @@ pub struct RequestClientBounce {
 	pub request_source_id: ObjId,
 	pub all_bounced: bool,
 	pub allow_client_override: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct BouncerActiveStatus {
+	pub active: bool,
 }
 
 #[derive(Debug, GameMessage)]
@@ -697,6 +1026,16 @@ pub struct NotifyClientObject {
 	pub param2: i32,
 	pub param_obj: ObjId,
 	pub param_str: GmString,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct DisplayZoneSummary {
+	#[default(false)]
+	pub is_property_map: bool,
+	#[default(false)]
+	pub is_zone_start: bool,
+	#[default(OBJID_EMPTY)]
+	pub sender: ObjId,
 }
 
 #[derive(Debug, GameMessage)]
@@ -717,7 +1056,7 @@ pub struct StartArrangingWithItem {
 	#[default(OBJID_EMPTY)]
 	pub build_area_id: ObjId,
 	pub build_start_pos: Vector3,
-	pub source_bag: i32, // todo: type
+	pub source_bag: InventoryType,
 	pub source_id: ObjId,
 	pub source_lot: Lot,
 	pub source_type: i32, // todo: type
@@ -731,7 +1070,7 @@ pub struct StartArrangingWithItem {
 pub struct FinishArrangingWithItem {
 	#[default(OBJID_EMPTY)]
 	pub build_area_id: ObjId,
-	pub new_source_bag: i32, // todo: type
+	pub new_source_bag: InventoryType,
 	pub new_source_id: ObjId,
 	pub new_source_lot: Lot,
 	pub new_source_type: i32, // todo: type
@@ -739,7 +1078,7 @@ pub struct FinishArrangingWithItem {
 	pub new_target_lot: Lot,
 	pub new_target_type: i32, // todo: type
 	pub new_target_pos: Vector3,
-	pub old_item_bag: i32, // todo: type
+	pub old_item_bag: InventoryType,
 	pub old_item_id: ObjId,
 	pub old_item_lot: Lot,
 	pub old_item_type: i32, // todo: type
@@ -760,9 +1099,35 @@ pub struct SetBuildModeConfirmed {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct BuildModeNotificationReport {
+	pub start: bool,
+	pub num_sent: i32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct SetModelToBuild {
+	#[default(LOT_NULL)]
+	pub template_id: Lot,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct SpawnModelBricks {
+	#[default(0.0)]
+	pub amount: f32,
+	#[default(Vector3::ZERO)]
+	pub pos: Vector3,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct NotifyClientFailedPrecondition {
 	pub failed_reason: GmWString,
 	pub precondition_id: i32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ModuleAssemblyDbDataForClient {
+	pub assembly_id: ObjId,
+	pub blob: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
@@ -821,8 +1186,46 @@ pub enum ObjectWorldState {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct VehicleLockInput {
+	#[default(true)]
+	pub lock_wheels: bool,
+	#[default(false)]
+	pub locked_powerslide: bool,
+	#[default(0.0)]
+	pub locked_x: f32,
+	#[default(0.0)]
+	pub locked_y: f32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct VehicleUnlockInput {
+	#[default(true)]
+	pub lock_wheels: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct RacingResetPlayerToLastReset {
+	pub player_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct RacingSetPlayerResetInfo {
+	pub current_lap: i32, // todo: unsigned, type?
+	pub furthest_reset_plane: u32,
+	pub player_id: ObjId,
+	pub respawn_pos: Vector3,
+	pub upcoming_plane: u32,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct LockNodeRotation {
 	pub node_name: GmString,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct NotifyVehicleOfRacingObject {
+	#[default(OBJID_EMPTY)]
+	pub racing_object_id: ObjId,
 }
 
 #[derive(Debug, GameMessage)]
@@ -830,6 +1233,19 @@ pub struct PlayerReachedRespawnCheckpoint {
 	pub pos: Vector3,
 	#[default(Quaternion::IDENTITY)]
 	pub rot: Quaternion,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct HandleUgcEquipPostDeleteBasedOnEditMode {
+	pub inv_item: ObjId,
+	#[default(0)]
+	pub items_total: i32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct HandleUgcEquipPreCreateBasedOnEditMode {
+	pub model_count: i32,
+	pub model_id: ObjId,
 }
 
 #[derive(Debug, GameMessage)]
@@ -850,6 +1266,42 @@ pub enum MatchResponseType {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct ChangeIdleFlags {
+	#[default(0)]
+	pub off: i32, // todo: type
+	#[default(0)]
+	pub on: i32, // todo: type
+}
+
+#[derive(Debug, GameMessage)]
+pub struct NotifyRacingClient {
+#[default(RacingClientNotificationType::Invalid)]
+	pub event_type: RacingClientNotificationType,
+	pub param1: i32,
+	pub param_obj: ObjId,
+	pub param_str: GmWString,
+	pub single_client: ObjId,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum RacingClientNotificationType {
+	Invalid,
+	ActivityStart,
+	RewardPlayer,
+	Exit,
+	Replay,
+	RemovePlayer,
+	LeaderboardUpdated,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct RacingPlayerLoaded {
+	pub player_id: ObjId,
+	pub vehicle_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct SetStatusImmunity {
 	pub state_change_type: ImmunityState,
 	pub immune_to_basic_attack: bool,
@@ -861,6 +1313,13 @@ pub struct SetStatusImmunity {
 	pub immune_to_pull_to_point: bool,
 	pub immune_to_quickbuild_interrupt: bool,
 	pub immune_to_speed: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct SetPetNameModerated {
+	#[default(OBJID_EMPTY)]
+	pub pet_db_id: ObjId,
+	pub moderation_status: PetModerationStatus,
 }
 
 #[derive(Debug, GameMessage)]
@@ -918,6 +1377,14 @@ pub struct NotifyRailActivatorStateChange {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct NotifyRewardMailed {
+	pub object_id: ObjId,
+	pub start_point: Vector3,
+	pub subkey: ObjId,
+	pub template_id: Lot,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct UpdatePlayerStatistic {
 	pub update_id: i32,
 	#[default(1)]
@@ -934,6 +1401,21 @@ pub struct NotifyNotEnoughInvSpace {
 #[derive(Debug, GameMessage)]
 pub struct NotifyPropertyOfEditMode {
 	pub editing_active: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct TeamSetLeader {
+	pub player_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct TeamGetStatusResponse {
+	pub leader_id: ObjId,
+	pub leader_zone_id: ZoneId,
+	pub team_buffer: Vec<u8>,
+	pub loot_flag: u8, // todo: type
+	pub num_of_other_players: u8,
+	pub leader_name: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
@@ -963,9 +1445,31 @@ pub struct TeamRemovePlayer {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct SetResurrectRestoreValues {
+	#[default(-1)]
+	pub armor_restore: i32, // todo: option
+	#[default(-1)]
+	pub health_restore: i32, // todo: option
+	#[default(-1)]
+	pub imagination_restore: i32, // todo: option
+}
+
+#[derive(Debug, GameMessage)]
+pub struct SetPropertyModerationStatus {
+	#[default(-1)]
+	pub moderation_status: i32, // todo: type
+}
+
+#[derive(Debug, GameMessage)]
 pub struct UpdatePropertyModelCount {
 	#[default(0)]
 	pub model_count: u32,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct VehicleStopBoost {
+	#[default(true)]
+	pub affect_passive: bool,
 }
 
 #[derive(Debug, GameMessage)]
@@ -1023,4 +1527,21 @@ pub struct NotifyLevelRewards {
 	pub level: i32,
 	#[default(false)]
 	pub sending_rewards: bool,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct MarkInventoryItemAsActive {
+	#[default(false)]
+	pub active: bool,
+	#[default(UnequippableActiveType::Pet)]
+	pub unequippable_active_type: UnequippableActiveType,
+	#[default(OBJID_EMPTY)]
+	pub item_id: ObjId,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum UnequippableActiveType {
+	Pet,
+	Mount,
 }
