@@ -5,7 +5,7 @@ use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use super::super::{GmString, GmWString, KillType, MissionState, Lot, LOT_NULL, Quaternion, Vector3};
+use super::super::{GmString, GmWString, InventoryType, KillType, MissionState, Lot, LOT_NULL, PetNotificationType, Quaternion, Vector3};
 use super::super::gm::{EquipInventory, UnEquipInventory, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -204,7 +204,7 @@ pub struct RespondToMission {
 
 #[derive(Debug, GameMessage)]
 pub struct ServerTerminateInteraction {
-	pub obj_idterminator: ObjId,
+	pub obj_id_terminator: ObjId,
 	pub terminate_type: TerminateType,
 }
 
@@ -220,10 +220,20 @@ pub enum TerminateType {
 pub struct RequestUse {
 	pub is_multi_interact_use: bool,
 	pub multi_interact_id: u32,
-	pub multi_interact_type: i32,
+	pub multi_interact_type: InteractionType,
 	pub object: ObjId,
 	#[default(false)]
 	pub secondary: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum InteractionType {
+	MissionOfferer,
+	Vendor,
+	ItemRecipe,
+	ItemForge,
+	Script = 999,
 }
 
 #[derive(Debug, GameMessage)]
@@ -231,14 +241,14 @@ pub struct BuyFromVendor {
 	#[default(false)]
 	pub confirmed: bool,
 	#[default(1)]
-	pub count: i32,
+	pub count: i32, // todo: unsigned?
 	pub item: Lot,
 }
 
 #[derive(Debug, GameMessage)]
 pub struct SellToVendor {
 	#[default(1)]
-	pub count: i32,
+	pub count: i32, // todo: unsigned?
 	pub item_obj_id: ObjId,
 }
 
@@ -372,7 +382,7 @@ pub struct RequestActivitySummaryLeaderboardData {
 pub struct NotifyPet {
 	pub obj_id_source: ObjId,
 	pub obj_to_notify_pet_about: ObjId,
-	pub pet_notification_type: i32,
+	pub pet_notification_type: PetNotificationType,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
@@ -600,7 +610,7 @@ pub struct StartBuildingWithItem {
 	#[default(true)]
 	pub first_time: bool,
 	pub success: bool,
-	pub source_bag: i32,
+	pub source_bag: InventoryType,
 	pub source_id: ObjId,
 	pub source_lot: Lot,
 	pub source_type: i32,
@@ -612,7 +622,7 @@ pub struct StartBuildingWithItem {
 
 #[derive(Debug, GameMessage)]
 pub struct DoneArrangingWithItem {
-	pub new_source_bag: i32,
+	pub new_source_bag: InventoryType,
 	pub new_source_id: ObjId,
 	pub new_source_lot: Lot,
 	pub new_source_type: i32,
@@ -620,7 +630,7 @@ pub struct DoneArrangingWithItem {
 	pub new_target_lot: Lot,
 	pub new_target_type: i32,
 	pub new_target_pos: Vector3,
-	pub old_item_bag: i32,
+	pub old_item_bag: InventoryType,
 	pub old_item_id: ObjId,
 	pub old_item_lot: Lot,
 	pub old_item_type: i32,
@@ -661,8 +671,8 @@ pub struct BuildExitConfirmation {
 
 #[derive(Debug, GameMessage)]
 pub struct MoveItemBetweenInventoryTypes {
-	pub inventory_type_a: i32,
-	pub inventory_type_b: i32,
+	pub inventory_type_a: InventoryType,
+	pub inventory_type_b: InventoryType,
 	pub object_id: ObjId,
 	#[default(true)]
 	pub show_flying_loot: bool,

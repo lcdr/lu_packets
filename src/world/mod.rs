@@ -60,6 +60,26 @@ pub enum MissionState {
 	ReadyToCompleteReported = 32,
 }
 
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum PetNotificationType {
+	OwnerDied = 1,
+	OwnerOnPetBouncer,
+	OwnerUsedBouncer,
+	PetOnJumpActivatedObj,
+	PetOffSwitch,
+	PetAtDigLocation,
+	PetLeftDigLocation,
+	EndSignal,
+	PetToDespawn,
+	GoToObject,
+	OwnerResurrected,
+	OwnerOnDig,
+	Released,
+	OwnerOffPetBouncer,
+	OwnerOffDig,
+}
+
 // todo: better modeling with NonNull and Option
 type MapId = u16;
 const MAP_ID_INVALID: MapId = 0;

@@ -5,7 +5,7 @@ use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use super::super::{CloneId, CLONE_ID_INVALID, GmString, GmWString, InventoryType, KillType, Lot, LOT_NULL, MapId, MAP_ID_INVALID, MissionState, Quaternion, Vector3, ZoneId};
+use super::super::{CloneId, CLONE_ID_INVALID, GmString, GmWString, InventoryType, KillType, Lot, LOT_NULL, MapId, MAP_ID_INVALID, MissionState, PetNotificationType, Quaternion, Vector3, ZoneId};
 use super::super::gm::{EquipInventory, UnEquipInventory, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -193,7 +193,7 @@ pub struct DropClientLoot {
 	pub use_position: bool,
 	#[default(Vector3::ZERO)]
 	pub final_position: Vector3,
-	pub currency: i32,
+	pub currency: i32, // todo: unsigned?
 	pub item_template: Lot,
 	pub loot_id: ObjId,
 	pub owner: ObjId,
@@ -385,7 +385,7 @@ pub struct Knockback {
 	#[default(OBJID_EMPTY)]
 	pub originator: ObjId,
 	#[default(0)]
-	pub knock_back_time_ms: i32,
+	pub knock_back_time_ms: i32, // todo: unsigned?
 	pub vector: Vector3,
 }
 
@@ -499,7 +499,7 @@ pub struct ResetMissions {
 #[derive(Debug, GameMessage)]
 pub struct NotifyClientShootingGalleryScore {
 	pub add_time: f32,
-	pub score: i32,
+	pub score: i32, // todo: unsigned?
 	pub target: ObjId,
 	pub target_pos: Vector3,
 }
@@ -723,27 +723,6 @@ pub struct ClientNotifyPet {
 	pub pet_notification_type: PetNotificationType,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
-#[repr(u32)]
-pub enum PetNotificationType {
-	Invalid,
-	OwnerDied,
-	OwnerOnPetBouncer,
-	OwnerUsedBouncer,
-	PetOnJumpActivatedObj,
-	PetOffSwitch,
-	PetAtDigLocation,
-	PetLeftDigLocation,
-	EndSignal,
-	PetToDespawn,
-	GoToObject,
-	OwnerResurrected,
-	OwnerOnDig,
-	Released,
-	OwnerOffPetBouncer,
-	OwnerOffDig,
-}
-
 #[derive(Debug, GameMessage)]
 pub struct NotifyPetTamingMinigame {
 	pub pet_id: ObjId,
@@ -817,7 +796,7 @@ pub struct ShowPetActionButton {
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum PetAbilityType {
-	Invalid,
+	Invalid, // todo: option
 	GoToObject,
 	JumpOnObject,
 	DigAtPosition,
@@ -837,8 +816,7 @@ pub struct UseItemRequirementsResponse {
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
 #[repr(u32)]
 pub enum UseItemResponse {
-	Invalid,
-	NoImaginationForPet,
+	NoImaginationForPet = 1,
 	FailedPrecondition,
 	MountsNotAllowed,
 }
@@ -867,9 +845,21 @@ pub struct UpdateReputation {
 #[derive(Debug, GameMessage)]
 pub struct PropertyRentalResponse {
 	pub clone_id: CloneId,
-	pub code: i32, // todo: type
+	pub code: PropertyRentalResponseCode,
 	pub property_id: ObjId,
 	pub rentdue: i64, // todo: type
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum PropertyRentalResponseCode {
+	Ok = 0,
+	AlreadySold = 4,
+	NoneLeft = 5,
+	YouCantAffordIt,
+	DbFailed,
+	PropertyNotReady,
+	DontHaveAchievement,
 }
 
 #[derive(Debug, GameMessage)]
