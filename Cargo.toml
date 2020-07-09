@@ -10,3 +10,6 @@ repository = "https://github.com/lcdr/lu_packets/"
 endio = { git = "https://github.com/lcdr/endio", rev = "7ce17a01a9bf05cd777d5e6d34887a60e810cb85" }
 endio_bit = { git = "https://github.com/lcdr/endio_bit", rev = "46b1b0eda359dd85b5eabf9714e839c3728c75af" }
 lu_packets_derive = { path = "lu_packets_derive" }
+
+[dev-dependencies]
+zip = "0.5.6"
