@@ -21,7 +21,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
 
       - name: Cache dependencies
         uses: actions/cache@v2
@@ -37,18 +36,18 @@ jobs:
           path: |
             target/.rustc_info.json
             target/debug
-          key: target-${{ github.workflow }}-${{ github.run_number }}
+          key: target-${{ github.run_number }}
           restore-keys: |
-            target-${{ github.workflow }}-${{ github.run_number-1 }}
+            target-
 
       - name: Cache docs
         uses: actions/cache@v2
         with:
           path: |
             target/doc
-          key: target-doc-${{ github.workflow }}-${{ github.run_number }}
+          key: target-doc-${{ github.run_number }}
           restore-keys: |
-            target-doc-${{ github.workflow }}-${{ github.run_number-1 }}
+            target-doc-
 
       - name: Generate documentation
         uses: actions-rs/cargo@v1
