@@ -1,5 +1,5 @@
 //! All packets a world server can receive.
-mod gm;
+pub mod gm;
 
 use std::io::{Read, Write};
 use std::io::Result as Res;

@@ -1,4 +1,4 @@
-mod gm;
+pub mod gm;
 
 use std::io::Read;
 use std::io::Result as Res;
