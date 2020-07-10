@@ -14,8 +14,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ~/.rustup
-          key: toolchain-${{ hashFiles('rust-toolchain') }}
+            ~/.rustup/toolchains
+          key: toolchain-test-${{ hashFiles('rust-toolchain') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
