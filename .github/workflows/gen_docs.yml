@@ -14,13 +14,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ~/.rustup
-          key: toolchain-${{ hashFiles('rust-toolchain') }}
-
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
+            ~/.rustup/toolchains
+            ~/.rustup/update-hashes
+            ~/.rustup/settings.toml
+          key: toolchain-test2-${{ hashFiles('rust-toolchain') }}
 
       - name: Cache dependencies
         uses: actions/cache@v2
@@ -36,9 +33,9 @@ jobs:
           path: |
             target/.rustc_info.json
             target/debug
-          key: target-${{ github.run_number }}
+          key: target-debug-${{ github.run_number }}
           restore-keys: |
-            target-
+            target-debug-
 
       - name: Cache docs
         uses: actions/cache@v2
