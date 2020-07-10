@@ -44,6 +44,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: doc
+          args: --no-deps
 
       - name: Create .nojekyll file
         uses: finnp/create-file-action@master
