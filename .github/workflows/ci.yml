@@ -10,14 +10,12 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Cache dependencies
+      - name: Cache toolchain
         uses: actions/cache@v2
         with:
           path: |
             ~/.rustup
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: toolchain-${{ hashFiles('rust-toolchain') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
@@ -25,13 +23,23 @@ jobs:
           profile: minimal
           toolchain: nightly
 
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: deps-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Cache build
         uses: actions/cache@v2
         with:
           path: |
             target/.rustc_info.json
             target/debug
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: target-${{ github.workflow }}-${{ github.run_number }}
+          restore-keys: |
+            target-${{ github.workflow }}-${{ github.run_number-1 }}
 
       - name: Compile
         uses: actions-rs/cargo@v1
