@@ -36,9 +36,9 @@ jobs:
           path: |
             target/.rustc_info.json
             target/debug
-          key: target-${{ github.run_number }}
+          key: target-debug-${{ github.run_number }}
           restore-keys: |
-            target-
+            target-debug-
 
       - name: Compile
         uses: actions-rs/cargo@v1
