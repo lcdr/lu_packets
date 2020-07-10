@@ -47,10 +47,9 @@ jobs:
 
       - name: Create .nojekyll file
         uses: finnp/create-file-action@master
-        env = {
-          FILE_NAME = "target/doc/.nojekyll"
-          FILE_DATA = ""
-        }
+        env:
+          FILE_NAME: "target/doc/.nojekyll"
+          FILE_DATA: ""
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@releases/v3
