@@ -1,10 +1,10 @@
-on: [push]
+on: pull_request
 
-name: Generate documentation
+name: Pull request checks
 
 jobs:
-  gen-docs:
-    name: Generate documentation
+  pull_request:
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -37,28 +37,13 @@ jobs:
           restore-keys: |
             target-debug-
 
-      - name: Cache docs
-        uses: actions/cache@v2
-        with:
-          path: |
-            target/doc
-          key: target-doc-${{ github.run_number }}
-          restore-keys: |
-            target-doc-
-
-      - name: Generate documentation
+      - name: Compile
         uses: actions-rs/cargo@v1
         with:
-          command: doc
-          args: --no-deps
+          command: test
+          args: --no-run
 
-      - name: Create .nojekyll file
-        run: touch target/doc/.nojekyll
-
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+      - name: Test
+        uses: actions-rs/cargo@v1
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: target/doc
-          SINGLE_COMMIT: true
+          command: test
