@@ -66,7 +66,7 @@ fn gen_deser_code(fields: &Fields) -> TokenStream {
 		let val = if is_bool {
 			quote! { reader.read_bit()? }
 		} else {
-			let parse = quote! { crate::world::GmParam::deserialize(reader)? };
+			let parse = quote! { crate::world::gm::GmParam::deserialize(reader)? };
 			match default {
 				None => quote! { #parse },
 				Some(default) => quote! {
@@ -114,7 +114,7 @@ fn gen_ser_code(fields: &Fields) -> TokenStream {
 		let write = if is_bool {
 			quote! { writer.write_bit(self.#ident)?; }
 		} else {
-			let write_field = quote! { crate::world::GmParam::serialize(&self.#ident, writer)? };
+			let write_field = quote! { crate::world::gm::GmParam::serialize(&self.#ident, writer)? };
 			match default {
 				None => quote! { #write_field; },
 				Some(default) => quote! {

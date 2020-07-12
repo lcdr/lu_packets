@@ -5,8 +5,8 @@ use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use super::super::{CloneId, CLONE_ID_INVALID, GmString, GmWString, InventoryType, KillType, Lot, LOT_NULL, MapId, MAP_ID_INVALID, MissionState, PetNotificationType, Quaternion, Vector3, ZoneId};
-use super::super::gm::{EquipInventory, UnEquipInventory, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
+use super::super::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
+use super::{EquipInventory, GmString, GmWString, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SubjectGameMessage {

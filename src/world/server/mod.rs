@@ -1,6 +1,4 @@
 //! All packets a world server can receive.
-pub mod gm;
-
 use std::io::{Read, Write};
 use std::io::Result as Res;
 
@@ -10,7 +8,7 @@ use endio::LittleEndian as LE;
 use crate::common::{err, ObjId, LuVarWStr, LuWStr33, LuWStr42, ServiceId};
 use crate::chat::server::ChatMessage;
 use super::ZoneId;
-use self::gm::SubjectGameMessage;
+use super::gm::server::SubjectGameMessage;
 
 pub use crate::general::server::GeneralMessage;
 
