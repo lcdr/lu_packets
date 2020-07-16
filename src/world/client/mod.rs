@@ -5,7 +5,7 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::FromVariants;
 
-use crate::common::{ObjId, LuStr33, LuWStr33};
+use crate::common::{ObjId, LuString33, LuWString33};
 use super::{Vector3, ZoneId};
 use super::gm::client::SubjectGameMessage;
 
@@ -93,8 +93,8 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
 #[derive(Debug)]
 pub struct CharListChar {
 	pub obj_id: u64,
-	pub char_name: LuWStr33,
-	pub pending_name: LuWStr33,
+	pub char_name: LuWString33,
+	pub pending_name: LuWString33,
 	pub requires_rename: bool,
 	pub is_free_trial: bool,
 	pub shirt_color: u32,
@@ -149,7 +149,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 	           u32: Serialize<LE, W>,
 	         ObjId: Serialize<LE, W>,
 	      &'a [u8]: Serialize<LE, W>,
-	  &'a LuWStr33: Serialize<LE, W>,
+	  &'a LuWString33: Serialize<LE, W>,
 	    &'a ZoneId: Serialize<LE, W>,
 	          bool: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()>	{
@@ -199,7 +199,7 @@ pub struct CharacterDeleteResponse {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TransferToWorld {
-	pub redirect_ip: LuStr33,
+	pub redirect_ip: LuString33,
 	pub redirect_port: u16,
 	pub is_maintenance_transfer: bool,
 }
@@ -213,13 +213,13 @@ pub struct BlueprintLoadItemResponse {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FriendRequest {
-	pub sender_name: LuWStr33,
+	pub sender_name: LuWString33,
 	pub is_best_friend_request: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TeamInvite {
-	pub sender_name: LuWStr33,
+	pub sender_name: LuWString33,
 	pub sender_id: ObjId,
 }
 
@@ -233,7 +233,7 @@ pub struct MinimumChatModeResponse {
 pub struct MinimumChatModeResponsePrivate {
 	pub chat_mode: u8, // todo: type?
 	pub chat_channel: u8, // todo: type?
-	pub recipient_name: LuWStr33,
+	pub recipient_name: LuWString33,
 	pub recipient_gm_level: u8,
 }
 

@@ -7,40 +7,41 @@ use std::io::Result as Res;
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use lu_packets_derive::{GameMessage, GmParam};
 
-use crate::common::{LuVarStr, LuVarWStr, ObjId, OBJID_EMPTY};
+use crate::common::{LuVarString, LuVarWString, ObjId, OBJID_EMPTY};
 use super::{Lot, LOT_NULL};
 
-type GmString = LuVarStr<u32>;
-type GmWString = LuVarWStr<u32>;
+type GmString = LuVarString<u32>;
+type GmWString = LuVarWString<u32>;
 
 pub(super) trait GmParam: Sized {
 	fn deserialize<R: Read>(reader: &mut R) -> Res<Self>;
 	fn serialize<W: Write>(&self, writer: &mut W) -> Res<()>;
 }
 
-macro_rules! impl_gm {
+#[macro_export]
+macro_rules! gm_param {
 	($typ:ty) => {
-		impl GmParam for $typ {
-			fn deserialize<R: Read>(reader: &mut R) -> Res<Self> {
-				LERead::read(reader)
+		impl crate::world::gm::GmParam for $typ {
+			fn deserialize<R: ::std::io::Read>(reader: &mut R) -> ::std::io::Result<Self> {
+				::endio::LERead::read(reader)
 			}
 
-			fn serialize<W: Write>(&self, writer: &mut W) -> Res<()> {
-				LEWrite::write(writer, self)
+			fn serialize<W: ::std::io::Write>(&self, writer: &mut W) -> ::std::io::Result<()> {
+				::endio::LEWrite::write(writer, self)
 			}
 		}
 	}
 }
 
-impl_gm!(u8);
-impl_gm!(u16);
-impl_gm!(u32);
-impl_gm!(u64);
-impl_gm!(i32);
-impl_gm!(i64);
-impl_gm!(f32);
-impl_gm!(GmString);
-impl_gm!(GmWString);
+gm_param!(u8);
+gm_param!(u16);
+gm_param!(u32);
+gm_param!(u64);
+gm_param!(i32);
+gm_param!(i64);
+gm_param!(f32);
+gm_param!(GmString);
+gm_param!(GmWString);
 
 impl GmParam for Vec<u8> {
 	fn deserialize<R: Read>(reader: &mut R) -> Res<Self> {

@@ -5,7 +5,7 @@ use std::io::Result as Res;
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 
-use crate::common::{err, ObjId, LuVarWStr, LuWStr33, LuWStr42, ServiceId};
+use crate::common::{err, ObjId, LuVarWString, LuWString33, LuWString42, ServiceId};
 use crate::chat::server::ChatMessage;
 use super::ZoneId;
 use super::gm::server::SubjectGameMessage;
@@ -42,14 +42,14 @@ pub enum WorldMessage {
 
 #[derive(Debug)]
 pub struct ClientValidation {
-	pub username: LuWStr33,
-	pub session_key: LuWStr33,
+	pub username: LuWString33,
+	pub session_key: LuWString33,
 	pub fdb_checksum: [u8; 32],
 }
 
 impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
 	where   u8: Deserialize<LE, R>,
-	  LuWStr33: Deserialize<LE, R> {
+	  LuWString33: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let username         = LERead::read(reader)?;
 		let session_key      = LERead::read(reader)?;
@@ -67,7 +67,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
 
 impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ClientValidation
 	where       u8: Serialize<LE, W>,
-	  &'a LuWStr33: Serialize<LE, W> {
+	  &'a LuWString33: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		LEWrite::write(writer, &self.username)?;
 		LEWrite::write(writer, &self.session_key)?;
@@ -79,7 +79,7 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ClientValidation
 
 #[derive(Debug)]
 pub struct CharacterCreateRequest {
-	pub char_name: LuWStr33,
+	pub char_name: LuWString33,
 	pub predef_name_ids: (u32, u32, u32),
 	pub shirt_color: u32,
 	pub pants_color: u32,
@@ -93,7 +93,7 @@ pub struct CharacterCreateRequest {
 impl<R: LERead> Deserialize<LE, R> for CharacterCreateRequest
 	where   u8: Deserialize<LE, R>,
 	       u32: Deserialize<LE, R>,
-	  LuWStr33: Deserialize<LE, R> {
+	  LuWString33: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let char_name = reader.read()?;
 		let name_id_1 = reader.read()?;
@@ -132,7 +132,7 @@ impl<R: LERead> Deserialize<LE, R> for CharacterCreateRequest
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterCreateRequest
 	where      u8: Serialize<LE, W>,
 	          u32: Serialize<LE, W>,
-	 &'a LuWStr33: Serialize<LE, W> {
+	 &'a LuWString33: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		writer.write(&self.char_name)?;
 		writer.write(self.predef_name_ids.0)?;
@@ -169,7 +169,7 @@ pub struct CharacterDeleteRequest {
 pub struct GeneralChatMessage {
 	pub chat_channel: u8, // todo: type?
 	pub source_id: u16,
-	pub message: LuVarWStr<u32>,
+	pub message: LuVarWString<u32>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -219,8 +219,8 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a RouteMessage
 pub struct StringCheck {
 	pub chat_mode: u8, // todo: type?
 	pub chat_channel: u8, // todo: type?
-	pub recipient_name: LuWStr42,
-	pub string: LuVarWStr<u16>,
+	pub recipient_name: LuWString42,
+	pub string: LuVarWString<u16>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

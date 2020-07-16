@@ -5,7 +5,8 @@ use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use super::super::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
+use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
+use crate::world::lnv::LuNameValue;
 use super::{EquipInventory, GmString, GmWString, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -20,6 +21,7 @@ pub enum GameMessage {
 	Teleport(Teleport) = 19,
 	DropClientLoot(DropClientLoot) = 30,
 	Die(Die) = 37,
+	PreloadAnimation(PreloadAnimation) = 42,
 	PlayAnimation(PlayAnimation) = 43,
 	SetName(SetName) = 72,
 	SetCurrency(SetCurrency) = 133,
@@ -32,6 +34,7 @@ pub enum GameMessage {
 	Knockback(Knockback) = 202,
 	EnableRebuild(EnableRebuild) = 213,
 	MoveItemInInventory(MoveItemInInventory) = 224,
+	AddItemToInventoryClientSync(AddItemToInventoryClientSync) = 227,
 	EquipInventory(EquipInventory) = 231,
 	UnEquipInventory(UnEquipInventory) = 233,
 	OfferMission(OfferMission) = 248,
@@ -69,10 +72,12 @@ pub enum GameMessage {
 	RegisterPetId(RegisterPetId) = 565,
 	RegisterPetDbId(RegisterPetDbId) = 566,
 	ShowActivityCountdown(ShowActivityCountdown) = 568,
+	DisplayTooltip(DisplayTooltip) = 569,
 	StartActivityTime(StartActivityTime) = 576,
 	ActivityPause(ActivityPause) = 602,
 	UseItemResult(UseItemResult) = 607,
 	PetResponse(PetResponse) = 641,
+	SendActivitySummaryLeaderboardData(SendActivitySummaryLeaderboardData) = 649,
 	ClientNotifyPet(ClientNotifyPet) = 659,
 	NotifyPetTamingMinigame(NotifyPetTamingMinigame) = 661,
 	PetTamingTryBuildResult(PetTamingTryBuildResult) = 668,
@@ -90,6 +95,8 @@ pub enum GameMessage {
 	PlatformResync(PlatformResync) = 761,
 	PlayCinematic(PlayCinematic) = 762,
 	EndCinematic(EndCinematic) = 763,
+	ScriptNetworkVarUpdate(ScriptNetworkVarUpdate) = 781,
+	BroadcastTextToChatbox(BroadcastTextToChatbox) = 858,
 	OpenPropertyVendor = 861,
 	ServerTradeInvite(ServerTradeInvite) = 870,
 	ServerTradeInitialReply(ServerTradeInitialReply) = 873,
@@ -132,6 +139,7 @@ pub enum GameMessage {
 	HandleUgcEquipPostDeleteBasedOnEditMode(HandleUgcEquipPostDeleteBasedOnEditMode) = 1300,
 	HandleUgcEquipPreCreateBasedOnEditMode(HandleUgcEquipPreCreateBasedOnEditMode) = 1301,
 	MatchResponse(MatchResponse) = 1309,
+	MatchUpdate(MatchUpdate) = 1310,
 	ChangeIdleFlags(ChangeIdleFlags) = 1338,
 	VehicleAddPassiveBoostAction = 1340,
 	VehicleRemovePassiveBoostAction = 1341,
@@ -217,6 +225,15 @@ pub struct Die {
 	pub killer_id: ObjId,
 	#[default(OBJID_EMPTY)]
 	pub loot_owner_id: ObjId,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct PreloadAnimation {
+	pub animation_id: GmWString,
+	#[default(false)]
+	pub handled: bool,
+	pub respond_obj_id: ObjId,
+	pub user_data: LuNameValue,
 }
 
 #[derive(Debug, GameMessage)]
@@ -407,6 +424,30 @@ pub enum FailReason {
 	OutOfImagination,
 	CanceledEarly,
 	BuildEnded,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct AddItemToInventoryClientSync {
+	pub bound: bool,
+	pub is_boe: bool,
+	pub is_bop: bool,
+	#[default(LootType::None)]
+	pub loot_type_source: LootType,
+	pub extra_info: LuNameValue,
+	pub obj_template: Lot,
+	#[default(OBJID_EMPTY)]
+	pub subkey: ObjId,
+	#[default(InventoryType::Default)]
+	pub inv_type: InventoryType,
+	#[default(1)]
+	pub item_count: u32,
+	#[default(0)]
+	pub items_total: u32,
+	pub new_obj_id: ObjId,
+	pub flying_loot_posit: Vector3,
+	#[default(true)]
+	pub show_flying_loot: bool,
+	pub slot_id: i32, // todo: unsigned?
 }
 
 #[derive(Debug, GameMessage)]
@@ -693,6 +734,26 @@ pub struct ShowActivityCountdown {
 }
 
 #[derive(Debug, GameMessage)]
+pub struct DisplayTooltip {
+	#[default(false)]
+	pub do_or_die: bool,
+	#[default(false)]
+	pub no_repeat: bool,
+	#[default(false)]
+	pub no_revive: bool,
+	#[default(false)]
+	pub is_property_tooltip: bool,
+	pub show: bool,
+	#[default(false)]
+	pub translate: bool,
+	pub time: i32, // todo: unsigned?
+	pub id: GmWString,
+	pub localize_params: LuNameValue,
+	pub image_name: GmWString,
+	pub text: GmWString,
+}
+
+#[derive(Debug, GameMessage)]
 pub struct StartActivityTime {
 	pub start_time: f32,
 }
@@ -715,6 +776,15 @@ pub struct PetResponse {
 	pub pet_command_type: i32, // todo: type
 	pub response: i32, // todo: type
 	pub type_id: i32, // todo: type
+}
+
+#[derive(Debug, GameMessage)]
+pub struct SendActivitySummaryLeaderboardData {
+	pub game_id: i32, // todo: type
+	pub info_type: i32, // todo: type
+	pub leaderboard_data: LuNameValue,
+	pub throttled: bool,
+	pub weekly: bool,
 }
 
 #[derive(Debug, GameMessage)]
@@ -920,6 +990,17 @@ pub struct EndCinematic {
 	#[default(false)]
 	pub leave_player_locked: bool,
 	pub path_name: GmWString,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct ScriptNetworkVarUpdate {
+	pub table_of_vars: LuNameValue,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct BroadcastTextToChatbox {
+	pub attrs: LuNameValue,
+	pub text: GmWString,
 }
 
 #[derive(Debug, GameMessage)]
@@ -1253,6 +1334,25 @@ pub enum MatchResponseType {
 	AlreadyNotReady,
 	Fail,
 	TeamFail,
+}
+
+#[derive(Debug, GameMessage)]
+pub struct MatchUpdate {
+	pub data: LuNameValue,
+	pub match_update_type: MatchUpdateType,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum MatchUpdateType {
+	PlayerAdded,
+	PlayerRemoved,
+	PhaseCreated,
+	PhaseWaitReady,
+	PhaseWaitStart,
+	PlayerReady,
+	PlayerNotReady,
+	PlayerUpdate,
 }
 
 #[derive(Debug, GameMessage)]

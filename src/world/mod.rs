@@ -1,5 +1,6 @@
 pub mod client;
 pub mod gm;
+pub mod lnv;
 pub mod server;
 
 use std::cmp::PartialEq;

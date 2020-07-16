@@ -1,7 +1,7 @@
 //! All packets an auth server can receive.
 use endio::{Deserialize, Serialize};
 
-use crate::common::{LuWStr33, LuWStr41, LuWStr128, LuWStr256, ServiceId};
+use crate::common::{LuWString33, LuWString41, LuWString128, LuWString256, ServiceId};
 pub use crate::general::server::GeneralMessage;
 
 pub type Message = crate::raknet::server::Message<LuMessage>;
@@ -23,8 +23,8 @@ pub enum AuthMessage {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LoginRequest {
-	pub username: LuWStr33,
-	pub password: LuWStr41,
+	pub username: LuWString33,
+	pub password: LuWString41,
 	pub locale_id: u16,
 	pub client_os: ClientOs,
 	pub computer_stats: ComputerStats,
@@ -40,8 +40,8 @@ pub enum ClientOs {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ComputerStats {
-	pub memory_stats: LuWStr256,
-	pub video_card_info: LuWStr128,
+	pub memory_stats: LuWString256,
+	pub video_card_info: LuWString128,
 	pub processor_info: ProcessorInfo,
 	pub os_info: OsInfo,
 }

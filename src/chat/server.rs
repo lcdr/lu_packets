@@ -4,7 +4,7 @@ use std::io::Result as Res;
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 
-use crate::common::{LuVarWStr, LuWStr33, ObjId};
+use crate::common::{LuVarWString, LuWString33, ObjId};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[post_disc_padding=9]
@@ -25,18 +25,18 @@ pub enum ChatMessage {
 #[derive(Debug)]
 pub struct GeneralChatMessage {
 	pub chat_channel: u8, // todo: type?
-	pub sender_name: LuWStr33,
+	pub sender_name: LuWString33,
 	pub sender: ObjId,
 	pub source_id: u16,
 	pub sender_gm_level: u8,
-	pub message: LuVarWStr<u32>,
+	pub message: LuVarWString<u32>,
 }
 
 impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
 	where   u8: Deserialize<LE, R>,
 	       u16: Deserialize<LE, R>,
 	       u32: Deserialize<LE, R>,
-	  LuWStr33: Deserialize<LE, R>,
+	  LuWString33: Deserialize<LE, R>,
 	     ObjId: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let chat_channel       = LERead::read(reader)?;
@@ -45,7 +45,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
 		let sender             = LERead::read(reader)?;
 		let source_id          = LERead::read(reader)?;
 		let sender_gm_level    = LERead::read(reader)?;
-		let message = LuVarWStr::deser_content(reader, str_len)?;
+		let message = LuVarWString::deser_content(reader, str_len)?;
 
 		Ok(Self { chat_channel, sender_name, sender, source_id, sender_gm_level, message })
 	}
@@ -55,7 +55,7 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a GeneralChatMessage
 	where       u8: Serialize<LE, W>,
 	           u16: Serialize<LE, W>,
 	           u32: Serialize<LE, W>,
-	  &'a LuWStr33: Serialize<LE, W>,
+	  &'a LuWString33: Serialize<LE, W>,
 	         ObjId: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		LEWrite::write(writer, self.chat_channel)?;
@@ -83,21 +83,21 @@ pub enum PrivateChatMessageResponseCode {
 #[derive(Debug)]
 pub struct PrivateChatMessage {
 	pub chat_channel: u8, // todo: type?
-	pub sender_name: LuWStr33,
+	pub sender_name: LuWString33,
 	pub sender: ObjId,
 	pub source_id: u16,
 	pub sender_gm_level: u8,
-	pub recipient_name: LuWStr33,
+	pub recipient_name: LuWString33,
 	pub recipient_gm_level: u8,
 	pub response_code: PrivateChatMessageResponseCode,
-	pub message: LuVarWStr<u32>,
+	pub message: LuVarWString<u32>,
 }
 
 impl<R: Read+LERead> Deserialize<LE, R> for PrivateChatMessage
 	where   u8: Deserialize<LE, R>,
 	       u16: Deserialize<LE, R>,
 	       u32: Deserialize<LE, R>,
-	  LuWStr33: Deserialize<LE, R>,
+	  LuWString33: Deserialize<LE, R>,
 	     ObjId: Deserialize<LE, R>,
 	  PrivateChatMessageResponseCode: Deserialize<LE, R> {
 	fn deserialize(reader: &mut R) -> Res<Self> {
@@ -110,7 +110,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for PrivateChatMessage
 		let recipient_name     = LERead::read(reader)?;
 		let recipient_gm_level = LERead::read(reader)?;
 		let response_code      = LERead::read(reader)?;
-		let message = LuVarWStr::deser_content(reader, str_len)?;
+		let message = LuVarWString::deser_content(reader, str_len)?;
 
 		Ok(Self { chat_channel, sender_name, sender, source_id, sender_gm_level, recipient_name, recipient_gm_level, response_code, message })
 	}
@@ -119,7 +119,7 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a PrivateChatMessage
 	where       u8: Serialize<LE, W>,
 	           u16: Serialize<LE, W>,
 	           u32: Serialize<LE, W>,
-	  &'a LuWStr33: Serialize<LE, W>,
+	  &'a LuWString33: Serialize<LE, W>,
 	         ObjId: Serialize<LE, W>,
 	  &'a PrivateChatMessageResponseCode: Serialize<LE, W> {
 	fn serialize(self, writer: &mut W) -> Res<()> {
@@ -148,7 +148,7 @@ pub enum AddFriendResponseCode {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AddFriendResponse {
 	pub response_code: AddFriendResponseCode,
-	pub friend_name: LuWStr33,
+	pub friend_name: LuWString33,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -167,7 +167,7 @@ pub struct TeamInviteResponse {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TeamLeave {
-	pub unused: LuWStr33,
+	pub unused: LuWString33,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -178,5 +178,5 @@ pub struct RequestMinimumChatMode {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RequestMinimumChatModePrivate {
 	pub chat_channel: u8, // todo: separate type?
-	pub recipient_name: LuWStr33,
+	pub recipient_name: LuWString33,
 }
