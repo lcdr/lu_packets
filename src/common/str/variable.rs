@@ -7,13 +7,17 @@ use endio::{Deserialize, LE, LERead, LEWrite, Serialize};
 
 use super::{AsciiChar, AsciiError, LuStrExt, LuWStr, Ucs2Char, Ucs2Error};
 
-#[derive(Eq, Hash, PartialEq)]
+#[derive(Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct AbstractLuVarString<C, L>(Vec<C>, PhantomData<L>);
 
 pub type LuVarString<L> = AbstractLuVarString<AsciiChar, L>;
 pub type LuVarWString<L> = AbstractLuVarString<Ucs2Char, L>;
 
 impl<C, L> AbstractLuVarString<C, L> {
+	pub fn new(vec: Vec<C>) -> Self {
+		Self(vec, PhantomData)
+	}
+
 	pub(crate) fn deser_content<R: Read>(reader: &mut R, str_len: L) -> Res<Self> where L: TryInto<usize> {
 		let str_len = match str_len.try_into() {
 			Ok(x) => x,
@@ -67,12 +71,12 @@ impl<L> From<&LuVarWString<L>> for String {
 	}
 }
 
-impl<L> TryFrom<&str> for LuVarString<L> {
+impl<L> TryFrom<&[u8]> for LuVarString<L> {
 	type Error = AsciiError;
 
-	fn try_from(string: &str) -> Result<Self, Self::Error> {
+	fn try_from(string: &[u8]) -> Result<Self, Self::Error> {
 		// todo: check for invalid character ranges for ascii
-		Ok(Self(unsafe { (&*(string.as_bytes() as *const [u8] as *const [AsciiChar])).into() }, PhantomData))
+		Ok(Self(unsafe { (&*(string as *const [u8] as *const [AsciiChar])).into() }, PhantomData))
 	}
 }
 
@@ -93,7 +97,7 @@ impl<L> TryFrom<&str> for LuVarWString<L> {
 	}
 }
 
-impl<C: Copy + Eq, L, R: Read> Deserialize<LE, R> for AbstractLuVarString<C, L>
+impl<C, L, R: Read> Deserialize<LE, R> for AbstractLuVarString<C, L>
 	where L: TryInto<usize> + Deserialize<LE, R> {
 
 	fn deserialize(reader: &mut R) -> Res<Self> {
@@ -102,7 +106,7 @@ impl<C: Copy + Eq, L, R: Read> Deserialize<LE, R> for AbstractLuVarString<C, L>
 	}
 }
 
-impl<'a, C: Copy + Eq, L, W: Write> Serialize<LE, W> for &'a AbstractLuVarString<C, L>
+impl<'a, C, L, W: Write> Serialize<LE, W> for &'a AbstractLuVarString<C, L>
 	where L: TryFrom<usize> + Serialize<LE, W> {
 
 	fn serialize(self, writer: &mut W) -> Res<()> {
@@ -111,11 +115,18 @@ impl<'a, C: Copy + Eq, L, W: Write> Serialize<LE, W> for &'a AbstractLuVarString
 	}
 }
 
-impl<C: Copy + Eq, L> std::ops::Deref for AbstractLuVarString<C, L> {
+impl<C, L> std::ops::Deref for AbstractLuVarString<C, L> {
 	type Target = Vec<C>;
 
 	#[inline]
 	fn deref(&self) -> &Self::Target {
 		&self.0
+	}
+}
+
+impl<C, L> std::ops::DerefMut for AbstractLuVarString<C, L> {
+	#[inline]
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.0
 	}
 }

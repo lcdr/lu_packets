@@ -12,10 +12,10 @@ pub(crate) fn err<T, U: std::fmt::Debug>(name: &str, value: U) -> Res<T> {
 	Err(Error::new(InvalidData, &format!("unknown {} {:?}", name, value)[..]))
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct SystemAddress {
-	ip: Ipv4Addr,
-	port: u16,
+	pub ip: Ipv4Addr,
+	pub port: u16,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]

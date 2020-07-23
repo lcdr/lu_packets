@@ -15,24 +15,10 @@ pub struct AsciiError;
 #[derive(Debug)]
 pub struct Ucs2Error;
 
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct AsciiChar(u8);
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Ucs2Char(u16);
-
-impl AsciiChar {
-	pub fn new(i: u8) -> Self {
-		// todo: range check
-		Self(i)
-	}
-}
-
-impl Ucs2Char {
-	pub fn new(i: u16) -> Self {
-		// todo: range check
-		Self(i)
-	}
-}
 
 impl LuChar for AsciiChar {
 	type Int = u8;
@@ -44,21 +30,36 @@ impl LuChar for Ucs2Char {
 	type Error = Ucs2Error;
 }
 
+impl From<u8> for AsciiChar {
+	fn from(byte: u8) -> Self {
+		// todo: range check
+		Self(byte)
+	}
+}
+
+impl From<u8> for Ucs2Char {
+	fn from(byte: u8) -> Self {
+		// todo: range check
+		Self(byte as u16)
+	}
+}
 
 type AbstractLuStr<C> = [C];
 
-pub type LuStr = [AsciiChar];
-pub type LuWStr = [Ucs2Char];
+pub type LuStr = AbstractLuStr<AsciiChar>;
+pub type LuWStr = AbstractLuStr<Ucs2Char>;
 
 pub trait LuStrExt {
 	type Char: LuChar;
 
+	fn from_slice(slice: &[<Self::Char as LuChar>::Int]) -> &[Self::Char] {
+		unsafe { &*(slice as *const [<Self::Char as LuChar>::Int] as *const [Self::Char]) }
+	}
+
 	fn as_slice(&self) -> &[<Self::Char as LuChar>::Int];
 	fn to_string(&self) -> String;
 
-	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-		write!(f, "{:?}", self.to_string())
-	}
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error>;
 }
 
 impl LuStrExt for LuStr {
@@ -71,6 +72,10 @@ impl LuStrExt for LuStr {
 	fn to_string(&self) -> String {
 		std::str::from_utf8(self.as_slice()).unwrap().into()
 	}
+
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+		write!(f, "b{:?}", self.to_string())
+	}
 }
 
 impl LuStrExt for LuWStr {
@@ -82,5 +87,9 @@ impl LuStrExt for LuWStr {
 
 	fn to_string(&self) -> String {
 		String::from_utf16(self.as_slice()).unwrap()
+	}
+
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+		write!(f, "{:?}", self.to_string())
 	}
 }

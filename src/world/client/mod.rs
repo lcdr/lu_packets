@@ -3,10 +3,10 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::FromVariants;
+use lu_packets_derive::{FromVariants, VariantTests};
 
 use crate::common::{ObjId, LuString33, LuWString33};
-use super::{Vector3, ZoneId};
+use super::{Lot, Vector3, ZoneId};
 use super::gm::client::SubjectGameMessage;
 
 pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
@@ -18,7 +18,7 @@ impl From<ClientMessage> for Message {
 	}
 }
 
-#[derive(Debug, Deserialize, Serialize, FromVariants)]
+#[derive(Debug, Deserialize, PartialEq, Serialize, FromVariants, VariantTests)]
 #[non_exhaustive]
 #[post_disc_padding=1]
 #[repr(u32)]
@@ -37,7 +37,7 @@ pub enum ClientMessage {
 	UpdateFreeTrialStatus(UpdateFreeTrialStatus) = 62,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u32)]
 pub enum InstanceType {
 	Public,
@@ -47,7 +47,7 @@ pub enum InstanceType {
 	Match,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct LoadStaticZone {
 	pub zone_id: ZoneId,
 	pub map_checksum: u32,
@@ -57,7 +57,7 @@ pub struct LoadStaticZone {
 	pub instance_type: InstanceType,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CharacterListResponse {
 	pub selected_char: u8,
 	pub chars: Vec<CharListChar>,
@@ -90,7 +90,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CharListChar {
 	pub obj_id: u64,
 	pub char_name: LuWString33,
@@ -105,6 +105,7 @@ pub struct CharListChar {
 	pub eye_style: u32,
 	pub mouth_style: u32,
 	pub last_location: ZoneId,
+	pub equipped_items: Vec<Lot>,
 }
 
 impl<R: Read+LERead> Deserialize<LE, R> for CharListChar {
@@ -120,25 +121,28 @@ impl<R: Read+LERead> Deserialize<LE, R> for CharListChar {
 		let shirt_color     = LERead::read(reader)?;
 		let mut unused = [0; 4];
 		Read::read(reader, &mut unused)?;
-		let pants_color = LERead::read(reader)?;
-		let hair_style = LERead::read(reader)?;
-		let hair_color = LERead::read(reader)?;
+		let pants_color     = LERead::read(reader)?;
+		let hair_style      = LERead::read(reader)?;
+		let hair_color      = LERead::read(reader)?;
 		let mut unused = [0; 8];
 		Read::read(reader, &mut unused)?;
-		let eyebrow_style = LERead::read(reader)?;
-		let eye_style = LERead::read(reader)?;
-		let mouth_style = LERead::read(reader)?;
+		let eyebrow_style   = LERead::read(reader)?;
+		let eye_style       = LERead::read(reader)?;
+		let mouth_style     = LERead::read(reader)?;
 		let mut unused = [0; 4];
 		Read::read(reader, &mut unused)?;
-		let last_location = LERead::read(reader)?;
+		let last_location   = LERead::read(reader)?;
 		let mut unused = [0; 8];
 		Read::read(reader, &mut unused)?;
-		let items_len: u16 = LERead::read(reader)?;
-		assert_eq!(items_len, 0); // todo
+		let items_len: u16  = LERead::read(reader)?;
+		let mut equipped_items = Vec::with_capacity(items_len as usize);
+		for _ in 0..items_len {
+			equipped_items.push(LERead::read(reader)?);
+		}
 		Ok(Self {
 			obj_id, char_name, pending_name, requires_rename,
 			is_free_trial, shirt_color, pants_color, hair_style, hair_color,
-			eyebrow_style, eye_style, mouth_style, last_location,
+			eyebrow_style, eye_style, mouth_style, last_location, equipped_items,
 		})
 	}
 }
@@ -177,12 +181,15 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
 		writer.write(&self.last_location)?;
 		writer.write(&[0; 8][..])?;
 
-		writer.write(0u16)?;
+		writer.write(self.equipped_items.len() as u16)?;
+		for item in &self.equipped_items {
+			writer.write(*item)?;
+		}
 		Ok(())
 	}
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
 pub enum CharacterCreateResponse {
 	Success,
@@ -192,44 +199,44 @@ pub enum CharacterCreateResponse {
 	CustomNameInUse,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharacterDeleteResponse {
 	pub success: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct TransferToWorld {
 	pub redirect_ip: LuString33,
 	pub redirect_port: u16,
 	pub is_maintenance_transfer: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct BlueprintLoadItemResponse {
 	pub success: bool,
 	pub item_id: ObjId,
 	pub dest_item_id: ObjId,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct FriendRequest {
 	pub sender_name: LuWString33,
 	pub is_best_friend_request: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct TeamInvite {
 	pub sender_name: LuWString33,
 	pub sender_id: ObjId,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct MinimumChatModeResponse {
 	pub chat_mode: u8, // todo: type?
 	pub chat_channel: u8, // todo: type?
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct MinimumChatModeResponsePrivate {
 	pub chat_mode: u8, // todo: type?
 	pub chat_channel: u8, // todo: type?
@@ -237,7 +244,7 @@ pub struct MinimumChatModeResponsePrivate {
 	pub recipient_gm_level: u8,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct UpdateFreeTrialStatus {
 	pub is_free_trial: bool,
 }

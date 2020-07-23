@@ -4,6 +4,7 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
+use lu_packets_derive::VariantTests;
 
 use crate::common::{err, ObjId, LuVarWString, LuWString33, LuWString42, ServiceId};
 use crate::chat::server::ChatMessage;
@@ -14,15 +15,14 @@ pub use crate::general::server::GeneralMessage;
 
 pub type Message = crate::raknet::server::Message<LuMessage>;
 
-#[derive(Debug, Deserialize, Serialize)]
-#[non_exhaustive]
+#[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[repr(u16)]
 pub enum LuMessage {
 	General(GeneralMessage) = ServiceId::General as u16,
 	World(WorldMessage) = ServiceId::World as u16,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[post_disc_padding=1]
 #[repr(u32)]
 pub enum WorldMessage {
@@ -40,7 +40,7 @@ pub enum WorldMessage {
 	UgcDownloadFailed(UgcDownloadFailed) = 120,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ClientValidation {
 	pub username: LuWString33,
 	pub session_key: LuWString33,
@@ -77,7 +77,7 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ClientValidation
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CharacterCreateRequest {
 	pub char_name: LuWString33,
 	pub predef_name_ids: (u32, u32, u32),
@@ -155,29 +155,29 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterCreateRequest
 	}
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharacterLoginRequest {
 	pub char_id: ObjId,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharacterDeleteRequest {
 	pub char_id: ObjId,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct GeneralChatMessage {
 	pub chat_channel: u8, // todo: type?
 	pub source_id: u16,
 	pub message: LuVarWString<u32>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct LevelLoadComplete {
 	pub zone_id: ZoneId,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 #[non_exhaustive]
 pub enum RouteMessage {
 	Chat(ChatMessage),
@@ -215,7 +215,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a RouteMessage
 	}
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct StringCheck {
 	pub chat_mode: u8, // todo: type?
 	pub chat_channel: u8, // todo: type?
@@ -223,7 +223,7 @@ pub struct StringCheck {
 	pub string: LuVarWString<u16>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u32)]
 pub enum UgcResType {
 	Lxfml,
@@ -232,7 +232,7 @@ pub enum UgcResType {
 	Dds,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct UgcDownloadFailed {
 	pub res_type: UgcResType,
 	pub blueprint_id: ObjId,

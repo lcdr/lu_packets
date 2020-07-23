@@ -1,0 +1,1 @@
+WorldMessage::CharacterListRequest

@@ -122,7 +122,7 @@ pub enum PetNotificationType {
 	OwnerOffDig,
 }
 
-#[derive(Debug, GameMessage)]
+#[derive(Debug, GameMessage, PartialEq)]
 pub struct EquipInventory {
 	#[default(false)]
 	pub ignore_cooldown: bool,
@@ -130,13 +130,13 @@ pub struct EquipInventory {
 	pub item_to_equip: ObjId,
 }
 
-#[derive(Debug, GameMessage)]
+#[derive(Debug, GameMessage, PartialEq)]
 pub struct SetIgnoreProjectileCollision {
 	#[default(false)]
 	pub should_ignore: bool,
 }
 
-#[derive(Debug, GameMessage)]
+#[derive(Debug, GameMessage, PartialEq)]
 pub struct UnEquipInventory {
 	#[default(false)]
 	pub even_if_dead: bool,
@@ -150,7 +150,7 @@ pub struct UnEquipInventory {
 
 const INVENTORY_INVALID: i32 = -1;
 
-#[derive(Debug, GameMessage)]
+#[derive(Debug, GameMessage, PartialEq)]
 pub struct MoveItemInInventory {
 	#[default(INVENTORY_INVALID)]
 	pub dest_inv_type: i32, // todo: type
@@ -160,7 +160,7 @@ pub struct MoveItemInInventory {
 	pub slot: i32, // todo: unsigned?
 }
 
-#[derive(Debug, GameMessage)]
+#[derive(Debug, GameMessage, PartialEq)]
 pub struct MoveInventoryBatch {
 	#[default(false)]
 	pub allow_partial: bool,

@@ -9,14 +9,38 @@ use super::{AbstractLuStr, AsciiChar, AsciiError, LuChar, LuStrExt, Ucs2Char, Uc
 // todo[const generics]: const generic strings
 // todo: exclude the final null terminator from the array
 macro_rules! abstract_lu_str {
-	($name:ident, $c:ty, $n:literal) => {
+	($name:ident, $c:ty, $null:expr, $n:literal) => {
 		// todo: runtime type invariants checks (valid, null terminator)
 		/// A string with a maximum length of $n.
 		pub struct $name([$c; $n]);
 
+		impl PartialEq for $name {
+			fn eq(&self, other: &Self) -> bool {
+				dbg!((&**self) == (&**other))
+			}
+		}
+
 		impl std::fmt::Debug for $name {
 			fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
 				(&**self).fmt(f)
+			}
+		}
+
+		impl std::ops::Deref for $name {
+			type Target = AbstractLuStr<$c>;
+
+			#[inline]
+			fn deref(&self) -> &Self::Target {
+				let terminator = self.0.iter().position(|&c| c == $null).unwrap();
+				&self.0[..terminator]
+			}
+		}
+
+		impl std::ops::DerefMut for $name {
+			#[inline]
+			fn deref_mut(&mut self) -> &mut Self::Target {
+				let terminator = self.0.iter().position(|&c| c == $null).unwrap();
+				&mut self.0[..terminator]
 			}
 		}
 
@@ -39,26 +63,16 @@ macro_rules! abstract_lu_str {
 
 macro_rules! lu_str {
 	($name:ident, $n:literal) => {
-		abstract_lu_str!($name, AsciiChar, $n);
+		abstract_lu_str!($name, AsciiChar, AsciiChar(0), $n);
 
-		impl std::ops::Deref for $name {
-			type Target = AbstractLuStr<AsciiChar>;
-
-			#[inline]
-			fn deref(&self) -> &Self::Target {
-				let terminator = self.0.iter().position(|&c| c == AsciiChar(0)).unwrap();
-				&self.0[..terminator]
-			}
-		}
-
-		impl TryFrom<&str> for $name {
+		impl TryFrom<&[u8]> for $name {
 			type Error = AsciiError;
 
-			fn try_from(string: &str) -> Result<Self, Self::Error> {
+			fn try_from(string: &[u8]) -> Result<Self, Self::Error> {
 				let mut bytes = [0u8; $n];
 				// todo: ascii range check
-				for (i, chr) in string.bytes().take($n-1).enumerate() {
-					bytes[i] = chr;
+				for (i, chr) in string.iter().take($n-1).enumerate() {
+					bytes[i] = *chr;
 				}
 				let bytes = unsafe { std::mem::transmute(bytes) };
 				Ok(Self(bytes))
@@ -69,17 +83,7 @@ macro_rules! lu_str {
 
 macro_rules! lu_wstr {
 	($name:ident, $n:literal) => {
-		abstract_lu_str!($name, Ucs2Char, $n);
-
-		impl std::ops::Deref for $name {
-			type Target = AbstractLuStr<Ucs2Char>;
-
-			#[inline]
-			fn deref(&self) -> &Self::Target {
-				let terminator = self.0.iter().position(|&c| c == Ucs2Char(0)).unwrap();
-				&self.0[..terminator]
-			}
-		}
+		abstract_lu_str!($name, Ucs2Char, Ucs2Char(0), $n);
 
 		impl TryFrom<&str> for $name {
 			type Error = Ucs2Error;
@@ -96,8 +100,7 @@ macro_rules! lu_wstr {
 
 		impl From<&$name> for String {
 			fn from(wstr: &$name) -> Self {
-				let terminator = wstr.0.iter().position(|&c| c == Ucs2Char(0)).unwrap();
-				String::from_utf16(unsafe {&*(&wstr.0[..terminator] as *const [Ucs2Char] as *const [<Ucs2Char as LuChar>::Int])}).unwrap()
+				String::from_utf16(unsafe {&*(&**wstr as *const [Ucs2Char] as *const [<Ucs2Char as LuChar>::Int])}).unwrap()
 			}
 		}
 	}
