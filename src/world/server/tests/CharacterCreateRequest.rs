@@ -1,11 +1,9 @@
 WorldMessage::CharacterCreateRequest(
 	CharacterCreateRequest {
 		char_name: lu!(""),
-		predef_name_ids: (
-			124,
-			276,
-			436,
-		),
+		predef_name_id_1: 124,
+		predef_name_id_2: 276,
+		predef_name_id_3: 436,
 		shirt_color: 15,
 		pants_color: 15,
 		hair_style: 9,

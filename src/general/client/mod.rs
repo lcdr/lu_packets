@@ -1,7 +1,4 @@
-use std::io::{Read, Write};
-use std::io::Result as Res;
-
-use endio::{Deserialize, LE, LERead, LEWrite, Serialize};
+use endio::{Deserialize, Serialize};
 use lu_packets_derive::VariantTests;
 
 use crate::common::ServiceId;
@@ -48,39 +45,12 @@ impl<C> From<DisconnectNotify> for Message<C> {
 	}
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[trailing_padding=41]
 pub struct Handshake {
 	pub network_version: u32,
+	#[padding=4]
 	pub service_id: ServiceId,
-}
-
-impl<R: Read+LERead> Deserialize<LE, R> for Handshake
-	where   u16: Deserialize<LE, R>,
-	        u32: Deserialize<LE, R>,
-	  ServiceId: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let network_version = LERead::read(reader)?;
-		let _: u32          = LERead::read(reader)?;
-		let service_id      = LERead::read(reader)?;
-		let _: u16          = LERead::read(reader)?;
-		let mut buf = [0u8; 39];
-		Read::read_exact(reader, &mut buf)?;
-		Ok(Self { network_version, service_id })
-	}
-}
-
-impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a Handshake
-	where       u16: Serialize<LE, W>,
-	            u32: Serialize<LE, W>,
-	  &'a ServiceId: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()> {
-		LEWrite::write(writer, self.network_version)?;
-		LEWrite::write(writer, 0u32)?;
-		LEWrite::write(writer, &self.service_id)?;
-		LEWrite::write(writer, 0u16)?;
-		LEWrite::write(writer, &[0u8; 39][..])?;
-		Ok(())
-	}
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
