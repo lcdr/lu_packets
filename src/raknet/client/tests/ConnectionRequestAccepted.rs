@@ -1,8 +1,12 @@
 Message::ConnectionRequestAccepted(
 	ConnectionRequestAccepted {
-		peer_ip: std::net::Ipv4Addr::LOCALHOST,
-		peer_port: 1234,
-		local_ip: std::net::Ipv4Addr::LOCALHOST,
-		local_port: 4321,
+		peer_addr: SystemAddress {
+			ip: std::net::Ipv4Addr::LOCALHOST,
+			port: 1234,
+		},
+		local_addr: SystemAddress {
+			ip: std::net::Ipv4Addr::LOCALHOST,
+			port: 4321,
+		},
 	},
 )

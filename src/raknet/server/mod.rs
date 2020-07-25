@@ -6,7 +6,7 @@ use endio::{Deserialize, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::VariantTests;
 
-use crate::common::SystemAddress;
+use super::SystemAddress;
 
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[test_params(crate::world::server::LuMessage)]

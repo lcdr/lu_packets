@@ -1,7 +1,7 @@
-use std::net::Ipv4Addr;
-
 use endio::{Deserialize, Serialize};
 use lu_packets_derive::VariantTests;
+
+use super::SystemAddress;
 
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[test_params(crate::world::client::LuMessage)]
@@ -33,10 +33,7 @@ pub struct ConnectedPong {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct ConnectionRequestAccepted {
-	pub peer_ip: Ipv4Addr,
-	pub peer_port: u16,
+	pub peer_addr: SystemAddress,
 	#[padding=2]
-	pub local_ip: Ipv4Addr,
-	pub local_port: u16,
+	pub local_addr: SystemAddress,
 }
-
