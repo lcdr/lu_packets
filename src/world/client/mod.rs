@@ -1,11 +1,10 @@
-use std::io::Read;
 use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::{FromVariants, VariantTests};
 
-use crate::common::{ObjId, LuString33, LuWString33};
+use crate::common::{ObjId, LuString33, LuWString33, LVec};
 use super::{Lot, Vector3, ZoneId};
 use super::gm::client::SubjectGameMessage;
 
@@ -90,103 +89,28 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
 	}
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharListChar {
-	pub obj_id: u64,
+	pub obj_id: ObjId,
+	#[padding=4]
 	pub char_name: LuWString33,
 	pub pending_name: LuWString33,
 	pub requires_rename: bool,
 	pub is_free_trial: bool,
+	#[padding=10]
 	pub shirt_color: u32,
+	#[padding=4]
 	pub pants_color: u32,
 	pub hair_style: u32,
 	pub hair_color: u32,
+	#[padding=8]
 	pub eyebrow_style: u32,
 	pub eye_style: u32,
 	pub mouth_style: u32,
+	#[padding=4]
 	pub last_location: ZoneId,
-	pub equipped_items: Vec<Lot>,
-}
-
-impl<R: Read+LERead> Deserialize<LE, R> for CharListChar {
-	fn deserialize(reader: &mut R) -> Res<Self>	{
-		let obj_id          = LERead::read(reader)?;
-		let _: u32          = LERead::read(reader)?;
-		let char_name       = LERead::read(reader)?;
-		let pending_name    = LERead::read(reader)?;
-		let requires_rename = LERead::read(reader)?;
-		let is_free_trial   = LERead::read(reader)?;
-		let mut unused = [0; 10];
-		Read::read(reader, &mut unused)?;
-		let shirt_color     = LERead::read(reader)?;
-		let mut unused = [0; 4];
-		Read::read(reader, &mut unused)?;
-		let pants_color     = LERead::read(reader)?;
-		let hair_style      = LERead::read(reader)?;
-		let hair_color      = LERead::read(reader)?;
-		let mut unused = [0; 8];
-		Read::read(reader, &mut unused)?;
-		let eyebrow_style   = LERead::read(reader)?;
-		let eye_style       = LERead::read(reader)?;
-		let mouth_style     = LERead::read(reader)?;
-		let mut unused = [0; 4];
-		Read::read(reader, &mut unused)?;
-		let last_location   = LERead::read(reader)?;
-		let mut unused = [0; 8];
-		Read::read(reader, &mut unused)?;
-		let items_len: u16  = LERead::read(reader)?;
-		let mut equipped_items = Vec::with_capacity(items_len as usize);
-		for _ in 0..items_len {
-			equipped_items.push(LERead::read(reader)?);
-		}
-		Ok(Self {
-			obj_id, char_name, pending_name, requires_rename,
-			is_free_trial, shirt_color, pants_color, hair_style, hair_color,
-			eyebrow_style, eye_style, mouth_style, last_location, equipped_items,
-		})
-	}
-}
-
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharListChar
-	where       u8: Serialize<LE, W>,
-	           u16: Serialize<LE, W>,
-	           u32: Serialize<LE, W>,
-	         ObjId: Serialize<LE, W>,
-	      &'a [u8]: Serialize<LE, W>,
-	  &'a LuWString33: Serialize<LE, W>,
-	    &'a ZoneId: Serialize<LE, W>,
-	          bool: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
-		writer.write(self.obj_id)?;
-		writer.write(0u32)?; // unused
-		writer.write(&self.char_name)?;
-		writer.write(&self.pending_name)?;
-		writer.write(self.requires_rename)?;
-		writer.write(self.is_free_trial)?;
-		writer.write(&[0; 10][..])?;
-
-		writer.write(self.shirt_color)?;
-		writer.write(&[0; 4][..])?;
-
-		writer.write(self.pants_color)?;
-		writer.write(self.hair_style)?;
-		writer.write(self.hair_color)?;
-		writer.write(&[0; 8][..])?;
-
-		writer.write(self.eyebrow_style)?;
-		writer.write(self.eye_style)?;
-		writer.write(self.mouth_style)?;
-		writer.write(&[0; 4][..])?;
-
-		writer.write(&self.last_location)?;
-		writer.write(&[0; 8][..])?;
-
-		writer.write(self.equipped_items.len() as u16)?;
-		for item in &self.equipped_items {
-			writer.write(*item)?;
-		}
-		Ok(())
-	}
+	#[padding=8]
+	pub equipped_items: LVec<Lot, u16>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]

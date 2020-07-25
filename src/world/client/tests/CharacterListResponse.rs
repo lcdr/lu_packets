@@ -27,7 +27,7 @@ ClientMessage::CharacterListResponse(
 					12426,
 					8600,
 					12561,
-				],
+				].into(),
 			},
 			CharListChar {
 				obj_id: 1152921507004579166,
@@ -54,7 +54,7 @@ ClientMessage::CharacterListResponse(
 					12730,
 					16065,
 					1727,
-				],
+				].into(),
 			},
 			CharListChar {
 				obj_id: 1152921507051526996,
@@ -80,7 +80,7 @@ ClientMessage::CharacterListResponse(
 					7379,
 					8353,
 					2641,
-				],
+				].into(),
 			},
 			CharListChar {
 				obj_id: 1152921510436607007,
@@ -107,7 +107,7 @@ ClientMessage::CharacterListResponse(
 					7392,
 					7403,
 					8456,
-				],
+				].into(),
 			},
 		],
 	},

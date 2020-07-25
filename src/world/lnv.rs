@@ -147,7 +147,7 @@ impl From<&LuVarWString<u32>> for LuNameValue {
 
 impl From<&LuNameValue> for LuVarWString<u32> {
 	fn from(lnv: &LuNameValue) -> Self {
-		let mut wstr = Self::new(vec![]);
+		let mut wstr: Self = vec![].into();
 		let mut i = 0;
 		let len = lnv.0.len();
 		let mut key_value: Vec<_> = lnv.0.iter().collect();
