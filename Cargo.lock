@@ -45,9 +45,9 @@ dependencies = [
 [[package]]
 name = "endio"
 version = "0.2.0"
-source = "git+https://github.com/lcdr/endio?rev=da85aa3a08db08d34c8a0d94f768a0e7f986fc24#da85aa3a08db08d34c8a0d94f768a0e7f986fc24"
+source = "git+https://github.com/lcdr/endio?rev=9981948f5cb6d78dba3c5115d1f3459918a64133#9981948f5cb6d78dba3c5115d1f3459918a64133"
 dependencies = [
- "endio_derive 0.2.0 (git+https://github.com/lcdr/endio?rev=da85aa3a08db08d34c8a0d94f768a0e7f986fc24)",
+ "endio_derive 0.2.0 (git+https://github.com/lcdr/endio?rev=9981948f5cb6d78dba3c5115d1f3459918a64133)",
 ]
 
 [[package]]
@@ -58,7 +58,7 @@ source = "git+https://github.com/lcdr/endio_bit?rev=46b1b0eda359dd85b5eabf9714e8
 [[package]]
 name = "endio_derive"
 version = "0.2.0"
-source = "git+https://github.com/lcdr/endio?rev=da85aa3a08db08d34c8a0d94f768a0e7f986fc24#da85aa3a08db08d34c8a0d94f768a0e7f986fc24"
+source = "git+https://github.com/lcdr/endio?rev=9981948f5cb6d78dba3c5115d1f3459918a64133#9981948f5cb6d78dba3c5115d1f3459918a64133"
 dependencies = [
  "proc-macro2 1.0.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -85,7 +85,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "lu_packets"
 version = "0.1.0"
 dependencies = [
- "endio 0.2.0 (git+https://github.com/lcdr/endio?rev=da85aa3a08db08d34c8a0d94f768a0e7f986fc24)",
+ "endio 0.2.0 (git+https://github.com/lcdr/endio?rev=9981948f5cb6d78dba3c5115d1f3459918a64133)",
  "endio_bit 0.1.0 (git+https://github.com/lcdr/endio_bit?rev=46b1b0eda359dd85b5eabf9714e839c3728c75af)",
  "lu_packets_derive 0.1.0",
  "zip 0.5.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -196,9 +196,9 @@ dependencies = [
 "checksum cc 1.0.58 (registry+https://github.com/rust-lang/crates.io-index)" = "f9a06fb2e53271d7c279ec1efea6ab691c35a2ae67ec0d91d7acec0caf13b518"
 "checksum cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)" = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 "checksum crc32fast 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ba125de2af0df55319f41944744ad91c71113bf74a4646efff39afe1f6842db1"
-"checksum endio 0.2.0 (git+https://github.com/lcdr/endio?rev=da85aa3a08db08d34c8a0d94f768a0e7f986fc24)" = "<none>"
+"checksum endio 0.2.0 (git+https://github.com/lcdr/endio?rev=9981948f5cb6d78dba3c5115d1f3459918a64133)" = "<none>"
 "checksum endio_bit 0.1.0 (git+https://github.com/lcdr/endio_bit?rev=46b1b0eda359dd85b5eabf9714e839c3728c75af)" = "<none>"
-"checksum endio_derive 0.2.0 (git+https://github.com/lcdr/endio?rev=da85aa3a08db08d34c8a0d94f768a0e7f986fc24)" = "<none>"
+"checksum endio_derive 0.2.0 (git+https://github.com/lcdr/endio?rev=9981948f5cb6d78dba3c5115d1f3459918a64133)" = "<none>"
 "checksum flate2 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)" = "68c90b0fc46cf89d227cc78b40e494ff81287a92dd07631e5af0d06fe3cf885e"
 "checksum libc 0.2.72 (registry+https://github.com/rust-lang/crates.io-index)" = "a9f8082297d534141b30c8d39e9b1773713ab50fdbe4ff30f750d063b3bfd701"
 "checksum miniz_oxide 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "be0f75932c1f6cfae3c04000e40114adf955636e19040f9c0a2c380702aa1c7f"

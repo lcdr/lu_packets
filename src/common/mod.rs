@@ -1,17 +1,13 @@
 mod str;
 
 use std::convert::{TryFrom, TryInto};
-use std::io::{Error, ErrorKind::InvalidData, Read, Write};
+use std::io::{Read, Write};
 use std::io::Result as Res;
 use std::marker::PhantomData;
 
 use endio::{Deserialize, LE, LERead, LEWrite, Serialize};
 
 pub use self::str::*;
-
-pub(crate) fn err<T, U: std::fmt::Debug>(name: &str, value: U) -> Res<T> {
-	Err(Error::new(InvalidData, &format!("unknown {} {:?}", name, value)[..]))
-}
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct LVec<T, L>(Vec<T>, PhantomData<L>);

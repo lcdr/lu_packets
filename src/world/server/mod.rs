@@ -6,7 +6,7 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::VariantTests;
 
-use crate::common::{err, ObjId, LuVarWString, LuWString33, LuWString42, ServiceId};
+use crate::common::{ObjId, LuVarWString, LuWString33, LuWString42, ServiceId};
 use crate::chat::server::ChatMessage;
 use super::ZoneId;
 use super::gm::server::SubjectGameMessage;
@@ -118,42 +118,11 @@ pub struct LevelLoadComplete {
 	pub zone_id: ZoneId,
 }
 
-#[derive(Debug, PartialEq)]
-#[non_exhaustive]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[pre_disc_padding=4]
+#[repr(u16)]
 pub enum RouteMessage {
-	Chat(ChatMessage),
-}
-
-impl<R: LERead> Deserialize<LE, R> for RouteMessage
-	where     u32: Deserialize<LE, R>,
-	    ServiceId: Deserialize<LE, R>,
-	  ChatMessage: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self> {
-		let _packet_size: u32 = reader.read()?;
-		let service_id: ServiceId = reader.read()?;
-		Ok(match service_id {
-			ServiceId::Chat => {
-				Self::Chat(reader.read()?)
-			}
-			_ => {
-				return err("route service id", service_id);
-			}
-		})
-	}
-}
-
-impl<'a, W: LEWrite> Serialize<LE, W> for &'a RouteMessage
-	where         u32: Serialize<LE, W>,
-	    &'a ServiceId: Serialize<LE, W>,
-	  &'a ChatMessage: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()> {
-		writer.write(0u32)?; // packet size, unused in this server's impl
-		writer.write(&ServiceId::Chat)?;
-		match self {
-			RouteMessage::Chat(msg) => { writer.write(msg)?; }
-		}
-		Ok(())
-	}
+	Chat(ChatMessage) = ServiceId::Chat as u16,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
