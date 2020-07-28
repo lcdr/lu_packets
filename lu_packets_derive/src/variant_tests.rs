@@ -1,4 +1,4 @@
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream};
 use syn::{parse_macro_input, Attribute, token::Comma, Data, DeriveInput, Ident, Meta, NestedMeta, punctuated::Punctuated};
 use quote::quote;
 
@@ -6,42 +6,25 @@ use quote::quote;
 pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 
-	let data = match &input.data {
-		Data::Enum(data) => data,
-		_ => panic!("only enums are supported"),
-	};
-
 	let name = &input.ident;
 	let test_params = get_test_params(&input.attrs);
 
 	let mut tests = vec![];
-	for v in &data.variants {
-		let variant = &v.ident;
 
-		let bin_path = format!("tests/{}.bin", variant);
-		let rs_path = format!("tests/{}.rs", variant);
-
-		let test_name = Ident::new(&format!("_{}", variant), Span::call_site());
-
-		let test = quote! {
-			#[test]
-			#[allow(non_snake_case)]
-			fn #test_name() {
-				use super::*;
-				let mut bin = &include_bytes!(#bin_path)[..];
-				let mut val = include!(#rs_path);
-				let mut input = bin;
-				let mut reader = &mut bin;
-				let parsed: #name<#test_params> = ::endio::LERead::read(reader).unwrap();
-				assert_eq!(reader, &[]);
-				assert_eq!(parsed, val);
-				let mut out = vec![];
-				::endio::LEWrite::write(&mut out, &parsed).unwrap();
-				assert_eq!(out, input);
+	match &input.data {
+		Data::Struct(_) => {
+			let test = gen_test_case(name, &test_params, name);
+			tests.push(test);
+		}
+		Data::Enum(data) => {
+			for v in &data.variants {
+				let variant = &v.ident;
+				let test = gen_test_case(name, &test_params, variant);
+				tests.push(test);
 			}
-		};
-		tests.push(test);
-	}
+		}
+		Data::Union(_) => unimplemented!(),
+	};
 
 	let mod_name = Ident::new(&format!("_{}", name), Span::call_site());
 
@@ -69,4 +52,29 @@ fn get_test_params(attrs: &Vec<Attribute>) -> Option<Punctuated<NestedMeta, Comm
 		return Some(list);
 	}
 	None
+}
+
+fn gen_test_case(type_name: &Ident, test_params: &Option<Punctuated<NestedMeta, Comma>>, test_name: &Ident) -> TokenStream {
+	let bin_path = format!("tests/{}.bin", test_name);
+	let rs_path = format!("tests/{}.rs", test_name);
+
+	let test_name = Ident::new(&format!("_{}", test_name), Span::call_site());
+
+	quote! {
+		#[test]
+		#[allow(non_snake_case)]
+		fn #test_name() {
+			use super::*;
+			let mut bin = &include_bytes!(#bin_path)[..];
+			let mut val = include!(#rs_path);
+			let mut input = bin;
+			let mut reader = &mut bin;
+			let parsed: #type_name<#test_params> = ::endio::LERead::read(reader).unwrap();
+			assert_eq!(reader, &[]);
+			assert_eq!(parsed, val);
+			let mut out = vec![];
+			::endio::LEWrite::write(&mut out, &parsed).unwrap();
+			assert_eq!(out, input);
+		}
+	}
 }
