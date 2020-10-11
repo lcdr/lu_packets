@@ -1,3 +1,4 @@
+//! World messages.
 pub mod client;
 pub mod gm;
 pub mod lnv;

@@ -18,6 +18,7 @@ pub(super) trait GmParam: Sized {
 	fn serialize<W: Write>(&self, writer: &mut W) -> Res<()>;
 }
 
+/// Implements `GmParam` by forwarding to `Deserialize` and `Serialize`.
 #[macro_export]
 macro_rules! gm_param {
 	($typ:ty) => {

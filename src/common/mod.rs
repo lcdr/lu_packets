@@ -1,3 +1,4 @@
+//! Shared types.
 mod str;
 
 use std::convert::{TryFrom, TryInto};
@@ -9,6 +10,11 @@ use endio::{Deserialize, LE, LERead, LEWrite, Serialize};
 
 pub use self::str::*;
 
+/**
+	Wraps a `Vec` with a length type so the vector can be (de-)serialized.
+
+	Note: the length type is not checked and the `Vec` still uses `usize` internally. Handle with care.
+*/
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct LVec<T, L>(Vec<T>, PhantomData<L>);
 

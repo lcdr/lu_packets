@@ -1,3 +1,4 @@
+//! Client-received general messages.
 use endio::{Deserialize, Serialize};
 use lu_packets_derive::VariantTests;
 

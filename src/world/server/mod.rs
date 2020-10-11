@@ -40,10 +40,35 @@ pub enum WorldMessage {
 	UgcDownloadFailed(UgcDownloadFailed) = 120,
 }
 
+/**
+	Client session info.
+
+	### Purpose
+	Providing session info for authentication.
+
+	### Trigger
+	[Server handshake](crate::general::client::Handshake).
+
+	### Handling
+	Verify with your auth server that the `(username, session_key)` combination is valid. If not, immediately disconnect the client, ideally with a [`DisconnectNotify::InvalidSessionKey`](crate::general::client::DisconnectNotify::InvalidSessionKey).
+
+	If you are concerned about players modding their client DB, also check the `fdb_checksum`. Note that players can still change their client to send a fake checksum, but this requires exe modding, which most players are presumably not familiar with.
+
+	If all validation checks pass, store the connection -> username association, as this is the only packet that references the username.
+
+	### Response
+	The client does not require a fixed response to this packet. However, world servers (with the exception of a dedicated char server) will usually want to respond to this with [`LoadStaticZone`](super::client::LoadStaticZone).
+
+	### Notes
+	**Important**: Do **not** handle any other packets from clients that have not yet been validated. Handling other packets before validation can lead to errors because the connection has not yet been associated with a username, and can lead to security vulnerabilities if session keys are not validated properly.
+*/
 #[derive(Debug, PartialEq)]
 pub struct ClientValidation {
+	/// Account username.
 	pub username: LuWString33,
+	/// [Session key from auth's login response](crate::auth::client::LoginResponse::Ok::session_key).
 	pub session_key: LuWString33,
+	/// MD5 hash of null-terminated cdclient.fdb file contents.
 	pub fdb_checksum: [u8; 32],
 }
 
