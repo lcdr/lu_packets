@@ -11,6 +11,9 @@
 	Example:
 
 	```
+	# #[macro_use] extern crate lu_packets;
+	# use lu_packets::lnv;
+	# fn main() {
 	lnv! {
 		"wstring": "string expression",
 		"i32": 42i32,
@@ -21,7 +24,8 @@
 		"i64": i64::MAX,
 		"u64": u64::MAX,
 		"string": b"byte slice"[..],
-	}
+	};
+	# }
 	```
 
 	Care should be taken with integer and float literals to suffix them with the correct type, as seen above. Rust assumes `i32` for integer and `f64` for float literals by default, which may not be what you want, and can lead to incorrect serialization.
@@ -32,10 +36,10 @@
 */
 #[macro_export]
 macro_rules! lnv {
-	{} => { crate::world::lnv::LuNameValue::new() };
+	{} => { $crate::world::lnv::LuNameValue::new() };
 	{$($name:literal:$value:expr,)*} => {
 		{
-			let mut lnv = crate::world::lnv::LuNameValue::new();
+			let mut lnv = $crate::world::lnv::LuNameValue::new();
 			$(lnv.insert(::std::convert::TryInto::try_into($name).unwrap(), $value.into());)*
 			lnv
 		}
