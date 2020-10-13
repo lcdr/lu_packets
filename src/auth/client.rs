@@ -1,3 +1,4 @@
+//! Client-received auth messsages.
 use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
@@ -6,7 +7,9 @@ use lu_packets_derive::FromVariants;
 
 use crate::common::{LuString33, LuVarWString, LuWString33};
 
+/// All LU messages that can be received by a client from an auth server.
 pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
+/// All messages that can be received by a client from an auth server.
 pub type Message = crate::raknet::client::Message<LuMessage>;
 
 impl From<ClientMessage> for Message {
@@ -15,6 +18,7 @@ impl From<ClientMessage> for Message {
 	}
 }
 
+/// All client-received auth messages.
 #[derive(Debug, FromVariants, Serialize)]
 #[post_disc_padding=1]
 #[repr(u32)]
@@ -22,15 +26,40 @@ pub enum ClientMessage {
 	LoginResponse(LoginResponse),
 }
 
+/**
+	Login response.
+
+	### Purpose
+	Reporting the result of a login request, including session key and redirect address in case of success.
+
+	### Trigger
+	Receipt of [`LoginRequest`](super::server::LoginRequest).
+
+	### Handling
+	If the variant is not [`Ok`](LoginResponse::Ok), report the error to the user.
+
+	If the variant is `Ok`, store the [`session_key`](LoginResponse::Ok::session_key) for later use. Close the connection and open a connection to [`redirect_address`](LoginResponse::Ok::redirect_address).
+
+	### Response
+	None, close the connection.
+
+	### Notes
+	Expect the connection to be closed soon after this message is received, if you're not closing it yourself already.
+*/
 #[derive(Debug)]
 #[non_exhaustive]
 #[repr(u8)]
 pub enum LoginResponse {
+	/// The login was successful.
 	Ok {
+		/// The session key to be used for authenticating with world servers (to be passed in [`ClientValidation::session_key`](crate::world::server::ClientValidation::session_key)).
 		session_key: LuWString33,
+		/// The address of a world server available for further service.
 		redirect_address: (LuString33, u16),
 	} = 1,
+	/// The login failed in an unusual way. More information can be found in the attached message.
 	CustomMessage(LuVarWString<u16>) = 5,
+	/// Username or password was incorrect.
 	InvalidUsernamePassword = 6,
 }
 

@@ -18,8 +18,7 @@ pub(super) trait GmParam: Sized {
 	fn serialize<W: Write>(&self, writer: &mut W) -> Res<()>;
 }
 
-/// Implements `GmParam` by forwarding to `Deserialize` and `Serialize`.
-#[macro_export]
+/// Implements `GmParam` by forwarding to [`Deserialize`] and [`Serialize`].
 macro_rules! gm_param {
 	($typ:ty) => {
 		impl crate::world::gm::GmParam for $typ {

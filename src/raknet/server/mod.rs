@@ -1,4 +1,4 @@
-//! All packets a world server can receive.
+//! Server-received raknet messages.
 use std::io::{Read, Write};
 use std::io::Result as Res;
 
