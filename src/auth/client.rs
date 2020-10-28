@@ -27,10 +27,9 @@ pub enum ClientMessage {
 }
 
 /**
-	Login response.
+	Responds to a login request.
 
-	### Purpose
-	Reporting the result of a login request, including session key and redirect address in case of success.
+	Sends session key and redirect address in case of success.
 
 	### Trigger
 	Receipt of [`LoginRequest`](super::server::LoginRequest).

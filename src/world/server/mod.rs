@@ -1,4 +1,4 @@
-//! All packets a world server can receive.
+//! Server-received world messages.
 use std::io::{Read, Write};
 use std::io::Result as Res;
 
@@ -41,18 +41,15 @@ pub enum WorldMessage {
 }
 
 /**
-	Client session info.
-
-	### Purpose
-	Providing session info for authentication.
+	Provides session info for authentication.
 
 	### Trigger
-	[Server handshake](crate::general::client::Handshake).
+	Receipt of [Server handshake](crate::general::client::Handshake).
 
 	### Handling
 	Verify with your auth server that the `(username, session_key)` combination is valid. If not, immediately disconnect the client, ideally with a [`DisconnectNotify::InvalidSessionKey`](crate::general::client::DisconnectNotify::InvalidSessionKey).
 
-	If you are concerned about players modding their client DB, also check the `fdb_checksum`. Note that players can still change their client to send a fake checksum, but this requires exe modding, which most players are presumably not familiar with.
+	If you are concerned about players modding their client DB, also check the [`fdb_checksum`](Self::fdb_checksum). Note that players can still change their client to send a fake checksum, but this requires exe modding, which most players are presumably not familiar with.
 
 	If all validation checks pass, store the connection -> username association, as this is the only packet that references the username.
 

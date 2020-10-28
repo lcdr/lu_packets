@@ -12,16 +12,15 @@ pub enum GeneralMessage {
 }
 
 /**
-	Client network version info.
+	Provides the client's network version.
 
-	### Purpose
-	Providing the client's network version to identify outdated clients and disconnect them early.
+	Allows to identify outdated clients and disconnect them early.
 
 	### Trigger
 	Establishment of raknet connection (receipt of [`ConnectionRequestAccepted`](crate::raknet::client::ConnectionRequestAccepted)).
 
 	### Handling
-	Check if [`network_version`](Handshake::network_version) matches the version you expect. Otherwise, disconnect the client, ideally with a [`DisconnectNotify::InvalidGameVersion`](super::client::DisconnectNotify::WrongGameVersion) specifying the expected version.
+	Check if [`network_version`](Self::network_version) matches the version you expect. Otherwise, disconnect the client, ideally with a [`DisconnectNotify::InvalidGameVersion`](super::client::DisconnectNotify::WrongGameVersion) specifying the expected version.
 
 	### Response
 	Respond with a server-sent [`Handshake`](super::client::Handshake) providing the server's network version and service ID.

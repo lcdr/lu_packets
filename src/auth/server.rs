@@ -26,10 +26,9 @@ pub enum AuthMessage {
 }
 
 /**
-	Login request.
+	Provides username and password to authenticate the client.
 
-	### Purpose
-	Providing username and password to authenticate the client, providing system stats for analytics.
+	Also provides system stats for analytics.
 
 	### Trigger
 	Receipt of [`Handshake`](crate::general::client::Handshake) with a [`service_id`](crate::general::client::Handshake`::service_id) of [`ServiceId::Auth`].

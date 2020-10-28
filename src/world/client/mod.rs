@@ -46,13 +46,38 @@ pub enum InstanceType {
 	Match,
 }
 
+/**
+	Tells the client to load a zone.
+
+	### Trigger
+	May be sent at any time. However, in a typical server instance architecture, this message will usually be sent as the first message directly after the client has validated itself with [`ClientValidation`](super::server::ClientValidation).
+
+	### Handling
+	Load the zone specified in [`zone_id`](Self::zone_id), whatever that may entail for your client implementation.
+
+	### Response
+	Respond with [`LevelLoadComplete`](super::server::LevelLoadComplete) once you're done loading.
+
+	### Notes
+	Server instances are usually statically assigned to host a "parallel universe" of a certain zone (world), which means that this message will be sent directly after client validation. However, other instance architectures are theoretically possible:
+
+	- Dynamic changing of the instance's zone, in which case additional [`LoadStaticZone`] messages could be sent (when the zone is changed).
+
+	- Shared/overlapping instances, where the instance connection changes as the player moves around in the world, or where instances take over from others (e.g. in the event of a reboot), with mobs and all other state being carried over. In this case the client would be instructed to connect to the new instance via [`TransferToWorld`], but would not receive a [`LoadStaticZone`] afterwards. If done correctly, the player wouldn't even notice the transfer at all.
+
+	However, these are quite advanced architectures, and for now it is unlikely that any server project will actually pull these off.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct LoadStaticZone {
+	/// ID of the zone to be loaded.
 	pub zone_id: ZoneId,
+	/// Checksum on the map on the server side. The original LU client will refuse to load any map where the client side checksum doesn't match the server checksum, to prevent inconsistencies and cheating.
 	pub map_checksum: u32,
 	// editor enabled and editor level, unused
 	#[padding=2]
+	/// The position of the player in the new world, likely used to be able to load the right part of the world.
 	pub player_position: Vector3,
+	/// The instance type of the zone being loaded.
 	pub instance_type: InstanceType,
 }
 

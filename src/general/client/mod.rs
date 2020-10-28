@@ -50,19 +50,16 @@ impl<C> From<DisconnectNotify> for Message<C> {
 }
 
 /**
-	Server network version info.
-
-	### Purpose
-	Completing a version handshake initiated by the client.
+	Completes a version handshake initiated by the client.
 
 	### Trigger
 	Receipt of a client-sent [`Handshake`](super::server::Handshake) packet that was acceptable to the server.
 
 	### Handling
-	Optionally check if the server's [`network_version`](Handshake::network_version) matches your own. You can usually assume that the server will check this itself and disconnect if it doesn't match, but you can check again to be sure.
+	Optionally check if the server's [`network_version`](Self::network_version) matches your own. You can usually assume that the server will check this itself and disconnect if it doesn't match, but you can check again to be sure.
 
 	### Response
-	If the server's [`service_id`](Handshake::service_id) is [`ServiceId::Auth`], respond with a [`LoginRequest`](crate::auth::server::LoginRequest) with your username and password. If it is [`ServiceId::World`], send a [`ClientValidation`](crate::world::server::ClientValidation) with your username and the session key provided by auth.
+	If the server's [`service_id`](Self::service_id) is [`ServiceId::Auth`], respond with a [`LoginRequest`](crate::auth::server::LoginRequest) with your username and password. If it is [`ServiceId::World`], send a [`ClientValidation`](crate::world::server::ClientValidation) with your username and the session key provided by auth.
 
 	### Notes
 	As the version confirm process was designed with more than just client-server in mind, it sends the server's network version and service id as well, even though this isn't really needed by the client (even the service id isn't needed, since you usually only connect to auth once, and it's the very first connection). This could be simplified if the protocol is ever revised.
@@ -78,10 +75,7 @@ pub struct Handshake {
 }
 
 /**
-	Disconnect notification.
-
-	### Purpose
-	Notifying the client when it was actively disconnected by the server.
+	Notifies the client when it was actively disconnected by the server.
 
 	### Trigger
 	Being disconnected by the server, the exact trigger depends on the variant.
