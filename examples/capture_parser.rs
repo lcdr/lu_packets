@@ -142,7 +142,7 @@ fn parse(path: &Path) -> Res<usize> {
 fn main() {
 	let args: Vec<String> = env::args().collect();
 	let capture = match args.get(1) {
-		Some(x) => x,
+		Some(x) => fs::canonicalize(x).unwrap(),
 		None => {
 			println!("Usage: capture_parser capture_path --print_packets");
 			return;
@@ -152,9 +152,9 @@ fn main() {
 
 	let start = Instant::now();
 	let packet_count = if capture.ends_with(".zip") {
-		parse(Path::new(capture))
+		parse(&capture)
 	} else {
-		visit_dirs(Path::new(capture))
+		visit_dirs(&capture)
 	}.unwrap();
 	println!();
 	println!("Number of parsed packets: {}", packet_count);
