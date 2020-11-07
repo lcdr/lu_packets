@@ -1,4 +1,4 @@
-//! Client-received auth messsages.
+//! Client-received auth messages.
 use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};

@@ -1,3 +1,4 @@
+//! Client-received world messages.
 use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
@@ -8,7 +9,9 @@ use crate::common::{ObjId, LuString33, LuWString33, LVec};
 use super::{Lot, Vector3, ZoneId};
 use super::gm::client::SubjectGameMessage;
 
+/// All LU messages that can be received by a client from a world server.
 pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
+/// All messages that can be received by a client from a world server.
 pub type Message = crate::raknet::client::Message<LuMessage>;
 
 impl From<ClientMessage> for Message {
@@ -17,6 +20,7 @@ impl From<ClientMessage> for Message {
 	}
 }
 
+/// All client-received world messages.
 #[derive(Debug, Deserialize, PartialEq, Serialize, FromVariants, VariantTests)]
 #[non_exhaustive]
 #[post_disc_padding=1]
@@ -29,7 +33,7 @@ pub enum ClientMessage {
 	SubjectGameMessage(SubjectGameMessage) = 12,
 	TransferToWorld(TransferToWorld) = 14,
 	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
-	FriendRequest(FriendRequest) = 27,
+	AddFriendRequest(AddFriendRequest) = 27,
 	TeamInvite(TeamInvite) = 35,
 	MinimumChatModeResponse(MinimumChatModeResponse) = 57,
 	MinimumChatModeResponsePrivate(MinimumChatModeResponsePrivate) = 58,
@@ -81,9 +85,26 @@ pub struct LoadStaticZone {
 	pub instance_type: InstanceType,
 }
 
+/**
+	Provides the list of characters of the client's account.
+
+	### Trigger
+	Receipt of [`CharacterListRequest`](super::server::WorldMessage::CharacterListRequest). Also sent in response to [`CharacterCreateRequest`](super::server::CharacterCreateRequest) after [`CharacterCreateResponse`] if the creation is successful.
+
+	### Handling
+	Display the characters to the user for selection.
+
+	### Response
+	None.
+
+	### Notes
+	The LU client can't handle sending more than four characters.
+*/
 #[derive(Debug, PartialEq)]
 pub struct CharacterListResponse {
+	/// Index into the list of characters below, specifying which character was used last.
 	pub selected_char: u8,
+	/// The list of characters.
 	pub chars: Vec<CharListChar>,
 }
 
@@ -114,6 +135,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
 	}
 }
 
+/// A character from the [`CharacterListResponse`] message.
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharListChar {
 	pub obj_id: ObjId,
@@ -138,25 +160,67 @@ pub struct CharListChar {
 	pub equipped_items: LVec<Lot, u16>,
 }
 
+/**
+	Reports the result of a character create request.
+
+	### Trigger
+	Receipt of [`CharacterCreateRequest`](super::server::CharacterCreateRequest).
+
+	### Handling
+	If the variant is not [`Success`](CharacterCreateResponse::Success), display an appropriate error message and let the user try again. If successful, wait for the updated [`CharacterListResponse`] packet to arrive and display the new character list.
+
+	### Response
+	None.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
 pub enum CharacterCreateResponse {
+	/// The character has been successfully created.
 	Success,
+	/// Something went wrong during creation.
 	GeneralFailure,
+	/// The selected name is not allowed by the name moderation policy.
 	NameNotAllowed,
+	/// The ThreePartName is already in use.
 	PredefinedNameInUse,
+	/// The custom name is already in use.
 	CustomNameInUse,
 }
 
+/**
+	Reports the result of a character delete request.
+
+	### Trigger
+	Receipt of [`CharacterDeleteRequest`](super::server::CharacterDeleteRequest).
+
+	### Handling
+	Delete the character locally if [`success`](Self::success) is `true`, else display an error message and keep the character.
+
+	### Response
+	None.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharacterDeleteResponse {
+	/// Whether the deletion was successful.
 	pub success: bool,
 }
 
+/**
+	Tells the client to open a connection to another server instance.
+
+	### Trigger
+	The server can send this at any time, but typically does when a launchpad or command is used to go to another world. Other reasons can include the instance shutting down, or exceeding its player limit.
+
+	### Response
+	Close the connection after the connection to the other instance has been established.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct TransferToWorld {
+	/// The host to connect to.
 	pub redirect_ip: LuString33,
+	/// The port to connect to.
 	pub redirect_port: u16,
+	/// If this is `true`, the original LU client displays a "Mythran dimensional shift succeeded" announcement.
 	pub is_maintenance_transfer: bool,
 }
 
@@ -167,15 +231,43 @@ pub struct BlueprintLoadItemResponse {
 	pub dest_item_id: ObjId,
 }
 
+/**
+	Informs the client that another player has asked them to be their friend.
+
+	### Trigger
+	Receipt of `ChatMessage::AddFriendRequest` (todo). Note that friend requests should be supported even if the recipient is on another instance, so a relay infrastructure like a chat server is necessary and needs to be accounted for.
+
+	### Handling
+	Display a dialog to the player asking them whether to accept or deny the request.
+
+	### Response
+	Respond with [`AddFriendResponse`](crate::chat::server::AddFriendResponse) once the user has made their choice.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-pub struct FriendRequest {
+pub struct AddFriendRequest {
+	/// Name of the requesting character.
 	pub sender_name: LuWString33,
+	/// Whether the request is asking to be best friends instead of just normal friends.
 	pub is_best_friend_request: bool,
 }
 
+/**
+	Informs the client that another player has asked them to be their friend.
+
+	### Trigger
+	Receipt of `ChatMessage::TeamInvite` (todo). Note that team invites should be supported even if the recipient is on another instance, so a relay infrastructure like a chat server is necessary and needs to be accounted for.
+
+	### Handling
+	Display a dialog to the player asking them whether to accept or deny the request.
+
+	### Response
+	Respond with [`TeamInviteResponse`](crate::chat::server::TeamInviteResponse) once the user has made their choice.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct TeamInvite {
+	/// Name of the requesting character.
 	pub sender_name: LuWString33,
+	/// Object ID of the requesting character.
 	pub sender_id: ObjId,
 }
 
@@ -193,7 +285,20 @@ pub struct MinimumChatModeResponsePrivate {
 	pub recipient_gm_level: u8,
 }
 
+/**
+	Notifies the client that its free trial status has changed.
+
+	### Trigger
+	Sent by the server when the status changes.
+
+	### Handling
+	Display appropriate UI, celebration, etc.
+
+	### Response
+	None.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct UpdateFreeTrialStatus {
+	/// Whether the player is on free trial.
 	pub is_free_trial: bool,
 }

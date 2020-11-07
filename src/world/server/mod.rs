@@ -13,8 +13,10 @@ use super::gm::server::SubjectGameMessage;
 
 pub use crate::general::server::GeneralMessage;
 
+/// All messages that can be received by a world server.
 pub type Message = crate::raknet::server::Message<LuMessage>;
 
+/// All LU messages that can be received by a world server.
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[repr(u16)]
 pub enum LuMessage {
@@ -22,6 +24,7 @@ pub enum LuMessage {
 	World(WorldMessage) = ServiceId::World as u16,
 }
 
+/// All server-received world messages.
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[post_disc_padding=1]
 #[repr(u32)]
@@ -99,32 +102,83 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ClientValidation
 	}
 }
 
+/**
+	Requests a new character to be created.
+
+	### Trigger
+	The player creating a new character and submitting it to the server.
+
+	### Handling
+	Check if the predefined name is available. If the custom name is set, check if it is available as well. If your server has a name policy, check if the custom name is known to be unacceptable.
+
+	If all checks pass, create the character and save it to the database using the information specified in this message.
+
+	### Response
+	Respond with [`CharacterCreateResponse`](super::client::CharacterCreateResponse), using the appropriate variant to indicate the result. If the character creation is successful, additionally send a [`CharacterListResponse`](super::client::CharacterListResponse) afterwards with the new character included.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[trailing_padding=1]
 pub struct CharacterCreateRequest {
+	/// The custom name, or blank if the predefined name is to be used.
 	pub char_name: LuWString33,
-	pub predef_name_id_1: u32,
-	pub predef_name_id_2: u32,
-	pub predef_name_id_3: u32,
+	/// First part of the predefined name.
+	pub predef_name_id_1: u32, // todo: enum
+	/// Second part of the predefined name.
+	pub predef_name_id_2: u32, // todo: enum
+	/// Third part of the predefined name.
+	pub predef_name_id_3: u32, // todo: enum
 	#[padding=9]
-	pub shirt_color: u32,
+	/// Chosen torso color.
+	pub torso_color: u32, // todo: enum
 	#[padding=4]
-	pub pants_color: u32,
-	pub hair_style: u32,
-	pub hair_color: u32,
+	/// Chosen legs color.
+	pub legs_color: u32, // todo: enum
+	/// Chosen hair style.
+	pub hair_style: u32, // todo: enum
+	/// Chosen hair color.
+	pub hair_color: u32, // todo: enum
 	#[padding=8]
-	pub eyebrow_style: u32,
-	pub eye_style: u32,
-	pub mouth_style: u32,
+	/// Chosen eyebrow style.
+	pub eyebrow_style: u32, // todo: enum
+	/// Chosen eye style.
+	pub eye_style: u32, // todo: enum
+	/// Chosen mouth style.
+	pub mouth_style: u32, // todo: enum
 }
 
+/**
+	Indicates that the player has chosen a character to play with.
+
+	### Trigger
+	The player selecting the character in the character selection screen and pressing play.
+
+	### Handling
+	Do what's necessary to let the character join the world it was last in. In the common case of the world server instance being different from the current instance, redirect the client to the world instance.
+
+	### Response
+	Respond with [`LoadStaticZone`](super::client::LoadStaticZone) if you're not switching instances, or [`TransferToWorld`](super::client::TransferToWorld) if you do.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharacterLoginRequest {
+	/// The object ID of the chosen character.
 	pub char_id: ObjId,
 }
 
+/**
+	Requests a character to be deleted.
+
+	### Trigger
+	The player deleting the character and confirming with their password.
+
+	### Handling
+	Delete the character from the database, with appropriate cascading deletes, such as deleting the characters from any friends lists they're in.
+
+	### Response
+	Respond with [`CharacterDeleteResponse`](super::client::CharacterDeleteResponse) indicating whether deletion was successful.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharacterDeleteRequest {
+	/// The object ID of the chosen character.
 	pub char_id: ObjId,
 }
 
@@ -135,8 +189,18 @@ pub struct GeneralChatMessage {
 	pub message: LuVarWString<u32>,
 }
 
+/**
+	Reports to the server that client-side loading has finished.
+
+	### Trigger
+	The client finishing a zone load initiated by [`LoadStaticZone`](super::client::LoadStaticZone).
+
+	### Handling / Response
+	Respond with `CreateCharacter` (todo). Add the client to your server's replica manager, so that existing objects in range are replicated using `ReplicaManagerCreation` (todo). Create the character's replica object and and let the replica manager broadcast its creation to all clients in range. Finally, send [`ServerDoneLoadingAllObjects`](crate::world::gm::client::GameMessage::ServerDoneLoadingAllObjects) from the character object to the client.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct LevelLoadComplete {
+	/// The ID of the zone that was loaded. Servers should not trust this, as a player could use it to get into zones they don't belong.
 	pub zone_id: ZoneId,
 }
 
@@ -147,11 +211,27 @@ pub enum RouteMessage {
 	Chat(ChatMessage) = ServiceId::Chat as u16,
 }
 
+/**
+	Asks the server whether a string the player entered is acceptable.
+
+	### Trigger
+	The player entering a string in the chat box. This message is sent as the player is typing, before pressing enter.
+
+	### Handling
+	Check whether the [`string`](Self::string) is acceptable per the server's moderation policy, taking into account the player's chat mode, channel, best friend status with possible recipient.
+
+	### Response
+	Respond with `ChatModerationString` (todo), indicating whether the string is ok, or if not, the spans that are not acceptable.
+
+	### Notes
+	This message is only for quick player feedback on acceptability. Final string submissions by the player will be sent in different messages (e.g. [`GeneralChatMessage`] or `Mail` (todo)). Those messages will need to be checked for moderation as well. This means that there's no harm in trusting the client to provide accurate context ([`chat_mode`](Self::chat_mode), [`chat_channel`](Self::chat_channel), [`recipient_name`](Self::recipient_name) in this message.
+*/
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct StringCheck {
 	pub chat_mode: u8, // todo: type?
 	pub chat_channel: u8, // todo: type?
 	pub recipient_name: LuWString42,
+	/// The string to be checked.
 	pub string: LuVarWString<u16>,
 }
 
