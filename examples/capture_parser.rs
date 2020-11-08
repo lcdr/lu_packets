@@ -70,9 +70,8 @@ fn parse(path: &Path) -> Res<usize> {
 				dbg!(msg);
 			};
 			packet_count += 1;
-		} else if file.name().contains("[53-05-00-0c")
+		} else if file.name().contains("[53-05-")
 		&& !file.name().contains("[53-05-00-00]")
-		&& !file.name().contains("[53-05-00-04]")
 		&& !file.name().contains("[53-05-00-06]")
 		&& !file.name().contains("[53-05-00-15]")
 		&& !file.name().contains("[53-05-00-1c]")

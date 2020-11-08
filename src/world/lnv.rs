@@ -1,12 +1,18 @@
+//! LU name value datatype.
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
+use std::io::{Read, Write};
+use std::io::Result as Res;
 
-use endio::{LERead, LEWrite};
+use flate2::{Compression, read::ZlibDecoder, write::ZlibEncoder};
+
+use endio::{Deserialize, LE, LERead, LEWrite, Serialize};
 use super::gm::GmParam;
 
 use crate::common::{LuStrExt, LuVarString, LuVarWString, LuWStr};
 
-#[derive(PartialEq)]
+/// A value contained in a [`LuNameValue`]
+#[derive(Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
 pub enum LnvValue {
 	WString(LuVarWString<u32>) = 0,
@@ -26,14 +32,14 @@ impl LnvValue {
 		let (ty, val) = string.split_at(string.find(":").unwrap());
 		let val = val.split_at(1).1;
 		match ty {
-			"0" => LnvValue::WString(val.try_into().unwrap()),
-			"1" => LnvValue::I32(val.parse().unwrap()),
-			"3" => LnvValue::F32(val.parse().unwrap()),
-			"4" => LnvValue::F64(val.parse().unwrap()),
-			"5" => LnvValue::U32(val.parse().unwrap()),
-			"7" => LnvValue::Bool(val == "1"),
-			"8" => LnvValue::I64(val.parse().unwrap()),
-			"9" => LnvValue::U64(val.parse().unwrap()),
+			"0"  => LnvValue::WString(val.try_into().unwrap()),
+			"1"  => LnvValue::I32(val.parse().unwrap()),
+			"3"  => LnvValue::F32(val.parse().unwrap()),
+			"4"  => LnvValue::F64(val.parse().unwrap()),
+			"5"  => LnvValue::U32(val.parse().unwrap()),
+			"7"  => LnvValue::Bool(val == "1"),
+			"8"  => LnvValue::I64(val.parse().unwrap()),
+			"9"  => LnvValue::U64(val.parse().unwrap()),
 			"13" => LnvValue::String(val.as_bytes().try_into().unwrap()),
 			_ => panic!(),
 		}
@@ -96,6 +102,7 @@ impl From<&[u8]> for LnvValue {
 	fn from(val: &[u8]) -> Self { LnvValue::String(val.try_into().unwrap()) }
 }
 
+/// A hash map with values being one of multiple possible types.
 #[derive(PartialEq)]
 pub struct LuNameValue(HashMap<LuVarWString<u32>, LnvValue>);
 
@@ -125,6 +132,68 @@ impl std::fmt::Debug for LuNameValue {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
 		write!(f, "lnv! ")?;
 		f.debug_map().entries(self.0.iter().map(|(k, v)| (k, v))).finish()
+	}
+}
+
+impl<R: Read> Deserialize<LE, R> for LuNameValue {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let len: u32 = LERead::read(reader)?;
+		let is_compressed: bool = LERead::read(reader)?;
+		let uncompressed = if is_compressed {
+			let uncomp_len: u32 = LERead::read(reader)?;
+			let comp_len: u32 = LERead::read(reader)?;
+			let mut comp = vec![0; comp_len as usize];
+			reader.read_exact(&mut comp)?;
+			let mut inflater = ZlibDecoder::new(&comp[..]);
+			let mut uncomp = Vec::with_capacity(uncomp_len as usize);
+			inflater.read_to_end(&mut uncomp)?;
+			assert_eq!(uncomp.len(), uncomp_len as usize);
+			uncomp
+		} else {
+			let mut uncomp = vec![0; len as usize -1];
+			reader.read_exact(&mut uncomp)?;
+			uncomp
+		};
+		let unc_reader = &mut &uncompressed[..];
+		let lnv_len: u32 = LERead::read(unc_reader)?;
+		let mut res = lnv!();
+		for _ in 0..lnv_len {
+			let enc_key_len: u8 = LERead::read(unc_reader)?;
+			let key = LuVarWString::deser_content(unc_reader, enc_key_len as u32 / 2)?;
+			let value = LERead::read(unc_reader)?;
+			res.insert(key, value);
+		}
+		Ok(res)
+	}
+}
+
+impl<'a, W: Write> Serialize<LE, W> for &'a LuNameValue {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		let mut uncompressed: Vec<u8> = vec![];
+		LEWrite::write(&mut uncompressed, self.len() as u32)?;
+
+		let mut key_value: Vec<_> = self.0.iter().collect();
+		key_value.sort_unstable_by(|(k1, _), (k2, _)| k1.cmp(k2));
+		for (key, value) in key_value {
+			LEWrite::write(&mut uncompressed, key.len() as u8 * 2)?;
+			key.ser_content(&mut uncompressed)?;
+			LEWrite::write(&mut uncompressed, value)?;
+		}
+		let is_compressed = true;
+		if !is_compressed {
+			LEWrite::write(writer, uncompressed.len() as u32 + 1)?;
+			LEWrite::write(writer, false)?;
+			writer.write_all(&uncompressed)?;
+		} else {
+			let mut compressed = vec![];
+			ZlibEncoder::new(&mut compressed, Compression::new(6)).write_all(&uncompressed)?;
+			LEWrite::write(writer, compressed.len() as u32 + 1 + 4 + 4)?;
+			LEWrite::write(writer, true)?;
+			LEWrite::write(writer, uncompressed.len() as u32)?;
+			LEWrite::write(writer, compressed.len() as u32)?;
+			writer.write_all(&compressed)?;
+		}
+		Ok(())
 	}
 }
 

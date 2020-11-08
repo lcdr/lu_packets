@@ -6,7 +6,7 @@ use endio::LittleEndian as LE;
 use lu_packets_derive::{FromVariants, VariantTests};
 
 use crate::common::{ObjId, LuString33, LuWString33, LVec};
-use super::{Lot, Vector3, ZoneId};
+use super::{Lot, lnv::LuNameValue, Vector3, ZoneId};
 use super::gm::client::SubjectGameMessage;
 
 /// All LU messages that can be received by a client from a world server.
@@ -27,6 +27,7 @@ impl From<ClientMessage> for Message {
 #[repr(u32)]
 pub enum ClientMessage {
 	LoadStaticZone(LoadStaticZone) = 2,
+	CreateCharacter(CreateCharacter) = 4,
 	CharacterListResponse(CharacterListResponse) = 6,
 	CharacterCreateResponse(CharacterCreateResponse) = 7,
 	CharacterDeleteResponse(CharacterDeleteResponse) = 11,
@@ -83,6 +84,11 @@ pub struct LoadStaticZone {
 	pub player_position: Vector3,
 	/// The instance type of the zone being loaded.
 	pub instance_type: InstanceType,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct CreateCharacter {
+	pub data: LuNameValue,
 }
 
 /**

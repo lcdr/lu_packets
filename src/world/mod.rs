@@ -38,7 +38,7 @@ pub struct Vector3 {
 }
 
 impl Vector3 {
-	const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
+	pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]

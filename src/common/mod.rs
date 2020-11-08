@@ -36,13 +36,13 @@ impl<T, L> LVec<T, L> {
 			Ok(x) => x,
 			_ => panic!(),
 		};
-		let mut string = Vec::<T>::with_capacity(str_len);
+		let mut vec = Vec::<T>::with_capacity(str_len);
 		unsafe {
-			string.set_len(str_len);
-			let mut ucs2_str_slice = std::slice::from_raw_parts_mut(string.as_mut_ptr() as *mut u8, str_len*std::mem::size_of::<T>());
+			vec.set_len(str_len);
+			let mut ucs2_str_slice = std::slice::from_raw_parts_mut(vec.as_mut_ptr() as *mut u8, str_len*std::mem::size_of::<T>());
 			Read::read(reader, &mut ucs2_str_slice)?;
 		}
-		Ok(Self(string, PhantomData))
+		Ok(Self(vec, PhantomData))
 	}
 
 	pub(crate) fn ser_len<W: LEWrite>(&self, writer: &mut W) -> Res<()> where L: TryFrom<usize> + Serialize<LE, W> {
