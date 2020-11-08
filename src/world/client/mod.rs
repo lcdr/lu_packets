@@ -145,9 +145,9 @@ pub struct CharListChar {
 	pub requires_rename: bool,
 	pub is_free_trial: bool,
 	#[padding=10]
-	pub shirt_color: u32,
+	pub torso_color: u32,
 	#[padding=4]
-	pub pants_color: u32,
+	pub legs_color: u32,
 	pub hair_style: u32,
 	pub hair_color: u32,
 	#[padding=8]
