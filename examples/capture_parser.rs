@@ -70,7 +70,7 @@ fn parse(path: &Path) -> Res<usize> {
 				dbg!(msg);
 			};
 			packet_count += 1;
-		} else if file.name().contains("[53-05-")
+		} else if file.name().contains("[53-02-") || (file.name().contains("[53-05-")
 		&& !file.name().contains("[53-05-00-00]")
 		&& !file.name().contains("[53-05-00-06]")
 		&& !file.name().contains("[53-05-00-15]")
@@ -121,7 +121,7 @@ fn parse(path: &Path) -> Res<usize> {
 		&& !file.name().contains("[1558]")
 		&& !file.name().contains("[1564]")
 		&& !file.name().contains("[1647]")
-		&& !file.name().contains("[1648]")
+		&& !file.name().contains("[1648]"))
 		{
 			let msg: WorldClientMessage = file.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), file.name(), file.size()));
 			if unsafe { PRINT_PACKETS } {

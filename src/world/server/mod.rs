@@ -7,6 +7,7 @@ use endio::LittleEndian as LE;
 use lu_packets_derive::VariantTests;
 
 use crate::common::{ObjId, LuVarWString, LuWString33, LuWString42, ServiceId};
+use crate::chat::ChatChannel;
 use crate::chat::server::ChatMessage;
 use super::ZoneId;
 use super::gm::server::SubjectGameMessage;
@@ -182,12 +183,43 @@ pub struct CharacterDeleteRequest {
 	pub char_id: ObjId,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Debug, PartialEq)]
 pub struct GeneralChatMessage {
-	pub chat_channel: u8, // todo: type?
+	pub chat_channel: ChatChannel,
 	pub source_id: u16,
 	pub message: LuVarWString<u32>,
 }
+
+impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
+	where   u8: Deserialize<LE, R>,
+	  LuWString33: Deserialize<LE, R> {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let chat_channel = LERead::read(reader)?;
+		let source_id    = LERead::read(reader)?;
+		let mut str_len: u32 = LERead::read(reader)?;
+		str_len -= 1;
+		let message = LuVarWString::deser_content(reader, str_len)?;
+		let _: u16       = LERead::read(reader)?;
+		Ok(Self {
+			chat_channel,
+			source_id,
+			message,
+		})
+	}
+}
+
+impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a GeneralChatMessage {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		LEWrite::write(writer, &self.chat_channel)?;
+		LEWrite::write(writer, self.source_id)?;
+		let mut str_len = self.message.len();
+		str_len += 1;
+		LEWrite::write(writer, str_len as u32)?;
+		self.message.ser_content(writer)?;
+		LEWrite::write(writer, 0u16)
+	}
+}
+
 
 /**
 	Reports to the server that client-side loading has finished.
@@ -229,7 +261,7 @@ pub enum RouteMessage {
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct StringCheck {
 	pub chat_mode: u8, // todo: type?
-	pub chat_channel: u8, // todo: type?
+	pub chat_channel: u8,
 	pub recipient_name: LuWString42,
 	/// The string to be checked.
 	pub string: LuVarWString<u16>,

@@ -1,6 +1,6 @@
 ChatMessage::RequestMinimumChatModePrivate(
 	RequestMinimumChatModePrivate {
-		chat_channel: 7,
+		chat_channel: ChatChannel::Private,
 		recipient_name: lu!("RockVonViper"),
 	},
 )

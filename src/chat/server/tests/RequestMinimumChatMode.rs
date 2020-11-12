@@ -1,5 +1,5 @@
 ChatMessage::RequestMinimumChatMode(
 	RequestMinimumChatMode {
-		chat_channel: 8,
+		chat_channel: ChatChannel::Team,
 	},
 )

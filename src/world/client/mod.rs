@@ -5,18 +5,40 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::{FromVariants, VariantTests};
 
-use crate::common::{ObjId, LuString33, LuWString33, LVec};
+use crate::chat::ChatChannel;
+use crate::chat::client::ChatMessage;
+use crate::common::{ObjId, LuString33, LuWString33, LVec, ServiceId};
+use crate::general::client::{DisconnectNotify, Handshake, GeneralMessage};
 use super::{Lot, lnv::LuNameValue, Vector3, ZoneId};
 use super::gm::client::SubjectGameMessage;
 
-/// All LU messages that can be received by a client from a world server.
-pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 /// All messages that can be received by a client from a world server.
 pub type Message = crate::raknet::client::Message<LuMessage>;
 
-impl From<ClientMessage> for Message {
-	fn from(msg: ClientMessage) -> Self {
-		LuMessage::Client(msg).into()
+/// All client-received LU messages from a world server.
+#[derive(Debug, Deserialize, FromVariants, PartialEq, Serialize, VariantTests)]
+#[repr(u16)]
+pub enum LuMessage {
+	General(GeneralMessage) = ServiceId::General as u16,
+	Chat(ChatMessage) = ServiceId::Chat as u16,
+	Client(ClientMessage) = ServiceId::Client as u16,
+}
+
+impl From<LuMessage> for Message {
+	fn from(msg: LuMessage) -> Self {
+		Message::UserMessage(msg)
+	}
+}
+
+impl From<Handshake> for Message {
+	fn from(msg: Handshake) -> Self {
+		GeneralMessage::Handshake(msg).into()
+	}
+}
+
+impl From<DisconnectNotify> for Message {
+	fn from(msg: DisconnectNotify) -> Self {
+		GeneralMessage::DisconnectNotify(msg).into()
 	}
 }
 
@@ -280,13 +302,13 @@ pub struct TeamInvite {
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct MinimumChatModeResponse {
 	pub chat_mode: u8, // todo: type?
-	pub chat_channel: u8, // todo: type?
+	pub chat_channel: ChatChannel,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct MinimumChatModeResponsePrivate {
 	pub chat_mode: u8, // todo: type?
-	pub chat_channel: u8, // todo: type?
+	pub chat_channel: ChatChannel,
 	pub recipient_name: LuWString33,
 	pub recipient_gm_level: u8,
 }

@@ -4,30 +4,6 @@ use lu_packets_derive::VariantTests;
 
 use crate::common::ServiceId;
 
-/// All client-received messages from a specific server type, including Raknet messages.
-pub type Message<C> = crate::raknet::client::Message<LuMessage<C>>;
-
-/// All client-received LU messages from a specific server type.
-#[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
-#[test_params(crate::world::client::ClientMessage)]
-#[repr(u16)]
-pub enum LuMessage<C> {
-	General(GeneralMessage) = ServiceId::General as u16,
-	Client(C) = ServiceId::Client as u16,
-}
-
-impl<C> From<LuMessage<C>> for Message<C> {
-	fn from(msg: LuMessage<C>) -> Self {
-		Message::UserMessage(msg)
-	}
-}
-
-impl<C> From<GeneralMessage> for Message<C> {
-	fn from(msg: GeneralMessage) -> Self {
-		LuMessage::General(msg).into()
-	}
-}
-
 /// Client-received general messages.
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[post_disc_padding=1]
@@ -35,18 +11,6 @@ impl<C> From<GeneralMessage> for Message<C> {
 pub enum GeneralMessage {
 	Handshake(Handshake),
 	DisconnectNotify(DisconnectNotify),
-}
-
-impl<C> From<Handshake> for Message<C> {
-	fn from(msg: Handshake) -> Self {
-		GeneralMessage::Handshake(msg).into()
-	}
-}
-
-impl<C> From<DisconnectNotify> for Message<C> {
-	fn from(msg: DisconnectNotify) -> Self {
-		GeneralMessage::DisconnectNotify(msg).into()
-	}
 }
 
 /**

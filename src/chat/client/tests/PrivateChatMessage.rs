@@ -1,8 +1,8 @@
 ChatMessage::PrivateChatMessage(
 	PrivateChatMessage {
-		chat_channel: ChatChannel::Private,
-		sender_name: lu!("nks quab"),
-		sender: 0,
+		chat_channel: crate::chat::ChatChannel::Private,
+		sender_name: lu!("CheekyMonkey"),
+		sender: 1152921507004579166,
 		source_id: 0,
 		sender_gm_level: 0,
 		recipient_name: lu!("BreezyFlyingNinja"),

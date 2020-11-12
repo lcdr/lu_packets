@@ -5,21 +5,40 @@ use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
 use lu_packets_derive::FromVariants;
 
-use crate::common::{LuString33, LuVarWString, LuWString33};
+use crate::common::{LuString33, LuVarWString, LuWString33, ServiceId};
+use crate::general::client::{DisconnectNotify, Handshake, GeneralMessage};
 
-/// All LU messages that can be received by a client from an auth server.
-pub type LuMessage = crate::general::client::LuMessage<ClientMessage>;
 /// All messages that can be received by a client from an auth server.
 pub type Message = crate::raknet::client::Message<LuMessage>;
 
-impl From<ClientMessage> for Message {
-	fn from(msg: ClientMessage) -> Self {
-		LuMessage::Client(msg).into()
+/// All LU messages that can be received by a client from an auth server.
+#[derive(Debug, FromVariants, PartialEq, Serialize)]
+#[repr(u16)]
+pub enum LuMessage {
+	General(GeneralMessage) = ServiceId::General as u16,
+	Client(ClientMessage) = ServiceId::Client as u16,
+}
+
+impl From<LuMessage> for Message {
+	fn from(msg: LuMessage) -> Self {
+		Message::UserMessage(msg)
+	}
+}
+
+impl From<Handshake> for Message {
+	fn from(msg: Handshake) -> Self {
+		GeneralMessage::Handshake(msg).into()
+	}
+}
+
+impl From<DisconnectNotify> for Message {
+	fn from(msg: DisconnectNotify) -> Self {
+		GeneralMessage::DisconnectNotify(msg).into()
 	}
 }
 
 /// All client-received auth messages.
-#[derive(Debug, FromVariants, Serialize)]
+#[derive(Debug, FromVariants, PartialEq, Serialize)]
 #[post_disc_padding=1]
 #[repr(u32)]
 pub enum ClientMessage {
@@ -45,7 +64,7 @@ pub enum ClientMessage {
 	### Notes
 	Expect the connection to be closed soon after this message is received, if you're not closing it yourself already.
 */
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 #[non_exhaustive]
 #[repr(u8)]
 pub enum LoginResponse {
