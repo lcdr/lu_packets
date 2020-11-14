@@ -17,7 +17,7 @@ jobs:
             ~/.rustup/toolchains
             ~/.rustup/update-hashes
             ~/.rustup/settings.toml
-          key: toolchain-test2-${{ hashFiles('rust-toolchain') }}
+          key: toolchain-${{ hashFiles('rust-toolchain') }}
 
       - name: Cache dependencies
         uses: actions/cache@v2
