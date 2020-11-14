@@ -75,6 +75,13 @@ fn gen_test_case(type_name: &Ident, test_params: &Option<Punctuated<NestedMeta, 
 			let mut out = vec![];
 			::endio::LEWrite::write(&mut out, &parsed).unwrap();
 			assert_eq!(out, input);
+			/*
+			if out != input {
+				// bless output
+				let mut out = std::fs::File::create().unwrap();
+				::endio::LEWrite::write(&mut out, &parsed).unwrap();
+			}
+			*/
 		}
 	}
 }

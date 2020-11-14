@@ -19,6 +19,7 @@ pub struct SubjectGameMessage {
 pub enum GameMessage {
 	RequestDie(RequestDie) = 38,
 	PlayEmote(PlayEmote) = 41,
+	StartSkill(StartSkill) = 119,
 	CasterDead(CasterDead) = 120,
 	VerifyAck(VerifyAck) = 121,
 	SelectSkill(SelectSkill) = 124,
@@ -149,6 +150,29 @@ pub struct RequestDie {
 pub struct PlayEmote {
 	pub emote_id: i32,
 	pub target_id: ObjId,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct StartSkill {
+	#[default(false)]
+	pub used_mouse: bool,
+	#[default(OBJID_EMPTY)]
+	pub consumable_item_id: ObjId,
+	#[default(0.0)]
+	pub caster_latency: f32,
+	#[default(0)]
+	pub cast_type: i32, // todo: type
+	#[default(Vector3::ZERO)]
+	pub last_clicked_posit: Vector3,
+	pub optional_originator_id: ObjId,
+	#[default(OBJID_EMPTY)]
+	pub optional_target_id: ObjId,
+	#[default(Quaternion::IDENTITY)]
+	pub originator_rot: Quaternion,
+	pub bitstream: Vec<u8>,
+	pub skill_id: u32, // todo: type
+	#[default(0)]
+	pub skill_handle: u32,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
