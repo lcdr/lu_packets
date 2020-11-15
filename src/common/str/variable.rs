@@ -4,8 +4,8 @@ use std::marker::PhantomData;
 use crate::common::LVec;
 use super::{AsciiChar, AsciiError, LuStrExt, LuWStr, Ucs2Char, Ucs2Error};
 
-pub type LuVarString<L> = LVec<AsciiChar, L>;
-pub type LuVarWString<L> = LVec<Ucs2Char, L>;
+pub type LuVarString<L> = LVec<L, AsciiChar>;
+pub type LuVarWString<L> = LVec<L, Ucs2Char>;
 
 impl<L> std::fmt::Debug for LuVarString<L> {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {

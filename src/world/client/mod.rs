@@ -58,6 +58,7 @@ pub enum ClientMessage {
 	TransferToWorld(TransferToWorld) = 14,
 	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
 	AddFriendRequest(AddFriendRequest) = 27,
+	GetFriendsListResponse(GetFriendsListResponse) = 30,
 	TeamInvite(TeamInvite) = 35,
 	MinimumChatModeResponse(MinimumChatModeResponse) = 57,
 	MinimumChatModeResponsePrivate(MinimumChatModeResponsePrivate) = 58,
@@ -187,7 +188,7 @@ pub struct CharListChar {
 	#[padding=4]
 	pub last_location: ZoneId,
 	#[padding=8]
-	pub equipped_items: LVec<Lot, u16>,
+	pub equipped_items: LVec<u16, Lot>,
 }
 
 /**
@@ -279,6 +280,26 @@ pub struct AddFriendRequest {
 	pub sender_name: LuWString33,
 	/// Whether the request is asking to be best friends instead of just normal friends.
 	pub is_best_friend_request: bool,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[trailing_padding=6]
+pub struct FriendState {
+	is_online: bool,
+	is_best_friend: bool,
+	is_free_trial: bool,
+	#[padding=5]
+	location: ZoneId,
+	object_id: ObjId,
+	char_name: LuWString33,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[repr(u8)]
+#[post_disc_padding=2]
+pub enum GetFriendsListResponse {
+	Ok(LVec<u16, FriendState>),
+	GeneralError,
 }
 
 /**

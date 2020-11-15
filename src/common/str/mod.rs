@@ -1,6 +1,8 @@
 mod fixed;
 mod variable;
 
+use endio::{Deserialize, Serialize};
+
 pub use self::fixed::*;
 pub use self::variable::*;
 
@@ -15,9 +17,9 @@ pub struct AsciiError;
 #[derive(Debug)]
 pub struct Ucs2Error;
 
-#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct AsciiChar(u8);
-#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Ucs2Char(u16);
 
 impl LuChar for AsciiChar {
