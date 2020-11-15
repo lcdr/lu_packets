@@ -250,18 +250,18 @@ pub enum RouteMessage {
 	The player entering a string in the chat box. This message is sent as the player is typing, before pressing enter.
 
 	### Handling
-	Check whether the [`string`](Self::string) is acceptable per the server's moderation policy, taking into account the player's chat mode, channel, best friend status with possible recipient.
+	Check whether the [`string`](Self::string) is acceptable per the server's moderation policy, taking into account the player's chat mode and best friend status with possible recipient.
 
 	### Response
-	Respond with `ChatModerationString` (todo), indicating whether the string is ok, or if not, the spans that are not acceptable.
+	Respond with [`ChatModerationString`](super::client::ChatModerationString), indicating whether the string is ok, or if not, the spans that are not acceptable.
 
 	### Notes
-	This message is only for quick player feedback on acceptability. Final string submissions by the player will be sent in different messages (e.g. [`GeneralChatMessage`] or `Mail` (todo)). Those messages will need to be checked for moderation as well. This means that there's no harm in trusting the client to provide accurate context ([`chat_mode`](Self::chat_mode), [`chat_channel`](Self::chat_channel), [`recipient_name`](Self::recipient_name) in this message.
+	This message is only for quick player feedback on acceptability. Final string submissions by the player will be sent in different messages (e.g. [`GeneralChatMessage`] or `Mail` (todo)). Those messages will need to be checked for moderation as well. This means that there's no harm in trusting the client to provide accurate context ([`chat_mode`](Self::chat_mode), [`recipient_name`](Self::recipient_name) in this message.
 */
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct StringCheck {
 	pub chat_mode: u8, // todo: type?
-	pub chat_channel: u8,
+	pub request_id: u8,
 	pub recipient_name: LuWString42,
 	/// The string to be checked.
 	pub string: LuVarWString<u16>,

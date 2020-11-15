@@ -1,4 +1,5 @@
 //! Client-received world messages.
+use std::io::{Read, Write};
 use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
@@ -7,7 +8,7 @@ use lu_packets_derive::{FromVariants, VariantTests};
 
 use crate::chat::ChatChannel;
 use crate::chat::client::ChatMessage;
-use crate::common::{ObjId, LuString33, LuWString33, LVec, ServiceId};
+use crate::common::{ObjId, LuString33, LuWString33, LuWString42, LVec, ServiceId};
 use crate::general::client::{DisconnectNotify, Handshake, GeneralMessage};
 use super::{Lot, lnv::LuNameValue, Vector3, ZoneId};
 use super::gm::client::SubjectGameMessage;
@@ -60,6 +61,7 @@ pub enum ClientMessage {
 	TeamInvite(TeamInvite) = 35,
 	MinimumChatModeResponse(MinimumChatModeResponse) = 57,
 	MinimumChatModeResponsePrivate(MinimumChatModeResponsePrivate) = 58,
+	ChatModerationString(ChatModerationString) = 59,
 	UpdateFreeTrialStatus(UpdateFreeTrialStatus) = 62,
 }
 
@@ -311,6 +313,66 @@ pub struct MinimumChatModeResponsePrivate {
 	pub chat_channel: ChatChannel,
 	pub recipient_name: LuWString33,
 	pub recipient_gm_level: u8,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+pub struct ModerationSpan {
+	pub start_index: u8,
+	pub length: u8,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct ChatModerationString {
+	//#[padding=2]
+	pub request_id: u8,
+	pub chat_mode: u8, // todo: type
+	pub whisper_name: LuWString42,
+	pub spans: Vec<ModerationSpan>,
+}
+
+impl<R: Read+LERead> Deserialize<LE, R> for ChatModerationString {
+	fn deserialize(reader: &mut R) -> Res<Self>	{
+		let _string_okay: bool = LERead::read(reader)?;
+		let _source_id: u16 = LERead::read(reader)?; // unused
+		let request_id = LERead::read(reader)?;
+		let chat_mode = LERead::read(reader)?;
+		let whisper_name = LERead::read(reader)?;
+		let mut spans = vec![];
+		let mut i = 0;
+		loop {
+			if i > 63 {
+				break;
+			}
+			let start_index = LERead::read(reader)?;
+			let length = LERead::read(reader)?;
+			if length != 0 {
+				spans.push(ModerationSpan { start_index, length });
+			}
+			i += 1;
+		}
+		Ok(dbg!(Self { request_id, chat_mode, whisper_name, spans } ))
+	}
+}
+
+impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ChatModerationString {
+	fn serialize(self, writer: &mut W) -> Res<()>	{
+		LEWrite::write(writer, self.spans.is_empty())?;
+		LEWrite::write(writer, 0u16)?;
+		LEWrite::write(writer, self.request_id)?;
+		LEWrite::write(writer, self.chat_mode)?;
+		LEWrite::write(writer, &self.whisper_name)?;
+		if self.spans.len() > 64 {
+			return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "spans longer than 64"));
+		}
+		for span in &self.spans {
+			LEWrite::write(writer, span.start_index)?;
+			LEWrite::write(writer, span.length)?;
+		}
+		for _ in self.spans.len()..64 {
+			Write::write(writer, &[0; 2])?;
+		}
+		Ok(())
+	}
 }
 
 /**
