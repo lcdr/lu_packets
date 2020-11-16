@@ -59,6 +59,7 @@ pub enum ClientMessage {
 	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
 	AddFriendRequest(AddFriendRequest) = 27,
 	GetFriendsListResponse(GetFriendsListResponse) = 30,
+	GetIgnoreListResponse(GetIgnoreListResponse) = 34,
 	TeamInvite(TeamInvite) = 35,
 	MinimumChatModeResponse(MinimumChatModeResponse) = 57,
 	MinimumChatModeResponsePrivate(MinimumChatModeResponsePrivate) = 58,
@@ -302,6 +303,21 @@ pub enum GetFriendsListResponse {
 	GeneralError,
 }
 
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[trailing_padding=6]
+pub struct IgnoreState {
+	object_id: ObjId,
+	char_name: LuWString33,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[repr(u8)]
+#[post_disc_padding=2]
+pub enum GetIgnoreListResponse {
+	Ok(LVec<u16, IgnoreState>),
+	GeneralError,
+}
+
 /**
 	Informs the client that another player has asked them to be their friend.
 
@@ -371,7 +387,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for ChatModerationString {
 			}
 			i += 1;
 		}
-		Ok(dbg!(Self { request_id, chat_mode, whisper_name, spans } ))
+		Ok(Self { request_id, chat_mode, whisper_name, spans })
 	}
 }
 
