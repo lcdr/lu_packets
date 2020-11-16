@@ -59,6 +59,7 @@ pub enum ClientMessage {
 	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
 	AddFriendRequest(AddFriendRequest) = 27,
 	GetFriendsListResponse(GetFriendsListResponse) = 30,
+	FriendUpdateNotify(FriendUpdateNotify) = 31,
 	GetIgnoreListResponse(GetIgnoreListResponse) = 34,
 	TeamInvite(TeamInvite) = 35,
 	MinimumChatModeResponse(MinimumChatModeResponse) = 57,
@@ -301,6 +302,24 @@ pub struct FriendState {
 pub enum GetFriendsListResponse {
 	Ok(LVec<u16, FriendState>),
 	GeneralError,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[repr(u8)]
+pub enum FriendUpdateType {
+	Logout,
+	Login,
+	Transfer,
+	FreeTrialChange,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct FriendUpdateNotify {
+	update_type: FriendUpdateType,
+	char_name: LuWString33,
+	zone_id: ZoneId,
+	is_best_friend: bool,
+	is_free_trial: bool,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]

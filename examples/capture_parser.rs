@@ -73,7 +73,6 @@ fn parse(path: &Path) -> Res<usize> {
 		&& !file.name().contains("[53-05-00-06]")
 		&& !file.name().contains("[53-05-00-15]")
 		&& !file.name().contains("[53-05-00-1c]")
-		&& !file.name().contains("[53-05-00-1f]")
 		&& !file.name().contains("[53-05-00-31]")
 		&& !file.name().contains("[76-00]")
 		&& !file.name().contains("[7f-00]")
