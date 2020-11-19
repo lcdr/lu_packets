@@ -1,5 +1,5 @@
 //! Client-received world messages.
-use std::io::{Read, Write};
+use std::io::{Error, ErrorKind::InvalidData, Read, Write};
 use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
@@ -58,6 +58,7 @@ pub enum ClientMessage {
 	TransferToWorld(TransferToWorld) = 14,
 	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
 	AddFriendRequest(AddFriendRequest) = 27,
+	AddFriendResponse(AddFriendResponse) = 28,
 	GetFriendsListResponse(GetFriendsListResponse) = 30,
 	FriendUpdateNotify(FriendUpdateNotify) = 31,
 	GetIgnoreListResponse(GetIgnoreListResponse) = 34,
@@ -284,6 +285,105 @@ pub struct AddFriendRequest {
 	pub is_best_friend_request: bool,
 }
 
+#[derive(Debug, PartialEq)]
+#[repr(u8)]
+pub enum AddFriendResponseType {
+	Accepted {
+		is_online: bool,
+		sender_id: ObjId,
+		zone_id: ZoneId,
+		is_best_friend: bool,
+		is_free_trial: bool,
+	},
+	AlreadyFriend {
+		is_best_friend: bool,
+	},
+	InvalidCharacter,
+	GeneralError {
+		is_best_friend: bool,
+	},
+	YourFriendListFull,
+	TheirFriendListFull,
+	Declined,
+	Busy,
+	NotOnline,
+	WaitingApproval,
+	Mythran,
+	Cancelled,
+	FriendIsFreeTrial,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct AddFriendResponse {
+	char_name: LuWString33,
+	response_type: AddFriendResponseType,
+}
+
+impl<R: Read> Deserialize<LE, R> for AddFriendResponse {
+	fn deserialize(reader: &mut R) -> Res<Self>	{
+		let disc: u8       = LERead::read(reader)?;
+		let is_online      = LERead::read(reader)?;
+		let char_name      = LERead::read(reader)?;
+		let sender_id      = LERead::read(reader)?;
+		let zone_id        = LERead::read(reader)?;
+		let is_best_friend = LERead::read(reader)?;
+		let is_free_trial  = LERead::read(reader)?;
+		Ok(Self { char_name, response_type:
+			match disc {
+				0  => AddFriendResponseType::Accepted { is_online, sender_id, zone_id, is_best_friend, is_free_trial },
+				1  => AddFriendResponseType::AlreadyFriend { is_best_friend },
+				2  => AddFriendResponseType::InvalidCharacter,
+				3  => AddFriendResponseType::GeneralError { is_best_friend },
+				4  => AddFriendResponseType::YourFriendListFull,
+				5  => AddFriendResponseType::TheirFriendListFull,
+				6  => AddFriendResponseType::Declined,
+				7  => AddFriendResponseType::Busy,
+				8  => AddFriendResponseType::NotOnline,
+				9  => AddFriendResponseType::WaitingApproval,
+				10 => AddFriendResponseType::Mythran,
+				11 => AddFriendResponseType::Cancelled,
+				12 => AddFriendResponseType::FriendIsFreeTrial,
+				_  => { return Err(Error::new(InvalidData, "invalid discriminant for AddFriendResponseType")) }
+			}
+		})
+	}
+}
+
+impl<'a, W: Write> Serialize<LE, W> for &'a AddFriendResponse {
+	fn serialize(self, writer: &mut W) -> Res<()>	{
+		let disc = unsafe { *(&self.response_type as *const AddFriendResponseType as *const u8) };
+		LEWrite::write(writer, disc)?;
+		let mut is_online_x = &false;
+		let mut sender_id_x = &0;
+		let mut zone_id_x = &ZoneId { map_id: 0, instance_id: 0, clone_id: 0 };
+		let mut is_best_friend_x = &false;
+		let mut is_free_trial_x = &false;
+		match &self.response_type {
+			AddFriendResponseType::Accepted { is_online, sender_id, zone_id, is_best_friend, is_free_trial } => {
+				is_online_x = is_online;
+				sender_id_x = sender_id;
+				zone_id_x = zone_id;
+				is_best_friend_x = is_best_friend;
+				is_free_trial_x = is_free_trial;
+			}
+			AddFriendResponseType::AlreadyFriend { is_best_friend } => {
+				is_best_friend_x = is_best_friend;
+			}
+			AddFriendResponseType::GeneralError { is_best_friend } => {
+				is_best_friend_x = is_best_friend;
+			}
+			_ => {},
+		}
+		LEWrite::write(writer, is_online_x)?;
+		LEWrite::write(writer, &self.char_name)?;
+		LEWrite::write(writer, sender_id_x)?;
+		LEWrite::write(writer, zone_id_x)?;
+		LEWrite::write(writer, is_best_friend_x)?;
+		LEWrite::write(writer, is_free_trial_x)?;
+		Ok(())
+	}
+}
+
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[trailing_padding=6]
 pub struct FriendState {
@@ -418,7 +518,7 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ChatModerationString {
 		LEWrite::write(writer, self.chat_mode)?;
 		LEWrite::write(writer, &self.whisper_name)?;
 		if self.spans.len() > 64 {
-			return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "spans longer than 64"));
+			return Err(Error::new(InvalidData, "spans longer than 64"));
 		}
 		for span in &self.spans {
 			LEWrite::write(writer, span.start_index)?;
