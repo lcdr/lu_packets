@@ -7,7 +7,7 @@ use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
 use crate::world::lnv::LuNameValue;
-use super::{EquipInventory, GmString, GmWString, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
+use super::{EquipInventory, GmString, GmWString, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct SubjectGameMessage {
@@ -25,6 +25,7 @@ pub enum GameMessage {
 	PlayAnimation(PlayAnimation) = 43,
 	SetName(SetName) = 72,
 	AddSkill(AddSkill) = 127,
+	RemoveSkill(RemoveSkill) = 128,
 	SetCurrency(SetCurrency) = 133,
 	TeamPickupItem(TeamPickupItem) = 140,
 	PlayFxEffect(PlayFxEffect) = 154,

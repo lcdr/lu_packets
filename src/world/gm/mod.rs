@@ -123,6 +123,13 @@ pub enum PetNotificationType {
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
+pub struct RemoveSkill {
+	#[default(false)]
+	pub from_skill_set: bool,
+	pub skill_id: u32,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
 pub struct EquipInventory {
 	#[default(false)]
 	pub ignore_cooldown: bool,
