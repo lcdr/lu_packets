@@ -21,7 +21,7 @@ fn visit_dirs(dir: &Path) -> Res<usize> {
 			let entry = entry?;
 			let path = entry.path();
 			packet_count += if path.is_dir() { visit_dirs(&path) } else { parse(&path) }?;
-			dbg!(packet_count);
+			println!("packet count = {}", packet_count);
 		}
 	}
 	Ok(packet_count)
@@ -73,7 +73,6 @@ fn parse(path: &Path) -> Res<usize> {
 		&& !file.name().contains("[53-05-00-15]")
 		&& !file.name().contains("[53-05-00-31]")
 		&& !file.name().contains("[76-00]")
-		&& !file.name().contains("[7f-00]")
 		&& !file.name().contains("[80-00]")
 		&& !file.name().contains("[e6-00]")
 		&& !file.name().contains("[ff-00]")
@@ -94,7 +93,6 @@ fn parse(path: &Path) -> Res<usize> {
 		&& !file.name().contains("[6f-06]")
 		&& !file.name().contains("[70-06]")
 		&& !file.name().contains("[118]")
-		&& !file.name().contains("[127]")
 		&& !file.name().contains("[128]")
 		&& !file.name().contains("[230]")
 		&& !file.name().contains("[255]")

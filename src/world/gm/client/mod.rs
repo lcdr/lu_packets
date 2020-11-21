@@ -24,6 +24,7 @@ pub enum GameMessage {
 	PreloadAnimation(PreloadAnimation) = 42,
 	PlayAnimation(PlayAnimation) = 43,
 	SetName(SetName) = 72,
+	AddSkill(AddSkill) = 127,
 	SetCurrency(SetCurrency) = 133,
 	TeamPickupItem(TeamPickupItem) = 140,
 	PlayFxEffect(PlayFxEffect) = 154,
@@ -255,6 +256,25 @@ const SECONDARY_PRIORITY: f32 = 0.4;
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct SetName {
 	pub name: GmWString,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct AddSkill {
+	#[default(0)]
+	pub ai_combat_weight: i32,
+	#[default(false)]
+	pub from_skill_set: bool,
+	#[default(0)]
+	pub cast_type: i32, // todo: type
+	#[default(-1.0)]
+	pub time_secs: f32,
+	#[default(-1)]
+	pub times_can_cast: i32,
+	pub skill_id: u32, // todo: type
+	#[default(-1)]
+	pub slot_id: i32, // todo: type
+	#[default(true)]
+	pub temporary: bool,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
