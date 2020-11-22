@@ -13,6 +13,7 @@ pub enum ChatMessage {
 	AddFriendRequest(AddFriendRequest) = 7,
 	AddFriendResponse(AddFriendResponse) = 8,
 	GetFriendsList = 10,
+	AddIgnore(AddIgnore) = 11,
 	GetIgnoreList = 13,
 	TeamInviteResponse(TeamInviteResponse) = 16,
 	TeamLeave(TeamLeave) = 18,
@@ -40,6 +41,11 @@ pub struct AddFriendRequest {
 pub struct AddFriendResponse {
 	pub response_code: AddFriendResponseCode,
 	pub friend_name: LuWString33,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct AddIgnore {
+	pub char_name: LuWString33,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
