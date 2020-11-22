@@ -45,6 +45,7 @@ pub enum WorldMessage {
 	Mail(Mail) = 23,
 	StringCheck(StringCheck) = 25,
 	RequestFreeTrialRefresh = 32,
+	Top5IssuesRequest(Top5IssuesRequest) = 91,
 	UgcDownloadFailed(UgcDownloadFailed) = 120,
 }
 
@@ -268,6 +269,21 @@ pub struct StringCheck {
 	pub recipient_name: LuWString42,
 	/// The string to be checked.
 	pub string: LuVarWString<u16>,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[repr(u32)]
+#[allow(non_camel_case_types)]
+pub enum Language {
+	en_US,
+	pl_US,
+	de_DE,
+	en_GB,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct Top5IssuesRequest {
+	language: Language,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
