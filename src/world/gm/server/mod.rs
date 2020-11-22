@@ -104,6 +104,7 @@ pub enum GameMessage {
 	ToggleSendingPositionUpdates(ToggleSendingPositionUpdates) = 1166,
 	PlacePropertyModel(PlacePropertyModel) = 1170,
 	ReportBug(ReportBug) = 1198,
+	RequestSmashPlayer = 1202,
 	ResyncEquipment = 1238,
 	RacingPlayerInfoResetFinished(RacingPlayerInfoResetFinished) = 1255,
 	VehicleSetWheelLockState(VehicleSetWheelLockState) = 1273,
