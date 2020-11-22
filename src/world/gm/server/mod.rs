@@ -103,6 +103,7 @@ pub enum GameMessage {
 	RequestServerProjectileImpact(RequestServerProjectileImpact) = 1148,
 	ToggleSendingPositionUpdates(ToggleSendingPositionUpdates) = 1166,
 	PlacePropertyModel(PlacePropertyModel) = 1170,
+	ReportBug(ReportBug) = 1198,
 	ResyncEquipment = 1238,
 	RacingPlayerInfoResetFinished(RacingPlayerInfoResetFinished) = 1255,
 	VehicleSetWheelLockState(VehicleSetWheelLockState) = 1273,
@@ -741,6 +742,14 @@ pub struct ToggleSendingPositionUpdates {
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct PlacePropertyModel {
 	pub model_id: ObjId,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct ReportBug {
+	pub body: GmWString,
+	pub client_version: GmString,
+	pub other_player_id: GmString,
+	pub selection: GmString,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
