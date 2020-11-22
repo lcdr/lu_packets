@@ -47,7 +47,6 @@ fn parse(path: &Path) -> Res<usize> {
 			packet_count += 1
 		} else if file.name().contains("[53-04-")
 			&& !file.name().contains("[53-04-00-16]")
-			&& !file.name().contains("[53-04-00-17]")
 			&& !file.name().contains("[30-00]")
 			&& !file.name().contains("[e6-00]")
 			&& !file.name().contains("[6b-03]")

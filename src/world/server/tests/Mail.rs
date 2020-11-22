@@ -1,0 +1,3 @@
+WorldMessage::Mail(
+	Mail::ListRequest,
+)

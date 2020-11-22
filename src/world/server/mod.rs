@@ -1,4 +1,6 @@
 //! Server-received world messages.
+pub mod mail;
+
 use std::io::{Read, Write};
 use std::io::Result as Res;
 
@@ -11,6 +13,7 @@ use crate::chat::ChatChannel;
 use crate::chat::server::ChatMessage;
 use super::ZoneId;
 use super::gm::server::SubjectGameMessage;
+use self::mail::Mail;
 
 pub use crate::general::server::GeneralMessage;
 
@@ -39,6 +42,7 @@ pub enum WorldMessage {
 	GeneralChatMessage(GeneralChatMessage) = 14,
 	LevelLoadComplete(LevelLoadComplete) = 19,
 	RouteMessage(RouteMessage) = 21,
+	Mail(Mail) = 23,
 	StringCheck(StringCheck) = 25,
 	RequestFreeTrialRefresh = 32,
 	UgcDownloadFailed(UgcDownloadFailed) = 120,
@@ -219,7 +223,6 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a GeneralChatMessage {
 		LEWrite::write(writer, 0u16)
 	}
 }
-
 
 /**
 	Reports to the server that client-side loading has finished.
