@@ -185,8 +185,8 @@ pub struct CharListChar {
 	pub hair_style: u32,
 	pub hair_color: u32,
 	#[padding=8]
-	pub eyebrow_style: u32,
-	pub eye_style: u32,
+	pub eyebrows_style: u32,
+	pub eyes_style: u32,
 	pub mouth_style: u32,
 	#[padding=4]
 	pub last_location: ZoneId,

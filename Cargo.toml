@@ -7,7 +7,7 @@ license = "AGPL-3.0-or-later"
 repository = "https://github.com/lcdr/lu_packets/"
 
 [dependencies]
-endio = { git = "https://github.com/lcdr/endio", rev = "9981948f5cb6d78dba3c5115d1f3459918a64133" }
+endio = { git = "https://github.com/lcdr/endio", rev = "6e988eed6d9d3b1fa0edde34062edfb3b01d344a" }
 endio_bit = { git = "https://github.com/lcdr/endio_bit", rev = "46b1b0eda359dd85b5eabf9714e839c3728c75af" }
 lu_packets_derive = { path = "lu_packets_derive" }
 flate2 = { version = "1.0", features = ["zlib"], default-features = false }

@@ -12,8 +12,8 @@ ClientMessage::CharacterListResponse(
 				legs_color: 14,
 				hair_style: 8,
 				hair_color: 84,
-				eyebrow_style: 4,
-				eye_style: 5,
+				eyebrows_style: 4,
+				eyes_style: 5,
 				mouth_style: 24,
 				last_location: ZoneId {
 					map_id: 1300,
@@ -39,8 +39,8 @@ ClientMessage::CharacterListResponse(
 				legs_color: 6,
 				hair_style: 4,
 				hair_color: 96,
-				eyebrow_style: 20,
-				eye_style: 1,
+				eyebrows_style: 20,
+				eyes_style: 1,
 				mouth_style: 8,
 				last_location: ZoneId {
 					map_id: 1251,
@@ -66,8 +66,8 @@ ClientMessage::CharacterListResponse(
 				legs_color: 10,
 				hair_style: 3,
 				hair_color: 9,
-				eyebrow_style: 32,
-				eye_style: 19,
+				eyebrows_style: 32,
+				eyes_style: 19,
 				mouth_style: 3,
 				last_location: ZoneId {
 					map_id: 1200,
@@ -92,8 +92,8 @@ ClientMessage::CharacterListResponse(
 				legs_color: 6,
 				hair_style: 6,
 				hair_color: 11,
-				eyebrow_style: 38,
-				eye_style: 22,
+				eyebrows_style: 38,
+				eyes_style: 22,
 				mouth_style: 24,
 				last_location: ZoneId {
 					map_id: 1800,

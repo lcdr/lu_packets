@@ -5,33 +5,82 @@ use std::fs::File;
 use std::path::Path;
 use std::time::Instant;
 
-use endio::LERead;
+use endio_bit::BEBitReader;
 use lu_packets::{
 	auth::server::Message as AuthServerMessage,
+	raknet::client::replica::{
+		ComponentCreation, ReplicaContext,
+		bbb::BbbCreation,
+		buff::BuffCreation,
+		character::CharacterCreation,
+		controllable_physics::ControllablePhysicsCreation,
+		destroyable::DestroyableCreation,
+		fx::FxCreation,
+		inventory::InventoryCreation,
+		level_progression::LevelProgressionCreation,
+		player_forced_movement::PlayerForcedMovementCreation,
+		possession_control::PossessionControlCreation,
+		skill::SkillCreation,
+	},
+	world::Lot,
 	world::server::Message as WorldServerMessage,
 	world::client::Message as WorldClientMessage,
 };
+use zip::{ZipArchive, read::ZipFile};
 
 static mut PRINT_PACKETS: bool = false;
 
-fn visit_dirs(dir: &Path) -> Res<usize> {
+struct PlayerContext<'a> {
+	inner: ZipFile<'a>,
+}
+
+impl std::io::Read for PlayerContext<'_> {
+	fn read(&mut self, buf: &mut [u8]) -> Res<usize> {
+		self.inner.read(buf)
+	}
+}
+
+// hacky hardcoded components to be able to read player replicas without DB lookup
+impl ReplicaContext for PlayerContext<'_> {
+	fn get_comp_creations<R: std::io::Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentCreation>>> {
+		use endio::Deserialize;
+
+		vec![
+			|x| Ok(Box::new(ControllablePhysicsCreation::deserialize(x)?)),
+			|x| Ok(Box::new(BuffCreation::deserialize(x)?)),
+			|x| Ok(Box::new(DestroyableCreation::deserialize(x)?)),
+			|x| Ok(Box::new(PossessionControlCreation::deserialize(x)?)),
+			|x| Ok(Box::new(LevelProgressionCreation::deserialize(x)?)),
+			|x| Ok(Box::new(PlayerForcedMovementCreation::deserialize(x)?)),
+			|x| Ok(Box::new(CharacterCreation::deserialize(x)?)),
+			|x| Ok(Box::new(InventoryCreation::deserialize(x)?)),
+			|x| Ok(Box::new(SkillCreation::deserialize(x)?)),
+			|x| Ok(Box::new(FxCreation::deserialize(x)?)),
+			|x| Ok(Box::new(BbbCreation::deserialize(x)?)),
+		]
+	}
+}
+
+fn visit_dirs(dir: &Path, level: usize) -> Res<usize> {
 	let mut packet_count = 0;
 	if dir.is_dir() {
 		for entry in fs::read_dir(dir)? {
 			let entry = entry?;
 			let path = entry.path();
-			packet_count += if path.is_dir() { visit_dirs(&path) } else { parse(&path) }?;
-			println!("packet count = {}", packet_count);
+			packet_count += if path.is_dir() { visit_dirs(&path, level+1) } else { parse(&path) }?;
+			println!("packet count = {:>level$}", packet_count, level=level*6);
 		}
 	}
 	Ok(packet_count)
 }
 
 fn parse(path: &Path) -> Res<usize> {
+	use endio::LERead;
+
 	if path.extension().unwrap() != "zip" { return Ok(0); }
 
 	let src = BufReader::new(File::open(path).unwrap());
-	let mut zip = zip::ZipArchive::new(src).unwrap();
+	let mut zip = ZipArchive::new(src).unwrap();
 	let mut i = 0;
 	let mut packet_count = 0;
 	while i < zip.len() {
@@ -64,8 +113,8 @@ fn parse(path: &Path) -> Res<usize> {
 		{
 			let msg: WorldServerMessage = file.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), file.name(), file.size()));
 			if unsafe { PRINT_PACKETS } {
-				dbg!(msg);
-			};
+				dbg!(&msg);
+			}
 			packet_count += 1;
 		} else if file.name().contains("[53-02-") || (file.name().contains("[53-05-")
 		&& !file.name().contains("[53-05-00-00]")
@@ -109,10 +158,13 @@ fn parse(path: &Path) -> Res<usize> {
 		&& !file.name().contains("[1564]")
 		&& !file.name().contains("[1647]")
 		&& !file.name().contains("[1648]"))
+		|| (file.name().contains("[24]") && file.name().contains("(1)"))
 		{
-			let msg: WorldClientMessage = file.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), file.name(), file.size()));
+			let mut ctx = PlayerContext { inner: file };
+			let msg: WorldClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.inner.name(), ctx.inner.size()));
+			file = ctx.inner;
 			if unsafe { PRINT_PACKETS } {
-				dbg!(msg);
+				dbg!(&msg);
 			}
 			packet_count += 1;
 		} else { i += 1; continue }
@@ -140,7 +192,7 @@ fn main() {
 	let packet_count = if capture.ends_with(".zip") {
 		parse(&capture)
 	} else {
-		visit_dirs(&capture)
+		visit_dirs(&capture, 0)
 	}.unwrap();
 	println!();
 	println!("Number of parsed packets: {}", packet_count);

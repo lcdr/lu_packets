@@ -8,8 +8,8 @@ WorldMessage::CharacterCreateRequest(
 		legs_color: 15,
 		hair_style: 9,
 		hair_color: 1,
-		eyebrow_style: 3,
-		eye_style: 22,
+		eyebrows_style: 3,
+		eyes_style: 22,
 		mouth_style: 24,
 	},
 )

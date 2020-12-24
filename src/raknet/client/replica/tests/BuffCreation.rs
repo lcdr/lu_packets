@@ -1,0 +1,36 @@
+BuffCreation {
+	buffs: Some(vec![
+		BuffInfo {
+			buff_id: 0,
+			time_left: Some(1),
+			cancel_on_death: true,
+			cancel_on_zone: true,
+			cancel_on_damaged: true,
+			cancel_on_remove_buff: true,
+			cancel_on_ui: true,
+			cancel_on_logout: true,
+			cancel_on_unequip: true,
+			cancel_on_damage_absorb_ran_out: true,
+			added_by_teammate: Some(2),
+			apply_on_teammates: true,
+			ref_count: 3,
+		},
+	].into()),
+	immunities: Some(vec![
+		BuffInfo {
+			buff_id: 4,
+			time_left: Some(5),
+			cancel_on_death: true,
+			cancel_on_zone: true,
+			cancel_on_damaged: true,
+			cancel_on_remove_buff: true,
+			cancel_on_ui: true,
+			cancel_on_logout: true,
+			cancel_on_unequip: true,
+			cancel_on_damage_absorb_ran_out: true,
+			added_by_teammate: Some(6),
+			apply_on_teammates: true,
+			ref_count: 7,
+		},
+	].into()),
+}

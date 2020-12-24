@@ -2,6 +2,8 @@
 	Documentation and (de-)serialization support for LU's network protocol.
 */
 #![feature(arbitrary_enum_discriminant)]
+#![feature(specialization)]
+#![allow(incomplete_features)]
 
 /**
 	Creates a [`LuNameValue`] containing the arguments.
@@ -30,16 +32,16 @@
 
 	Care should be taken with integer and float literals to suffix them with the correct type, as seen above. Rust assumes `i32` for integer and `f64` for float literals by default, which may not be what you want, and can lead to incorrect serialization.
 
-	[`LuNameValue`]: crate::world::lnv::LuNameValue
+	[`LuNameValue`]: crate::world::LuNameValue
 	[`LuVarWString<u32>`]: crate::common::str::variable::LuVarWString
-	[`LnvValue`]: crate::world::lnv::LnvValue
+	[`LnvValue`]: crate::world::LnvValue
 */
 #[macro_export]
 macro_rules! lnv {
-	{} => { $crate::world::lnv::LuNameValue::new() };
+	{} => { $crate::world::LuNameValue::new() };
 	{$($name:literal:$value:expr,)*} => {
 		{
-			let mut lnv = $crate::world::lnv::LuNameValue::new();
+			let mut lnv = $crate::world::LuNameValue::new();
 			$(lnv.insert(::std::convert::TryInto::try_into($name).unwrap(), $value.into());)*
 			lnv
 		}

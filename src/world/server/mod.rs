@@ -6,11 +6,13 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
+use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::VariantTests;
 
 use crate::common::{ObjId, LuVarWString, LuWString33, LuWString42, ServiceId};
 use crate::chat::ChatChannel;
 use crate::chat::server::ChatMessage;
+use crate::raknet::client::replica::controllable_physics::FrameStats;
 use super::ZoneId;
 use super::gm::server::SubjectGameMessage;
 use self::mail::Mail;
@@ -42,6 +44,7 @@ pub enum WorldMessage {
 	GeneralChatMessage(GeneralChatMessage) = 14,
 	LevelLoadComplete(LevelLoadComplete) = 19,
 	RouteMessage(RouteMessage) = 21,
+	PositionUpdate(PositionUpdate) = 22,
 	Mail(Mail) = 23,
 	StringCheck(StringCheck) = 25,
 	RequestFreeTrialRefresh = 32,
@@ -145,9 +148,9 @@ pub struct CharacterCreateRequest {
 	pub hair_color: u32, // todo: enum
 	#[padding=8]
 	/// Chosen eyebrow style.
-	pub eyebrow_style: u32, // todo: enum
+	pub eyebrows_style: u32, // todo: enum
 	/// Chosen eye style.
-	pub eye_style: u32, // todo: enum
+	pub eyes_style: u32, // todo: enum
 	/// Chosen mouth style.
 	pub mouth_style: u32, // todo: enum
 }
@@ -245,6 +248,26 @@ pub struct LevelLoadComplete {
 #[repr(u16)]
 pub enum RouteMessage {
 	Chat(ChatMessage) = ServiceId::Chat as u16,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct PositionUpdate {
+	frame_stats: FrameStats,
+}
+
+impl<R: Read> Deserialize<LE, R> for PositionUpdate {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let mut reader = BEBitReader::new(reader);
+		let frame_stats = LERead::read(&mut reader)?;
+		Ok(Self { frame_stats })
+	}
+}
+
+impl<'a, W: Write> Serialize<LE, W> for &'a PositionUpdate {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		let mut writer = BEBitWriter::new(writer);
+		LEWrite::write(&mut writer, &self.frame_stats)
+	}
 }
 
 /**

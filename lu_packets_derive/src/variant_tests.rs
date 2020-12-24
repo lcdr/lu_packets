@@ -3,7 +3,7 @@ use syn::{parse_macro_input, Attribute, token::Comma, Data, DeriveInput, Ident, 
 use quote::quote;
 
 // todo: only run this when generating tests
-pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn derive(input: proc_macro::TokenStream, reader_code: TokenStream, writer_code: TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 
 	let name = &input.ident;
@@ -13,13 +13,13 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	match &input.data {
 		Data::Struct(_) => {
-			let test = gen_test_case(name, &test_params, name);
+			let test = gen_test_case(name, &test_params, name, &reader_code, &writer_code);
 			tests.push(test);
 		}
 		Data::Enum(data) => {
 			for v in &data.variants {
 				let variant = &v.ident;
-				let test = gen_test_case(name, &test_params, variant);
+				let test = gen_test_case(name, &test_params, variant, &reader_code, &writer_code);
 				tests.push(test);
 			}
 		}
@@ -54,7 +54,7 @@ fn get_test_params(attrs: &Vec<Attribute>) -> Option<Punctuated<NestedMeta, Comm
 	None
 }
 
-fn gen_test_case(type_name: &Ident, test_params: &Option<Punctuated<NestedMeta, Comma>>, test_name: &Ident) -> TokenStream {
+fn gen_test_case(type_name: &Ident, test_params: &Option<Punctuated<NestedMeta, Comma>>, test_name: &Ident, reader_code: &TokenStream, writer_code: &TokenStream) -> TokenStream {
 	let bin_path = format!("tests/{}.bin", test_name);
 	let rs_path = format!("tests/{}.rs", test_name);
 
@@ -66,15 +66,36 @@ fn gen_test_case(type_name: &Ident, test_params: &Option<Punctuated<NestedMeta, 
 		fn #test_name() {
 			use super::*;
 			let mut bin = &include_bytes!(#bin_path)[..];
-			let mut val = include!(#rs_path);
+			let mut expected = include!(#rs_path);
 			let mut input = bin;
-			let mut reader = &mut bin;
-			let parsed: #type_name<#test_params> = ::endio::LERead::read(reader).unwrap();
-			assert_eq!(reader, &[]);
-			assert_eq!(parsed, val);
+			let mut reader = #reader_code;
+			let parsed: #type_name<#test_params> = ::endio::LERead::read(&mut reader).unwrap();
+			let mut read_buf = [0];
+			let amount_read = std::io::Read::read(&mut reader, &mut read_buf).unwrap();
+			assert_eq!(amount_read, 0, "bin not fully read");
+			assert_eq!(parsed, expected, "parsed struct does not match rs");
+			/*
+			if parsed != expected {
+				// bless input
+				let mut out = vec![];
+				{
+					let mut writer = #writer_code;
+					::endio::LEWrite::write(&mut writer, &expected).unwrap();
+				}
+				let mut out_filename = std::path::PathBuf::from(file!());
+				out_filename.pop();
+				out_filename.push(#bin_path);
+				let mut file = std::fs::File::create(out_filename).unwrap();
+				std::io::Write::write_all(&mut file, &mut out).unwrap();
+				return;
+			}
+			*/
 			let mut out = vec![];
-			::endio::LEWrite::write(&mut out, &parsed).unwrap();
-			assert_eq!(out, input);
+			{
+				let mut writer = #writer_code;
+				::endio::LEWrite::write(&mut writer, &parsed).unwrap();
+			}
+			assert_eq!(out, input, "serialized struct does not match bin");
 			/*
 			if out != input {
 				// bless output

@@ -2,6 +2,7 @@
 mod str;
 
 use std::convert::{TryFrom, TryInto};
+use std::fmt::{Formatter, Debug};
 use std::io::{Read, Write};
 use std::io::Result as Res;
 use std::marker::PhantomData;
@@ -15,7 +16,7 @@ pub use self::str::*;
 
 	Note: the length type is not checked and the `Vec` still uses `usize` internally. Handle with care.
 */
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct LVec<L, T>(Vec<T>, PhantomData<L>);
 
 impl<L, T> LVec<L, T> {
@@ -60,7 +61,13 @@ impl<L, T> LVec<L, T> {
 	}
 }
 
-impl<T, L, R: Read> Deserialize<LE, R> for LVec<L, T>
+impl<L, T: Debug> Debug for LVec<L, T> {
+	fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+		self.0.fmt(f)
+	}
+}
+
+impl<L, T, R: Read> Deserialize<LE, R> for LVec<L, T>
 	where L: TryInto<usize> + Deserialize<LE, R>,
 	      T: Deserialize<LE, R>	{
 
@@ -70,7 +77,7 @@ impl<T, L, R: Read> Deserialize<LE, R> for LVec<L, T>
 	}
 }
 
-impl<'a, T, L, W: Write> Serialize<LE, W> for &'a LVec<L, T>
+impl<'a, L, T, W: Write> Serialize<LE, W> for &'a LVec<L, T>
 	where L: TryFrom<usize> + Serialize<LE, W>,
 	  for<'b> &'b T: Serialize<LE, W> {
 
