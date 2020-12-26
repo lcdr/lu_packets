@@ -1,4 +1,4 @@
-SkillCreation {
+SkillConstruction {
 	skills_in_progress: Some(vec![
 		SkillInfo {
 			unknown_1: 0,

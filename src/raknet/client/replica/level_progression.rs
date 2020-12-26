@@ -4,14 +4,14 @@ use endio::Serialize;
 use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct LevelProgressionCreation {
+pub struct LevelProgressionConstruction {
 	pub current_level: Option<u32>,
 }
 
-impl ComponentCreation for LevelProgressionCreation {
+impl ComponentConstruction for LevelProgressionConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

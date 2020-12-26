@@ -5,7 +5,7 @@ use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LuVarWString, ObjId};
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(Debug, PartialEq)]
 pub enum TransitionState {
@@ -65,7 +65,7 @@ pub struct SocialInfo {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct CharacterCreation {
+pub struct CharacterConstruction {
 	pub claim_code_1: Option<u64>,
 	pub claim_code_2: Option<u64>,
 	pub claim_code_3: Option<u64>,
@@ -119,7 +119,7 @@ pub struct CharacterCreation {
 	pub social_info: Option<SocialInfo>,
 }
 
-impl ComponentCreation for CharacterCreation {
+impl ComponentConstruction for CharacterConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

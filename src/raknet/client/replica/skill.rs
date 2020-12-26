@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LVec, ObjId};
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct BehaviorInfo {
@@ -32,11 +32,11 @@ pub struct SkillInfo {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct SkillCreation {
+pub struct SkillConstruction {
 	pub skills_in_progress: Option<LVec<u32, SkillInfo>>,
 }
 
-impl ComponentCreation for SkillCreation {
+impl ComponentConstruction for SkillConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LuVarString, LuVarWString, LVec, ObjId};
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct EffectInfo {
@@ -17,11 +17,11 @@ pub struct EffectInfo {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct FxCreation {
+pub struct FxConstruction {
 	pub active_effects: LVec<u32, EffectInfo>,
 }
 
-impl ComponentCreation for FxCreation {
+impl ComponentConstruction for FxConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

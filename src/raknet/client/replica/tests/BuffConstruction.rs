@@ -1,4 +1,4 @@
-BuffCreation {
+BuffConstruction {
 	buffs: Some(vec![
 		BuffInfo {
 			buff_id: 0,

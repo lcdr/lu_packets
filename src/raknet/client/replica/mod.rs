@@ -73,12 +73,12 @@ impl<W: Write, T> ReplicaS<W> for &Option<T> where for<'a> &'a T: ReplicaS<W>+Se
 	}
 }
 
-pub trait ComponentCreation: Debug {
+pub trait ComponentConstruction: Debug {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()>;
 }
 
 pub trait ReplicaContext {
-	fn get_comp_creations<R: Read>(&mut self, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentCreation>>>;
+	fn get_comp_constructions<R: Read>(&mut self, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>>;
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -99,7 +99,7 @@ pub struct ParentChildInfo {
 }
 
 #[derive(Debug)]
-pub struct ReplicaCreation {
+pub struct ReplicaConstruction {
 	pub network_id: u16,
 	pub object_id: ObjId,
 	pub lot: Lot,
@@ -113,17 +113,17 @@ pub struct ReplicaCreation {
 	pub world_state: Option<u8>, // todo: type
 	pub gm_level: Option<u8>, // todo: type
 	pub parent_child_info: Option<ParentChildInfo>,
-	pub components: Vec<Box<dyn ComponentCreation>>,
+	pub components: Vec<Box<dyn ComponentConstruction>>,
 }
 
-impl PartialEq<ReplicaCreation> for ReplicaCreation {
-	fn eq(&self, rhs: &ReplicaCreation) -> bool {
+impl PartialEq<ReplicaConstruction> for ReplicaConstruction {
+	fn eq(&self, rhs: &ReplicaConstruction) -> bool {
 		// hacky but i don't know a better way
 		format!("{:?}", self) == format!("{:?}", rhs)
 	}
 }
 
-impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaCreation {
+impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaConstruction {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let mut bit_reader = BEBitReader::new(reader);
 		let bit = bit_reader.read_bit()?;
@@ -142,7 +142,7 @@ impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaCreation {
 		let gm_level          = ReplicaD::deserialize(&mut bit_reader)?;
 		let parent_child_info = ReplicaD::deserialize(&mut bit_reader)?;
 		let mut components = vec![];
-		for new in unsafe {bit_reader.get_mut_unchecked()}.get_comp_creations(lot) {
+		for new in unsafe {bit_reader.get_mut_unchecked()}.get_comp_constructions(lot) {
 			components.push(new(&mut bit_reader)?);
 		}
 
@@ -165,7 +165,7 @@ impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaCreation {
 	}
 }
 
-impl<'a, W: Write> Serialize<LE, W> for &'a ReplicaCreation {
+impl<'a, W: Write> Serialize<LE, W> for &'a ReplicaConstruction {
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		let mut bit_writer = BEBitWriter::new(vec![]);
 		bit_writer.write_bit(true)?;
@@ -207,7 +207,7 @@ impl Read for DummyContext<'_> {
 
 #[cfg(test)]
 impl ReplicaContext for DummyContext<'_> {
-	fn get_comp_creations<R: Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentCreation>>> {
+	fn get_comp_constructions<R: Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		vec![]
 	}
 }

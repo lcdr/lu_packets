@@ -235,7 +235,7 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a GeneralChatMessage {
 	The client finishing a zone load initiated by [`LoadStaticZone`](super::client::LoadStaticZone).
 
 	### Handling / Response
-	Respond with [`CreateCharacter`](super::client::CreateCharacter) containing details about the player's character. Add the client to your server's replica manager, so that existing objects in range are replicated using `ReplicaManagerCreation` (todo). Create the character's replica object and and let the replica manager broadcast its creation to all clients in range. Finally, send [`ServerDoneLoadingAllObjects`](crate::world::gm::client::GameMessage::ServerDoneLoadingAllObjects) from the character object to the client.
+	Respond with [`CreateCharacter`](super::client::CreateCharacter) containing details about the player's character. Add the client to your server's replica manager, so that existing objects in range are replicated using [`ReplicaConstruction`](crate::raknet::client::replica::ReplicaConstruction). Create the character's replica object and and let the replica manager broadcast its construction to all clients in range. Finally, send [`ServerDoneLoadingAllObjects`](crate::world::gm::client::GameMessage::ServerDoneLoadingAllObjects) from the character object to the client.
 */
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct LevelLoadComplete {

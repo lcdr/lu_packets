@@ -1,4 +1,4 @@
-CharacterCreation {
+CharacterConstruction {
 	claim_code_1: Some(1),
 	claim_code_2: Some(2),
 	claim_code_3: Some(3),

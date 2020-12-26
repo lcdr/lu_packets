@@ -7,7 +7,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 use crate::common::{LVec, ObjId};
 use crate::world::{LuNameValue, Lot, Quaternion, Vector3};
 use crate::world::gm::InventoryType;
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct EquippedItemInfo {
@@ -29,12 +29,12 @@ pub struct EquippedModelTransform {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct InventoryCreation {
+pub struct InventoryConstruction {
 	pub equipped_items: Option<LVec<u32, EquippedItemInfo>>,
 	pub equipped_model_transforms: Option<LVec<u32, EquippedModelTransform>>,
 }
 
-impl ComponentCreation for InventoryCreation {
+impl ComponentConstruction for InventoryConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

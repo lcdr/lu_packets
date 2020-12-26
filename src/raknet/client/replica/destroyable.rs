@@ -5,7 +5,7 @@ use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::LVec;
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct StatusImmunityInfo {
@@ -121,14 +121,14 @@ impl<'a, W: Write> Serialize<LE, BEBitWriter<W>> for &'a StatsInfo {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct DestroyableCreation {
+pub struct DestroyableConstruction {
 	pub status_immunity_info: Option<StatusImmunityInfo>,
 	pub stats_info: Option<StatsInfo>,
 	pub is_on_a_threat_list: Option<bool>,
 }
 
 
-impl ComponentCreation for DestroyableCreation {
+impl ComponentConstruction for DestroyableConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

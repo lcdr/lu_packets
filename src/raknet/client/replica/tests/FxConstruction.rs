@@ -1,4 +1,4 @@
-FxCreation {
+FxConstruction {
 	active_effects: vec![
 		EffectInfo {
 			effect_name: lu!(&b"effect_name"[..]),

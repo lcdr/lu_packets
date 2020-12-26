@@ -4,7 +4,7 @@ use endio::Serialize;
 use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct ForcedMovementInfo {
@@ -13,11 +13,11 @@ pub struct ForcedMovementInfo {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct PlayerForcedMovementCreation {
+pub struct PlayerForcedMovementConstruction {
 	pub forced_movement_info: Option<ForcedMovementInfo>,
 }
 
-impl ComponentCreation for PlayerForcedMovementCreation {
+impl ComponentConstruction for PlayerForcedMovementConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

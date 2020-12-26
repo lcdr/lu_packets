@@ -1,5 +1,5 @@
-Message::ReplicaCreation(
-	ReplicaCreation {
+Message::ReplicaConstruction(
+	ReplicaConstruction {
 		network_id: 11,
 		object_id: 70368744177662,
 		lot: 13006,

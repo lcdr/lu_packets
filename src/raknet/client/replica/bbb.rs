@@ -5,14 +5,14 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::ObjId;
-use super::ComponentCreation;
+use super::ComponentConstruction;
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct BbbCreation {
+pub struct BbbConstruction {
 	pub metadata_source_item: Option<ObjId>,
 }
 
-impl ComponentCreation for BbbCreation {
+impl ComponentConstruction for BbbConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

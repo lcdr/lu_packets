@@ -1,4 +1,4 @@
-DestroyableCreation {
+DestroyableConstruction {
 	status_immunity_info: Some(StatusImmunityInfo {
 		immune_to_basic_attack: 0,
 		immune_to_damage_over_time: 1,

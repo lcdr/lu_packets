@@ -1,4 +1,4 @@
-InventoryCreation {
+InventoryConstruction {
 	equipped_items: Some(vec![
 		EquippedItemInfo {
 			id: 0,

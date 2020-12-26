@@ -9,18 +9,18 @@ use endio_bit::BEBitReader;
 use lu_packets::{
 	auth::server::Message as AuthServerMessage,
 	raknet::client::replica::{
-		ComponentCreation, ReplicaContext,
-		bbb::BbbCreation,
-		buff::BuffCreation,
-		character::CharacterCreation,
-		controllable_physics::ControllablePhysicsCreation,
-		destroyable::DestroyableCreation,
-		fx::FxCreation,
-		inventory::InventoryCreation,
-		level_progression::LevelProgressionCreation,
-		player_forced_movement::PlayerForcedMovementCreation,
-		possession_control::PossessionControlCreation,
-		skill::SkillCreation,
+		ComponentConstruction, ReplicaContext,
+		bbb::BbbConstruction,
+		buff::BuffConstruction,
+		character::CharacterConstruction,
+		controllable_physics::ControllablePhysicsConstruction,
+		destroyable::DestroyableConstruction,
+		fx::FxConstruction,
+		inventory::InventoryConstruction,
+		level_progression::LevelProgressionConstruction,
+		player_forced_movement::PlayerForcedMovementConstruction,
+		possession_control::PossessionControlConstruction,
+		skill::SkillConstruction,
 	},
 	world::Lot,
 	world::server::Message as WorldServerMessage,
@@ -42,21 +42,21 @@ impl std::io::Read for PlayerContext<'_> {
 
 // hacky hardcoded components to be able to read player replicas without DB lookup
 impl ReplicaContext for PlayerContext<'_> {
-	fn get_comp_creations<R: std::io::Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentCreation>>> {
+	fn get_comp_constructions<R: std::io::Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		use endio::Deserialize;
 
 		vec![
-			|x| Ok(Box::new(ControllablePhysicsCreation::deserialize(x)?)),
-			|x| Ok(Box::new(BuffCreation::deserialize(x)?)),
-			|x| Ok(Box::new(DestroyableCreation::deserialize(x)?)),
-			|x| Ok(Box::new(PossessionControlCreation::deserialize(x)?)),
-			|x| Ok(Box::new(LevelProgressionCreation::deserialize(x)?)),
-			|x| Ok(Box::new(PlayerForcedMovementCreation::deserialize(x)?)),
-			|x| Ok(Box::new(CharacterCreation::deserialize(x)?)),
-			|x| Ok(Box::new(InventoryCreation::deserialize(x)?)),
-			|x| Ok(Box::new(SkillCreation::deserialize(x)?)),
-			|x| Ok(Box::new(FxCreation::deserialize(x)?)),
-			|x| Ok(Box::new(BbbCreation::deserialize(x)?)),
+			|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(BuffConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(CharacterConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(InventoryConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(SkillConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(FxConstruction::deserialize(x)?)),
+			|x| Ok(Box::new(BbbConstruction::deserialize(x)?)),
 		]
 	}
 }
