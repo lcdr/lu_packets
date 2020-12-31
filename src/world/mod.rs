@@ -1,6 +1,7 @@
 //! World messages.
 pub mod client;
 pub mod gm;
+pub mod amf3;
 mod lnv;
 pub mod server;
 

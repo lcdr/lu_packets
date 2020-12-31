@@ -69,7 +69,7 @@ fn gen_test_case(type_name: &Ident, test_params: &Option<Punctuated<NestedMeta, 
 			let mut expected = include!(#rs_path);
 			let mut input = bin;
 			let mut reader = #reader_code;
-			let parsed: #type_name<#test_params> = ::endio::LERead::read(&mut reader).unwrap();
+			let parsed: #type_name<#test_params> = ::endio::LERead::read(&mut reader).expect("error while parsing bin");
 			let mut read_buf = [0];
 			let amount_read = std::io::Read::read(&mut reader, &mut read_buf).unwrap();
 			assert_eq!(amount_read, 0, "bin not fully read");

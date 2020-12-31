@@ -5,8 +5,8 @@ use lu_packets_derive::{GameMessage, GmParam, VariantTests};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
-use crate::world::lnv::LuNameValue;
+use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, LuNameValue, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
+use crate::world::amf3::Amf3;
 use super::{EquipInventory, GmString, GmWString, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -128,6 +128,7 @@ pub enum GameMessage {
 	EchoSyncSkill(EchoSyncSkill) = 1144,
 	DoClientProjectileImpact(DoClientProjectileImpact) = 1151,
 	SetPlayerAllowedRespawn(SetPlayerAllowedRespawn) = 1165,
+	UiMessageServerToSingleClient(UiMessageServerToSingleClient) = 1184,
 	UncastSkill(UncastSkill) = 1206,
 	FireEventClientSide(FireEventClientSide) = 1213,
 	ChangeObjectWorldState(ChangeObjectWorldState) = 1223,
@@ -1245,6 +1246,12 @@ pub struct DoClientProjectileImpact {
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct SetPlayerAllowedRespawn {
 	pub dont_prompt_for_respawn: bool,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct UiMessageServerToSingleClient {
+	pub args: Amf3,
+	pub message_name: GmString,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

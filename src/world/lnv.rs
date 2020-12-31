@@ -11,7 +11,7 @@ use super::gm::GmParam;
 
 use crate::common::{LuStrExt, LuVarString, LuVarWString, LuWStr};
 
-/// A value contained in a [`LuNameValue`]
+/// A value contained in a [`LuNameValue`].
 #[derive(Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
 pub enum LnvValue {
