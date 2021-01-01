@@ -102,6 +102,10 @@ impl From<&[u8]> for LnvValue {
 	fn from(val: &[u8]) -> Self { LnvValue::String(val.try_into().unwrap()) }
 }
 
+impl<const N: usize> From<&[u8; N]> for LnvValue {
+	fn from(val: &[u8; N]) -> Self { LnvValue::String(val.try_into().unwrap()) }
+}
+
 /// A hash map with values being one of multiple possible types.
 #[derive(PartialEq)]
 pub struct LuNameValue(HashMap<LuVarWString<u32>, LnvValue>);

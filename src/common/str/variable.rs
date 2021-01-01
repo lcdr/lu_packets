@@ -40,6 +40,14 @@ impl<L> TryFrom<&[u8]> for LuVarString<L> {
 	}
 }
 
+impl<L, const N: usize> TryFrom<&[u8; N]> for LuVarString<L> {
+	type Error = AsciiError;
+
+	fn try_from(string: &[u8; N]) -> Result<Self, Self::Error> {
+		Self::try_from(&string[..])
+	}
+}
+
 impl<L> From<&LuWStr> for LuVarWString<L> {
 	fn from(string: &LuWStr) -> Self {
 		Self(string.into(), PhantomData)

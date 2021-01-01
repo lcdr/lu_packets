@@ -69,13 +69,25 @@ macro_rules! lu_str {
 			type Error = AsciiError;
 
 			fn try_from(string: &[u8]) -> Result<Self, Self::Error> {
+				if string.len() >= $n {
+					// actually length error but whatever
+					return Err(AsciiError);
+				}
 				let mut bytes = [0u8; $n];
 				// todo: ascii range check
-				for (i, chr) in string.iter().take($n-1).enumerate() {
+				for (i, chr) in string.iter().enumerate() {
 					bytes[i] = *chr;
 				}
 				let bytes = unsafe { std::mem::transmute(bytes) };
 				Ok(Self(bytes))
+			}
+		}
+
+		impl<const N: usize> TryFrom<&[u8; N]> for $name {
+			type Error = AsciiError;
+
+			fn try_from(string: &[u8; N]) -> Result<Self, Self::Error> {
+				Self::try_from(&string[..])
 			}
 		}
 	}

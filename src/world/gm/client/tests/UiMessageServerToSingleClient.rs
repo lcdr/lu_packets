@@ -7,6 +7,6 @@ GameMessage::UiMessageServerToSingleClient(
 			"string": "string",
 			"array": amf3! ["inner", "array", true],
 		},
-		message_name: lu!(&b"QueueChoiceBox"[..]),
+		message_name: lu!(b"QueueChoiceBox"),
 	},
 )

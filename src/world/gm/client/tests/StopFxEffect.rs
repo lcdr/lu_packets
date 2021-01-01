@@ -1,6 +1,6 @@
 GameMessage::StopFxEffect(
 	StopFxEffect {
 		kill_immediate: false,
-		name: lu!(&b"BrickFadeUpVisCompleteEffect"[..]),
+		name: lu!(b"BrickFadeUpVisCompleteEffect"),
 	},
 )

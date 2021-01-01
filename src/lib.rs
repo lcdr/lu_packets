@@ -2,6 +2,7 @@
 	Documentation and (de-)serialization support for LU's network protocol.
 */
 #![feature(arbitrary_enum_discriminant)]
+#![feature(min_const_generics)]
 #![feature(specialization)]
 #![allow(incomplete_features)]
 
@@ -97,7 +98,7 @@ macro_rules! amf3 {
 		"bool": true,
 		"i64": i64::MAX,
 		"u64": u64::MAX,
-		"string": b"byte slice"[..],
+		"string": b"byte slice",
 	};
 	# }
 	```

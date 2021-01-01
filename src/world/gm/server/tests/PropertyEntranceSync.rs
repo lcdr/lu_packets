@@ -8,6 +8,6 @@ GameMessage::PropertyEntranceSync(
 		reputation_time: 0,
 		sort_method: 5,
 		start_index: 0,
-		filter_text: lu!(&b""[..]),
+		filter_text: lu!(b""),
 	},
 )
