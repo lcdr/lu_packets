@@ -5,7 +5,8 @@ use lu_packets_derive::{GameMessage, GmParam, VariantTests};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use super::super::{Lot, LOT_NULL, Quaternion, Vector3};
+use crate::world::{Lot, LOT_NULL, Quaternion, Vector3};
+use crate::world::amf3::Amf3;
 use super::{EquipInventory, GmString, GmWString, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -19,6 +20,7 @@ pub struct SubjectGameMessage {
 pub enum GameMessage {
 	RequestDie(RequestDie) = 38,
 	PlayEmote(PlayEmote) = 41,
+	ControlBehaviors(ControlBehaviors) = 48,
 	StartSkill(StartSkill) = 119,
 	CasterDead(CasterDead) = 120,
 	VerifyAck(VerifyAck) = 121,
@@ -152,6 +154,12 @@ pub struct RequestDie {
 pub struct PlayEmote {
 	pub emote_id: i32,
 	pub target_id: ObjId,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct ControlBehaviors {
+	pub args: Amf3,
+	pub command: GmString,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
