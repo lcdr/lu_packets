@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::ObjId;
-use super::ComponentConstruction;
+use super::{ComponentConstruction, ComponentSerialization};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
@@ -28,6 +28,14 @@ pub struct PossessionControlConstruction {
 }
 
 impl ComponentConstruction for PossessionControlConstruction {
+	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
+		self.serialize(writer)
+	}
+}
+
+pub type PossessionControlSerialization = PossessionControlConstruction;
+
+impl ComponentSerialization for PossessionControlSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

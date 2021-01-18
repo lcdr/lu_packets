@@ -19,7 +19,7 @@ use lu_packets::{
 		inventory::InventoryConstruction,
 		level_progression::LevelProgressionConstruction,
 		player_forced_movement::PlayerForcedMovementConstruction,
-		possession_control::PossessionControlConstruction,
+		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
 		skill::SkillConstruction,
 	},
 	world::Lot,
@@ -76,6 +76,7 @@ impl ReplicaContext for PlayerContext<'_> {
 		vec![
 			|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)),
 			|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?)),
+			|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)),
 		]
 	}
 }
