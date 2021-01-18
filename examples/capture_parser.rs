@@ -10,7 +10,7 @@ use lu_packets::{
 	auth::server::Message as AuthServerMessage,
 	raknet::client::replica::{
 		ComponentConstruction, ComponentSerialization, ReplicaContext,
-		bbb::BbbConstruction,
+		bbb::{BbbConstruction, BbbSerialization},
 		buff::BuffConstruction,
 		character::{CharacterConstruction, CharacterSerialization},
 		controllable_physics::{ControllablePhysicsConstruction, ControllablePhysicsSerialization},
@@ -81,6 +81,7 @@ impl ReplicaContext for PlayerContext<'_> {
 			|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?)),
 			|x| Ok(Box::new(CharacterSerialization::deserialize(x)?)),
 			|x| Ok(Box::new(InventorySerialization::deserialize(x)?)),
+			|x| Ok(Box::new(BbbSerialization::deserialize(x)?)),
 		]
 	}
 }
