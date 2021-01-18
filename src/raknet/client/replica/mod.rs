@@ -82,7 +82,7 @@ pub trait ComponentSerialization: Debug {
 }
 
 pub trait ReplicaContext {
-	fn get_comp_constructions<R: Read>(&mut self, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>>;
+	fn get_comp_constructions<R: Read>(&mut self, network_id: u16, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>>;
 	fn get_comp_serializations<R: Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>>;
 }
 
@@ -147,7 +147,7 @@ impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaConstruction {
 		let gm_level          = ReplicaD::deserialize(&mut bit_reader)?;
 		let parent_child_info = ReplicaD::deserialize(&mut bit_reader)?;
 		let mut components = vec![];
-		for new in unsafe {bit_reader.get_mut_unchecked()}.get_comp_constructions(lot) {
+		for new in unsafe {bit_reader.get_mut_unchecked()}.get_comp_constructions(network_id, lot) {
 			components.push(new(&mut bit_reader)?);
 		}
 
@@ -200,6 +200,7 @@ impl<'a, W: Write> Serialize<LE, W> for &'a ReplicaConstruction {
 #[derive(Debug)]
 pub struct ReplicaSerialization {
 	pub network_id: u16,
+	pub parent_child_info: Option<ParentChildInfo>,
 	pub components: Vec<Box<dyn ComponentSerialization>>,
 }
 
@@ -215,6 +216,7 @@ impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaSerialization {
 		let network_id = LERead::read(reader)?;
 		let comp_desers = reader.get_comp_serializations(network_id);
 		let mut bit_reader = BEBitReader::new(reader);
+		let parent_child_info = ReplicaD::deserialize(&mut bit_reader)?;
 		let mut components = vec![];
 		for new in comp_desers {
 			components.push(new(&mut bit_reader)?);
@@ -222,6 +224,7 @@ impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaSerialization {
 
 		Ok(Self {
 			network_id,
+			parent_child_info,
 			components,
 		})
 	}
@@ -231,6 +234,8 @@ impl<'a, W: Write> Serialize<LE, W> for &'a ReplicaSerialization {
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		LEWrite::write(writer, self.network_id)?;
 		let mut bit_writer = BEBitWriter::new(vec![]);
+		ReplicaS::serialize(&self.parent_child_info, &mut bit_writer)?;
+
 		for comp in &self.components {
 			comp.ser(&mut bit_writer)?;
 		}
@@ -255,11 +260,11 @@ impl Read for DummyContext<'_> {
 
 #[cfg(test)]
 impl ReplicaContext for DummyContext<'_> {
-	fn get_comp_constructions<R: Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
+	fn get_comp_constructions<R: Read>(&mut self, _network_id: u16, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		vec![]
 	}
 
-	fn get_comp_serializations<R: Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
+	fn get_comp_serializations<R: Read>(&mut self, _network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
 		vec![]
 	}
 }

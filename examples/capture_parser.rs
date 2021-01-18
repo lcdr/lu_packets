@@ -13,7 +13,7 @@ use lu_packets::{
 		bbb::BbbConstruction,
 		buff::BuffConstruction,
 		character::CharacterConstruction,
-		controllable_physics::ControllablePhysicsConstruction,
+		controllable_physics::{ControllablePhysicsConstruction, ControllablePhysicsSerialization},
 		destroyable::DestroyableConstruction,
 		fx::FxConstruction,
 		inventory::InventoryConstruction,
@@ -32,6 +32,7 @@ static mut PRINT_PACKETS: bool = false;
 
 struct PlayerContext<'a> {
 	inner: ZipFile<'a>,
+	player_network_ids: &'a mut Vec<u16>,
 }
 
 impl std::io::Read for PlayerContext<'_> {
@@ -42,8 +43,13 @@ impl std::io::Read for PlayerContext<'_> {
 
 // hacky hardcoded components to be able to read player replicas without DB lookup
 impl ReplicaContext for PlayerContext<'_> {
-	fn get_comp_constructions<R: std::io::Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
+	fn get_comp_constructions<R: std::io::Read>(&mut self, network_id: u16, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		use endio::Deserialize;
+
+		if lot != 1 {
+			return vec![];
+		}
+		self.player_network_ids.push(network_id);
 
 		vec![
 			|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?)),
@@ -60,8 +66,16 @@ impl ReplicaContext for PlayerContext<'_> {
 		]
 	}
 
-	fn get_comp_serializations<R: std::io::Read>(&mut self, _network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
-		vec![]
+	fn get_comp_serializations<R: std::io::Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
+		use endio::Deserialize;
+
+		if !self.player_network_ids.contains(&network_id) {
+			return vec![];
+		}
+
+		vec![
+			|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)),
+		]
 	}
 }
 
@@ -85,6 +99,7 @@ fn parse(path: &Path) -> Res<usize> {
 
 	let src = BufReader::new(File::open(path).unwrap());
 	let mut zip = ZipArchive::new(src).unwrap();
+	let mut player_network_ids = vec![];
 	let mut i = 0;
 	let mut packet_count = 0;
 	while i < zip.len() {
@@ -159,8 +174,9 @@ fn parse(path: &Path) -> Res<usize> {
 		&& !file.name().contains("[1647]")
 		&& !file.name().contains("[1648]"))
 		|| (file.name().contains("[24]") && file.name().contains("(1)"))
+		|| file.name().contains("[27]")
 		{
-			let mut ctx = PlayerContext { inner: file };
+			let mut ctx = PlayerContext { inner: file, player_network_ids: &mut player_network_ids };
 			let msg: WorldClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.inner.name(), ctx.inner.size()));
 			file = ctx.inner;
 			if unsafe { PRINT_PACKETS } {
@@ -168,10 +184,12 @@ fn parse(path: &Path) -> Res<usize> {
 			}
 			packet_count += 1;
 		} else { i += 1; continue }
-		// assert fully read
-		let mut rest = vec![];
-		std::io::Read::read_to_end(&mut file, &mut rest).unwrap();
-		assert_eq!(rest, vec![], "{}", path.to_str().unwrap());
+		if !file.name().contains("[27]") {
+			// assert fully read
+			let mut rest = vec![];
+			std::io::Read::read_to_end(&mut file, &mut rest).unwrap();
+			assert_eq!(rest, vec![], "{}", path.to_str().unwrap());
+		}
 		i += 1;
 	}
 	Ok(packet_count)

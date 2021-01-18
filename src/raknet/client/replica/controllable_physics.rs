@@ -6,7 +6,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::ObjId;
 use crate::world::{Vector3, Quaternion};
-use super::{ComponentConstruction};
+use super::{ComponentConstruction, ComponentSerialization};
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct JetpackInfo {
@@ -72,7 +72,27 @@ pub struct ControllablePhysicsConstruction {
 	pub frame_stats: Option<FrameStats>,
 }
 
+#[derive(Debug, PartialEq, ReplicaSerde)]
+pub struct FrameStatsTeleportInfo {
+	pub frame_stats: FrameStats,
+	pub is_teleporting: bool,
+}
+
+#[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
+pub struct ControllablePhysicsSerialization {
+	pub cheat_info: Option<CheatInfo>,
+	pub unknown_1: Option<Unknown1>,
+	pub unknown_2: Option<Unknown2>,
+	pub frame_stats_teleport_info: Option<FrameStatsTeleportInfo>,
+}
+
 impl ComponentConstruction for ControllablePhysicsConstruction {
+	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
+		self.serialize(writer)
+	}
+}
+
+impl ComponentSerialization for ControllablePhysicsSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
