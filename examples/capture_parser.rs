@@ -12,7 +12,7 @@ use lu_packets::{
 		ComponentConstruction, ComponentSerialization, ReplicaContext,
 		bbb::BbbConstruction,
 		buff::BuffConstruction,
-		character::CharacterConstruction,
+		character::{CharacterConstruction, CharacterSerialization},
 		controllable_physics::{ControllablePhysicsConstruction, ControllablePhysicsSerialization},
 		destroyable::{DestroyableConstruction, DestroyableSerialization},
 		fx::FxConstruction,
@@ -79,6 +79,7 @@ impl ReplicaContext for PlayerContext<'_> {
 			|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)),
 			|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?)),
 			|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?)),
+			|x| Ok(Box::new(CharacterSerialization::deserialize(x)?)),
 		]
 	}
 }
