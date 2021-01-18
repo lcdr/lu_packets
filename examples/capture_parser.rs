@@ -17,7 +17,7 @@ use lu_packets::{
 		destroyable::{DestroyableConstruction, DestroyableSerialization},
 		fx::FxConstruction,
 		inventory::InventoryConstruction,
-		level_progression::LevelProgressionConstruction,
+		level_progression::{LevelProgressionConstruction, LevelProgressionSerialization},
 		player_forced_movement::PlayerForcedMovementConstruction,
 		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
 		skill::SkillConstruction,
@@ -77,6 +77,7 @@ impl ReplicaContext for PlayerContext<'_> {
 			|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)),
 			|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?)),
 			|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)),
+			|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?)),
 		]
 	}
 }
