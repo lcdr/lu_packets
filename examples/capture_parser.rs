@@ -33,6 +33,7 @@ static mut PRINT_PACKETS: bool = false;
 struct PlayerContext<'a> {
 	inner: ZipFile<'a>,
 	player_network_ids: &'a mut Vec<u16>,
+	assert_fully_read: bool,
 }
 
 impl std::io::Read for PlayerContext<'_> {
@@ -70,8 +71,10 @@ impl ReplicaContext for PlayerContext<'_> {
 		use endio::Deserialize;
 
 		if !self.player_network_ids.contains(&network_id) {
+			self.assert_fully_read = false;
 			return vec![];
 		}
+		self.assert_fully_read = true;
 
 		vec![
 			|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)),
@@ -183,20 +186,26 @@ fn parse(path: &Path) -> Res<usize> {
 		|| (file.name().contains("[24]") && file.name().contains("(1)"))
 		|| file.name().contains("[27]")
 		{
-			let mut ctx = PlayerContext { inner: file, player_network_ids: &mut player_network_ids };
+			let mut ctx = PlayerContext { inner: file, player_network_ids: &mut player_network_ids, assert_fully_read: true };
 			let msg: WorldClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.inner.name(), ctx.inner.size()));
 			file = ctx.inner;
 			if unsafe { PRINT_PACKETS } {
 				dbg!(&msg);
 			}
 			packet_count += 1;
+
+			if ctx.assert_fully_read {
+				// assert fully read
+				let mut rest = vec![];
+				std::io::Read::read_to_end(&mut file, &mut rest).unwrap();
+				assert_eq!(rest, vec![], "Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), file.name(), file.size());
+			}
+			i += 1; continue
 		} else { i += 1; continue }
-		if !file.name().contains("[27]") {
-			// assert fully read
-			let mut rest = vec![];
-			std::io::Read::read_to_end(&mut file, &mut rest).unwrap();
-			assert_eq!(rest, vec![], "{}", path.to_str().unwrap());
-		}
+		// assert fully read
+		let mut rest = vec![];
+		std::io::Read::read_to_end(&mut file, &mut rest).unwrap();
+		assert_eq!(rest, vec![], "Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), file.name(), file.size());
 		i += 1;
 	}
 	Ok(packet_count)
