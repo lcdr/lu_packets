@@ -1,0 +1,20 @@
+DestroyableSerialization {
+	serialization_stats_info: Some(SerializationStatsInfo {
+		cur_health: 9,
+		max_health: 10.0,
+		cur_armor: 11,
+		max_armor: 12.0,
+		cur_imag: 13,
+		max_imag: 14.0,
+		damage_absorption_points: 15,
+		immunity: true,
+		is_gm_immune: true,
+		is_shielded: true,
+		actual_max_health: 16.0,
+		actual_max_armor: 17.0,
+		actual_max_imag: 18.0,
+		factions: vec![19].into(),
+		is_smashable: true,
+	}),
+	is_on_a_threat_list: Some(true),
+}

@@ -5,7 +5,7 @@ use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::LVec;
-use super::ComponentConstruction;
+use super::{ComponentConstruction, ComponentSerialization};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct StatusImmunityInfo {
@@ -127,8 +127,38 @@ pub struct DestroyableConstruction {
 	pub is_on_a_threat_list: Option<bool>,
 }
 
+#[derive(Debug, PartialEq, ReplicaSerde)]
+pub struct SerializationStatsInfo {
+	pub cur_health: u32,
+	pub max_health: f32,
+	pub cur_armor: u32,
+	pub max_armor: f32,
+	pub cur_imag: u32,
+	pub max_imag: f32,
+	pub damage_absorption_points: u32,
+	pub immunity: bool,
+	pub is_gm_immune: bool,
+	pub is_shielded: bool,
+	pub actual_max_health: f32,
+	pub actual_max_armor: f32,
+	pub actual_max_imag: f32,
+	pub factions: LVec<u32, i32>,
+	pub is_smashable: bool,
+}
+
+#[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
+pub struct DestroyableSerialization {
+	pub serialization_stats_info: Option<SerializationStatsInfo>,
+	pub is_on_a_threat_list: Option<bool>,
+}
 
 impl ComponentConstruction for DestroyableConstruction {
+	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
+		self.serialize(writer)
+	}
+}
+
+impl ComponentSerialization for DestroyableSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}

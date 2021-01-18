@@ -14,7 +14,7 @@ use lu_packets::{
 		buff::BuffConstruction,
 		character::CharacterConstruction,
 		controllable_physics::{ControllablePhysicsConstruction, ControllablePhysicsSerialization},
-		destroyable::DestroyableConstruction,
+		destroyable::{DestroyableConstruction, DestroyableSerialization},
 		fx::FxConstruction,
 		inventory::InventoryConstruction,
 		level_progression::LevelProgressionConstruction,
@@ -75,6 +75,7 @@ impl ReplicaContext for PlayerContext<'_> {
 
 		vec![
 			|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)),
+			|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?)),
 		]
 	}
 }
