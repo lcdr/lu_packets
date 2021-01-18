@@ -5,7 +5,7 @@ use endio::{Deserialize, Serialize};
 use lu_packets_derive::ReplicaVariantTests;
 
 use super::SystemAddress;
-use replica::ReplicaConstruction;
+use replica::{ReplicaConstruction, ReplicaSerialization};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize, ReplicaVariantTests)]
 #[test_params(crate::world::client::LuMessage)]
@@ -16,6 +16,7 @@ pub enum Message<U> {
 	ConnectionRequestAccepted(ConnectionRequestAccepted) = 14,
 	DisconnectionNotification = 19,
 	ReplicaConstruction(ReplicaConstruction) = 36,
+	ReplicaSerialization(ReplicaSerialization) = 39,
 	UserMessage(U) = 83,
 }
 

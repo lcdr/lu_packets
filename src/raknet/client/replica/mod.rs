@@ -77,8 +77,13 @@ pub trait ComponentConstruction: Debug {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()>;
 }
 
+pub trait ComponentSerialization: Debug {
+	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()>;
+}
+
 pub trait ReplicaContext {
 	fn get_comp_constructions<R: Read>(&mut self, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>>;
+	fn get_comp_serializations<R: Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>>;
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -192,6 +197,49 @@ impl<'a, W: Write> Serialize<LE, W> for &'a ReplicaConstruction {
 	}
 }
 
+#[derive(Debug)]
+pub struct ReplicaSerialization {
+	pub network_id: u16,
+	pub components: Vec<Box<dyn ComponentSerialization>>,
+}
+
+impl PartialEq<ReplicaSerialization> for ReplicaSerialization {
+	fn eq(&self, rhs: &ReplicaSerialization) -> bool {
+		// hacky but i don't know a better way
+		format!("{:?}", self) == format!("{:?}", rhs)
+	}
+}
+
+impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaSerialization {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let network_id = LERead::read(reader)?;
+		let comp_desers = reader.get_comp_serializations(network_id);
+		let mut bit_reader = BEBitReader::new(reader);
+		let mut components = vec![];
+		for new in comp_desers {
+			components.push(new(&mut bit_reader)?);
+		}
+
+		Ok(Self {
+			network_id,
+			components,
+		})
+	}
+}
+
+impl<'a, W: Write> Serialize<LE, W> for &'a ReplicaSerialization {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		LEWrite::write(writer, self.network_id)?;
+		let mut bit_writer = BEBitWriter::new(vec![]);
+		for comp in &self.components {
+			comp.ser(&mut bit_writer)?;
+		}
+		bit_writer.flush()?;
+		LEWrite::write(writer, bit_writer.get_ref())?;
+		Ok(())
+	}
+}
+
 #[cfg(test)]
 #[derive(Debug)]
 pub(super) struct DummyContext<'a> {
@@ -208,6 +256,10 @@ impl Read for DummyContext<'_> {
 #[cfg(test)]
 impl ReplicaContext for DummyContext<'_> {
 	fn get_comp_constructions<R: Read>(&mut self, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
+		vec![]
+	}
+
+	fn get_comp_serializations<R: Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
 		vec![]
 	}
 }

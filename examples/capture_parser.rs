@@ -9,7 +9,7 @@ use endio_bit::BEBitReader;
 use lu_packets::{
 	auth::server::Message as AuthServerMessage,
 	raknet::client::replica::{
-		ComponentConstruction, ReplicaContext,
+		ComponentConstruction, ComponentSerialization, ReplicaContext,
 		bbb::BbbConstruction,
 		buff::BuffConstruction,
 		character::CharacterConstruction,
@@ -58,6 +58,10 @@ impl ReplicaContext for PlayerContext<'_> {
 			|x| Ok(Box::new(FxConstruction::deserialize(x)?)),
 			|x| Ok(Box::new(BbbConstruction::deserialize(x)?)),
 		]
+	}
+
+	fn get_comp_serializations<R: std::io::Read>(&mut self, _network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
+		vec![]
 	}
 }
 
