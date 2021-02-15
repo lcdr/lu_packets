@@ -13,4 +13,6 @@ lu_packets_derive = { path = "lu_packets_derive" }
 flate2 = { version = "1.0", features = ["zlib"], default-features = false }
 
 [dev-dependencies]
+libsqlite3-sys = { version = "0.20.1", features = ["bundled"] }
+rusqlite = "0.24.2"
 zip = "0.5.6"

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::io::{BufReader, Result as Res};
 use std::fs;
@@ -26,90 +27,153 @@ use lu_packets::{
 	world::server::Message as WorldServerMessage,
 	world::client::Message as WorldClientMessage,
 };
+use rusqlite::{params, Connection};
 use zip::{ZipArchive, read::ZipFile};
 
 static mut PRINT_PACKETS: bool = false;
 
-struct PlayerContext<'a> {
-	inner: ZipFile<'a>,
-	player_network_ids: &'a mut Vec<u16>,
+const COMP_ORDER : [u32; 7] = [1, 7, 4, 17, 9, 2, 107];
+
+struct Cdclient {
+	conn: Connection,
+	comp_cache: HashMap<Lot, Vec<u32>>,
+}
+
+impl Cdclient {
+	fn get_comps(&mut self, lot: Lot) -> &Vec<u32> {
+		if !self.comp_cache.contains_key(&lot) {
+			let mut stmt = self.conn.prepare("select component_type from componentsregistry where id = ?").unwrap();
+			let rows = stmt.query_map(params![lot], |row| row.get(0)).unwrap();
+			let mut comps = vec![];
+			for row in rows {
+				comps.push(row.unwrap());
+			}
+			dbg!(&comps);
+			comps.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
+			dbg!(&comps);
+			self.comp_cache.insert(lot, comps);
+		}
+		&self.comp_cache.get(&lot).unwrap()
+	}
+}
+
+struct ZipContext<'a> {
+	zip: ZipFile<'a>,
+	lots: &'a mut HashMap<u16, Lot>,
+	cdclient: &'a mut Cdclient,
 	assert_fully_read: bool,
 }
 
-impl std::io::Read for PlayerContext<'_> {
+impl std::io::Read for ZipContext<'_> {
 	fn read(&mut self, buf: &mut [u8]) -> Res<usize> {
-		self.inner.read(buf)
+		self.zip.read(buf)
 	}
 }
 
 // hacky hardcoded components to be able to read player replicas without DB lookup
-impl ReplicaContext for PlayerContext<'_> {
+impl ReplicaContext for ZipContext<'_> {
 	fn get_comp_constructions<R: std::io::Read>(&mut self, network_id: u16, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		use endio::Deserialize;
 
+		let comps = self.cdclient.get_comps(lot);
 		if lot != 1 {
 			return vec![];
 		}
-		self.player_network_ids.push(network_id);
-
-		vec![
-			|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(BuffConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(CharacterConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(InventoryConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(SkillConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(FxConstruction::deserialize(x)?)),
-			|x| Ok(Box::new(BbbConstruction::deserialize(x)?)),
-		]
+		let mut constrs: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> = vec![];
+		for comp in comps {
+			match comp {
+				1 => {
+					constrs.push(|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?)));
+				}
+				2 => {
+					constrs.push(|x| Ok(Box::new(FxConstruction::deserialize(x)?)));
+				}
+				4 => {
+					constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?)));
+					constrs.push(|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?)));
+					constrs.push(|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?)));
+					constrs.push(|x| Ok(Box::new(CharacterConstruction::deserialize(x)?)));
+				}
+				7 => {
+					constrs.push(|x| Ok(Box::new(BuffConstruction::deserialize(x)?)));
+					constrs.push(|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?)));
+				}
+				9 => {
+					constrs.push(|x| Ok(Box::new(SkillConstruction::deserialize(x)?)));
+				}
+				17 => {
+					constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?)));
+				}
+				107 => {
+					constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?)));
+				}
+				55 | 68 => {},
+				x => panic!("{}", x),
+			}
+		}
+		self.lots.insert(network_id, lot);
+		constrs
 	}
 
 	fn get_comp_serializations<R: std::io::Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
 		use endio::Deserialize;
 
-		if !self.player_network_ids.contains(&network_id) {
-			self.assert_fully_read = false;
-			return vec![];
+		if let Some(lot) = self.lots.get(&network_id) {
+			let comps = self.cdclient.get_comps(*lot);
+			let mut sers: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> = vec![];
+			for comp in comps {
+				match comp {
+					1 => {
+						sers.push(|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)));
+					}
+					4 => {
+						sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)));
+						sers.push(|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?)));
+						sers.push(|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?)));
+						sers.push(|x| Ok(Box::new(CharacterSerialization::deserialize(x)?)));
+					}
+					7 => {
+						sers.push(|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?)));
+					}
+					17 => {
+						sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?)));
+					}
+					107 => {
+						sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?)));
+					}
+					2 | 9 | 55 | 68 => {},
+					x => panic!("{}", x),
+				}
+			}
+			self.assert_fully_read = true;
+			return sers;
 		}
-		self.assert_fully_read = true;
-
-		vec![
-			|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)),
-			|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?)),
-			|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)),
-			|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?)),
-			|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?)),
-			|x| Ok(Box::new(CharacterSerialization::deserialize(x)?)),
-			|x| Ok(Box::new(InventorySerialization::deserialize(x)?)),
-			|x| Ok(Box::new(BbbSerialization::deserialize(x)?)),
-		]
+		self.assert_fully_read = false;
+		vec![]
 	}
 }
 
-fn visit_dirs(dir: &Path, level: usize) -> Res<usize> {
+fn visit_dirs(dir: &Path, cdclient: &mut Cdclient, level: usize) -> Res<usize> {
 	let mut packet_count = 0;
 	if dir.is_dir() {
 		for entry in fs::read_dir(dir)? {
 			let entry = entry?;
 			let path = entry.path();
-			packet_count += if path.is_dir() { visit_dirs(&path, level+1) } else { parse(&path) }?;
+			packet_count += if path.is_dir() { visit_dirs(&path, cdclient, level+1) } else { parse(&path, cdclient) }?;
 			println!("packet count = {:>level$}", packet_count, level=level*6);
 		}
 	}
 	Ok(packet_count)
 }
 
-fn parse(path: &Path) -> Res<usize> {
+fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 	use endio::LERead;
 
 	if path.extension().unwrap() != "zip" { return Ok(0); }
 
 	let src = BufReader::new(File::open(path).unwrap());
 	let mut zip = ZipArchive::new(src).unwrap();
-	let mut player_network_ids = vec![];
+	let mut lots = HashMap::new();
 	let mut i = 0;
 	let mut packet_count = 0;
 	while i < zip.len() {
@@ -186,9 +250,9 @@ fn parse(path: &Path) -> Res<usize> {
 		|| (file.name().contains("[24]") && file.name().contains("(1)"))
 		|| file.name().contains("[27]")
 		{
-			let mut ctx = PlayerContext { inner: file, player_network_ids: &mut player_network_ids, assert_fully_read: true };
-			let msg: WorldClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.inner.name(), ctx.inner.size()));
-			file = ctx.inner;
+			let mut ctx = ZipContext { zip: file, lots: &mut lots, cdclient, assert_fully_read: true };
+			let msg: WorldClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.zip.name(), ctx.zip.size()));
+			file = ctx.zip;
 			if unsafe { PRINT_PACKETS } {
 				dbg!(&msg);
 			}
@@ -213,20 +277,19 @@ fn parse(path: &Path) -> Res<usize> {
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
-	let capture = match args.get(1) {
-		Some(x) => fs::canonicalize(x).unwrap(),
-		None => {
-			println!("Usage: capture_parser capture_path --print_packets");
-			return;
-		}
-	};
-	unsafe { PRINT_PACKETS = args.get(2).is_some(); }
+	if args.len() < 3 {
+		println!("Usage: capture_parser capture_path cdclient_path --print_packets");
+		return;
+	}
+	let capture = fs::canonicalize(&args[1]).unwrap();
+	let mut cdclient = Cdclient { conn: Connection::open(&args[2]).unwrap(), comp_cache: HashMap::new() };
+	unsafe { PRINT_PACKETS = args.get(3).is_some(); }
 
 	let start = Instant::now();
 	let packet_count = if capture.ends_with(".zip") {
-		parse(&capture)
+		parse(&capture, &mut cdclient)
 	} else {
-		visit_dirs(&capture, 0)
+		visit_dirs(&capture, &mut cdclient, 0)
 	}.unwrap();
 	println!();
 	println!("Number of parsed packets: {}", packet_count);
