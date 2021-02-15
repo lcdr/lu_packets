@@ -19,6 +19,7 @@ use lu_packets::{
 		fx::FxConstruction,
 		inventory::{InventoryConstruction, InventorySerialization},
 		level_progression::{LevelProgressionConstruction, LevelProgressionSerialization},
+		phantom_physics::{PhantomPhysicsConstruction, PhantomPhysicsSerialization},
 		player_forced_movement::{PlayerForcedMovementConstruction, PlayerForcedMovementSerialization},
 		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
 		skill::SkillConstruction,
@@ -32,7 +33,7 @@ use zip::{ZipArchive, read::ZipFile};
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 7] = [1, 7, 4, 17, 9, 2, 107];
+const COMP_ORDER : [u32; 8] = [1, 40, 7, 4, 17, 9, 2, 107];
 
 struct Cdclient {
 	conn: Connection,
@@ -76,9 +77,7 @@ impl ReplicaContext for ZipContext<'_> {
 		use endio::Deserialize;
 
 		let comps = self.cdclient.get_comps(lot);
-		if lot != 1 {
-			return vec![];
-		}
+
 		let mut constrs: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> = vec![];
 		for comp in comps {
 			match comp {
@@ -103,6 +102,9 @@ impl ReplicaContext for ZipContext<'_> {
 				}
 				17 => {
 					constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?)));
+				}
+				40 => {
+					constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?)));
 				}
 				107 => {
 					constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?)));
@@ -137,6 +139,9 @@ impl ReplicaContext for ZipContext<'_> {
 					}
 					17 => {
 						sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?)));
+					}
+					40 => {
+						sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?)));
 					}
 					107 => {
 						sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?)));
@@ -247,7 +252,7 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("[1564]")
 		&& !file.name().contains("[1647]")
 		&& !file.name().contains("[1648]"))
-		|| (file.name().contains("[24]") && file.name().contains("(1)"))
+		|| (file.name().contains("[24]") && !file.name().contains("(5958)"))
 		|| file.name().contains("[27]")
 		{
 			let mut ctx = ZipContext { zip: file, lots: &mut lots, cdclient, assert_fully_read: true };

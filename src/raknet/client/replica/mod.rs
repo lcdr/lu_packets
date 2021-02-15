@@ -6,6 +6,7 @@ pub mod destroyable;
 pub mod fx;
 pub mod inventory;
 pub mod level_progression;
+pub mod phantom_physics;
 pub mod player_forced_movement;
 pub mod possession_control;
 pub mod skill;
