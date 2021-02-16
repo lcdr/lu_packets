@@ -4,14 +4,9 @@ use endio::{Deserialize, Serialize};
 use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
-use crate::world::{Vector3, Quaternion};
+use crate::world::Vector3;
 use super::{ComponentConstruction, ComponentSerialization};
-
-#[derive(Debug, PartialEq, ReplicaSerde)]
-pub struct PositionRotationInfo {
-	pub position: Vector3,
-	pub rotation: Quaternion,
-}
+use super::simple_physics::PositionRotationInfo;
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u32)]

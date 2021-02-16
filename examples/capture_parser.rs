@@ -22,6 +22,7 @@ use lu_packets::{
 		phantom_physics::{PhantomPhysicsConstruction, PhantomPhysicsSerialization},
 		player_forced_movement::{PlayerForcedMovementConstruction, PlayerForcedMovementSerialization},
 		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
+		simple_physics::{SimplePhysicsConstruction, SimplePhysicsSerialization},
 		skill::SkillConstruction,
 	},
 	world::Lot,
@@ -33,7 +34,7 @@ use zip::{ZipArchive, read::ZipFile};
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 8] = [1, 40, 7, 4, 17, 9, 2, 107];
+const COMP_ORDER : [u32; 9] = [1, 3, 40, 7, 4, 17, 9, 2, 107];
 
 struct Cdclient {
 	conn: Connection,
@@ -87,6 +88,9 @@ impl ReplicaContext for ZipContext<'_> {
 				2 => {
 					constrs.push(|x| Ok(Box::new(FxConstruction::deserialize(x)?)));
 				}
+				3 => {
+					constrs.push(|x| Ok(Box::new(SimplePhysicsConstruction::deserialize(x)?)));
+				}
 				4 => {
 					constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?)));
 					constrs.push(|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?)));
@@ -109,7 +113,7 @@ impl ReplicaContext for ZipContext<'_> {
 				107 => {
 					constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?)));
 				}
-				55 | 68 => {},
+				55 | 56 | 68 => {},
 				x => panic!("{}", x),
 			}
 		}
@@ -127,6 +131,9 @@ impl ReplicaContext for ZipContext<'_> {
 				match comp {
 					1 => {
 						sers.push(|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)));
+					}
+					3 => {
+						sers.push(|x| Ok(Box::new(SimplePhysicsSerialization::deserialize(x)?)));
 					}
 					4 => {
 						sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)));
@@ -146,7 +153,7 @@ impl ReplicaContext for ZipContext<'_> {
 					107 => {
 						sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?)));
 					}
-					2 | 9 | 55 | 68 => {},
+					2 | 9 | 55 | 56 | 68 => {},
 					x => panic!("{}", x),
 				}
 			}
@@ -252,7 +259,9 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("[1564]")
 		&& !file.name().contains("[1647]")
 		&& !file.name().contains("[1648]"))
-		|| (file.name().contains("[24]") && !file.name().contains("(5958)"))
+		|| (file.name().contains("[24]")
+		&& !file.name().contains("(5958)")
+		&& !file.name().contains("(8304)"))
 		|| file.name().contains("[27]")
 		{
 			let mut ctx = ZipContext { zip: file, lots: &mut lots, cdclient, assert_fully_read: true };

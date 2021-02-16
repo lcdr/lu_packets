@@ -9,6 +9,7 @@ pub mod level_progression;
 pub mod phantom_physics;
 pub mod player_forced_movement;
 pub mod possession_control;
+pub mod simple_physics;
 pub mod skill;
 
 use std::fmt::Debug;
