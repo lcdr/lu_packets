@@ -11,6 +11,7 @@ use lu_packets::{
 	auth::server::Message as AuthServerMessage,
 	raknet::client::replica::{
 		ComponentConstruction, ComponentSerialization, ReplicaContext,
+		base_combat_ai::{BaseCombatAiConstruction, BaseCombatAiSerialization},
 		bbb::{BbbConstruction, BbbSerialization},
 		buff::BuffConstruction,
 		character::{CharacterConstruction, CharacterSerialization},
@@ -23,6 +24,7 @@ use lu_packets::{
 		player_forced_movement::{PlayerForcedMovementConstruction, PlayerForcedMovementSerialization},
 		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
 		simple_physics::{SimplePhysicsConstruction, SimplePhysicsSerialization},
+		script::ScriptConstruction,
 		skill::SkillConstruction,
 	},
 	world::Lot,
@@ -34,7 +36,7 @@ use zip::{ZipArchive, read::ZipFile};
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 9] = [1, 3, 40, 7, 4, 17, 9, 2, 107];
+const COMP_ORDER : [u32; 11] = [1, 3, 40, 7, 4, 17, 5, 9, 60, 2, 107];
 
 struct Cdclient {
 	conn: Connection,
@@ -97,6 +99,9 @@ impl ReplicaContext for ZipContext<'_> {
 					constrs.push(|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?)));
 					constrs.push(|x| Ok(Box::new(CharacterConstruction::deserialize(x)?)));
 				}
+				5 => {
+					constrs.push(|x| Ok(Box::new(ScriptConstruction::deserialize(x)?)));
+				}
 				7 => {
 					constrs.push(|x| Ok(Box::new(BuffConstruction::deserialize(x)?)));
 					constrs.push(|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?)));
@@ -110,10 +115,13 @@ impl ReplicaContext for ZipContext<'_> {
 				40 => {
 					constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?)));
 				}
+				60 => {
+					constrs.push(|x| Ok(Box::new(BaseCombatAiConstruction::deserialize(x)?)));
+				}
 				107 => {
 					constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?)));
 				}
-				55 | 56 | 68 => {},
+				31 | 55 | 56 | 68 => {},
 				x => panic!("{}", x),
 			}
 		}
@@ -150,10 +158,13 @@ impl ReplicaContext for ZipContext<'_> {
 					40 => {
 						sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?)));
 					}
+					60 => {
+						sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?)));
+					}
 					107 => {
 						sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?)));
 					}
-					2 | 9 | 55 | 56 | 68 => {},
+					2 | 5 | 9 | 31 | 55 | 56 | 68 => {},
 					x => panic!("{}", x),
 				}
 			}
