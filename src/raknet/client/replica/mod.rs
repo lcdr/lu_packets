@@ -10,6 +10,7 @@ pub mod level_progression;
 pub mod phantom_physics;
 pub mod player_forced_movement;
 pub mod possession_control;
+pub mod quickbuild;
 pub mod script;
 pub mod simple_physics;
 pub mod skill;

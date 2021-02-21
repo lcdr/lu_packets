@@ -1,3 +1,5 @@
+mod zip_context;
+
 use std::collections::HashMap;
 use std::env;
 use std::io::{BufReader, Result as Res};
@@ -6,39 +8,21 @@ use std::fs::File;
 use std::path::Path;
 use std::time::Instant;
 
-use endio_bit::BEBitReader;
 use lu_packets::{
 	auth::server::Message as AuthServerMessage,
-	raknet::client::replica::{
-		ComponentConstruction, ComponentSerialization, ReplicaContext,
-		base_combat_ai::{BaseCombatAiConstruction, BaseCombatAiSerialization},
-		bbb::{BbbConstruction, BbbSerialization},
-		buff::BuffConstruction,
-		character::{CharacterConstruction, CharacterSerialization},
-		controllable_physics::{ControllablePhysicsConstruction, ControllablePhysicsSerialization},
-		destroyable::{DestroyableConstruction, DestroyableSerialization},
-		fx::FxConstruction,
-		inventory::{InventoryConstruction, InventorySerialization},
-		level_progression::{LevelProgressionConstruction, LevelProgressionSerialization},
-		phantom_physics::{PhantomPhysicsConstruction, PhantomPhysicsSerialization},
-		player_forced_movement::{PlayerForcedMovementConstruction, PlayerForcedMovementSerialization},
-		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
-		simple_physics::{SimplePhysicsConstruction, SimplePhysicsSerialization},
-		script::ScriptConstruction,
-		skill::SkillConstruction,
-	},
 	world::Lot,
 	world::server::Message as WorldServerMessage,
 	world::client::Message as WorldClientMessage,
 };
 use rusqlite::{params, Connection};
-use zip::{ZipArchive, read::ZipFile};
+use zip::ZipArchive;
+use self::zip_context::ZipContext;
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 11] = [1, 3, 40, 7, 4, 17, 5, 9, 60, 2, 107];
+const COMP_ORDER : [u32; 17] = [1, 3, 40, 98, 7, 110, 109, 106, 4, 17, 5, 9, 60, 48, 2, 44, 107];
 
-struct Cdclient {
+pub struct Cdclient {
 	conn: Connection,
 	comp_cache: HashMap<Lot, Vec<u32>>,
 }
@@ -50,129 +34,26 @@ impl Cdclient {
 			let rows = stmt.query_map(params![lot], |row| row.get(0)).unwrap();
 			let mut comps = vec![];
 			for row in rows {
-				comps.push(row.unwrap());
+				let value = row.unwrap();
+				comps.push(value);
+				// special case: implied components
+				match value {
+					2  => { comps.push(44); }
+					4  => { comps.push(110); comps.push(109); comps.push(106); }
+					7  => { comps.push(98); }
+					48 => { comps.push(7); }
+					_ => {},
+				}
 			}
+			dbg!(&comps);
+			comps.sort();
+			comps.dedup();
 			dbg!(&comps);
 			comps.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
 			dbg!(&comps);
 			self.comp_cache.insert(lot, comps);
 		}
 		&self.comp_cache.get(&lot).unwrap()
-	}
-}
-
-struct ZipContext<'a> {
-	zip: ZipFile<'a>,
-	lots: &'a mut HashMap<u16, Lot>,
-	cdclient: &'a mut Cdclient,
-	assert_fully_read: bool,
-}
-
-impl std::io::Read for ZipContext<'_> {
-	fn read(&mut self, buf: &mut [u8]) -> Res<usize> {
-		self.zip.read(buf)
-	}
-}
-
-// hacky hardcoded components to be able to read player replicas without DB lookup
-impl ReplicaContext for ZipContext<'_> {
-	fn get_comp_constructions<R: std::io::Read>(&mut self, network_id: u16, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
-		use endio::Deserialize;
-
-		let comps = self.cdclient.get_comps(lot);
-
-		let mut constrs: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> = vec![];
-		for comp in comps {
-			match comp {
-				1 => {
-					constrs.push(|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?)));
-				}
-				2 => {
-					constrs.push(|x| Ok(Box::new(FxConstruction::deserialize(x)?)));
-				}
-				3 => {
-					constrs.push(|x| Ok(Box::new(SimplePhysicsConstruction::deserialize(x)?)));
-				}
-				4 => {
-					constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?)));
-					constrs.push(|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?)));
-					constrs.push(|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?)));
-					constrs.push(|x| Ok(Box::new(CharacterConstruction::deserialize(x)?)));
-				}
-				5 => {
-					constrs.push(|x| Ok(Box::new(ScriptConstruction::deserialize(x)?)));
-				}
-				7 => {
-					constrs.push(|x| Ok(Box::new(BuffConstruction::deserialize(x)?)));
-					constrs.push(|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?)));
-				}
-				9 => {
-					constrs.push(|x| Ok(Box::new(SkillConstruction::deserialize(x)?)));
-				}
-				17 => {
-					constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?)));
-				}
-				40 => {
-					constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?)));
-				}
-				60 => {
-					constrs.push(|x| Ok(Box::new(BaseCombatAiConstruction::deserialize(x)?)));
-				}
-				107 => {
-					constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?)));
-				}
-				31 | 55 | 56 | 68 => {},
-				x => panic!("{}", x),
-			}
-		}
-		self.lots.insert(network_id, lot);
-		constrs
-	}
-
-	fn get_comp_serializations<R: std::io::Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
-		use endio::Deserialize;
-
-		if let Some(lot) = self.lots.get(&network_id) {
-			let comps = self.cdclient.get_comps(*lot);
-			let mut sers: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> = vec![];
-			for comp in comps {
-				match comp {
-					1 => {
-						sers.push(|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?)));
-					}
-					3 => {
-						sers.push(|x| Ok(Box::new(SimplePhysicsSerialization::deserialize(x)?)));
-					}
-					4 => {
-						sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)));
-						sers.push(|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?)));
-						sers.push(|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?)));
-						sers.push(|x| Ok(Box::new(CharacterSerialization::deserialize(x)?)));
-					}
-					7 => {
-						sers.push(|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?)));
-					}
-					17 => {
-						sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?)));
-					}
-					40 => {
-						sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?)));
-					}
-					60 => {
-						sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?)));
-					}
-					107 => {
-						sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?)));
-					}
-					2 | 5 | 9 | 31 | 55 | 56 | 68 => {},
-					x => panic!("{}", x),
-				}
-			}
-			self.assert_fully_read = true;
-			return sers;
-		}
-		self.assert_fully_read = false;
-		vec![]
 	}
 }
 
