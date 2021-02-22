@@ -7,6 +7,7 @@ use lu_packets::{
 		ComponentConstruction, ComponentSerialization, ReplicaContext,
 		base_combat_ai::{BaseCombatAiConstruction, BaseCombatAiSerialization},
 		bbb::{BbbConstruction, BbbSerialization},
+		bouncer::{BouncerConstruction, BouncerSerialization},
 		buff::BuffConstruction,
 		character::{CharacterConstruction, CharacterSerialization},
 		controllable_physics::{ControllablePhysicsConstruction, ControllablePhysicsSerialization},
@@ -63,6 +64,9 @@ impl ReplicaContext for ZipContext<'_> {
 				5 => {
 					constrs.push(|x| Ok(Box::new(ScriptConstruction::deserialize(x)?)));
 				}
+				6 => {
+					constrs.push(|x| Ok(Box::new(BouncerConstruction::deserialize(x)?)));
+				}
 				7 => {
 					constrs.push(|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?)));
 				}
@@ -99,7 +103,7 @@ impl ReplicaContext for ZipContext<'_> {
 				110 => {
 					constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?)));
 				}
-				2 | 31 | 55 | 56 | 68 => {},
+				2 | 31 | 35 | 55 | 56 | 64 | 68 | 73 => {},
 				x => panic!("{}", x),
 			}
 		}
@@ -123,6 +127,9 @@ impl ReplicaContext for ZipContext<'_> {
 					}
 					4 => {
 						sers.push(|x| Ok(Box::new(CharacterSerialization::deserialize(x)?)));
+					}
+					6 => {
+						sers.push(|x| Ok(Box::new(BouncerSerialization::deserialize(x)?)));
 					}
 					7 => {
 						sers.push(|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?)));
@@ -151,7 +158,7 @@ impl ReplicaContext for ZipContext<'_> {
 					110 => {
 						sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?)));
 					}
-					2 | 5 | 9 | 31 | 44 | 55 | 56 | 68 | 98 => {},
+					2 | 5 | 9 | 31 | 35 | 44 | 55 | 56 | 64 | 68 | 73 | 98 => {},
 					x => panic!("{}", x),
 				}
 			}

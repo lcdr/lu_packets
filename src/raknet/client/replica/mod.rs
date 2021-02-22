@@ -1,5 +1,6 @@
 pub mod base_combat_ai;
 pub mod bbb;
+pub mod bouncer;
 pub mod buff;
 pub mod character;
 pub mod controllable_physics;
