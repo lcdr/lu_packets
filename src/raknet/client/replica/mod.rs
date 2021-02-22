@@ -3,6 +3,7 @@ pub mod bbb;
 pub mod bouncer;
 pub mod buff;
 pub mod character;
+pub mod collectible;
 pub mod controllable_physics;
 pub mod destroyable;
 pub mod fx;

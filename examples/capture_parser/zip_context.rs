@@ -10,6 +10,7 @@ use lu_packets::{
 		bouncer::{BouncerConstruction, BouncerSerialization},
 		buff::BuffConstruction,
 		character::{CharacterConstruction, CharacterSerialization},
+		collectible::{CollectibleConstruction, CollectibleSerialization},
 		controllable_physics::{ControllablePhysicsConstruction, ControllablePhysicsSerialization},
 		destroyable::{DestroyableConstruction, DestroyableSerialization},
 		fx::FxConstruction,
@@ -62,6 +63,7 @@ impl ReplicaContext for ZipContext<'_> {
 				9 =>   { constrs.push(|x| Ok(Box::new(SkillConstruction::deserialize(x)?))); }
 				16 =>  { constrs.push(|x| Ok(Box::new(VendorConstruction::deserialize(x)?))); }
 				17 =>  { constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?))); }
+				23 =>  { constrs.push(|x| Ok(Box::new(CollectibleConstruction::deserialize(x)?))); }
 				40 =>  { constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?))); }
 				44 =>  { constrs.push(|x| Ok(Box::new(FxConstruction::deserialize(x)?))); }
 				48 =>  { constrs.push(|x| Ok(Box::new(QuickbuildConstruction::deserialize(x)?))); }
@@ -94,6 +96,7 @@ impl ReplicaContext for ZipContext<'_> {
 					7 =>   { sers.push(|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?))); }
 					16 =>  { sers.push(|x| Ok(Box::new(VendorSerialization::deserialize(x)?))); }
 					17 =>  { sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?))); }
+					23 =>  { sers.push(|x| Ok(Box::new(CollectibleSerialization::deserialize(x)?))); }
 					40 =>  { sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?))); }
 					48 =>  { sers.push(|x| Ok(Box::new(QuickbuildSerialization::deserialize(x)?))); }
 					60 =>  { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }

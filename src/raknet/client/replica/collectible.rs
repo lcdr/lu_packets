@@ -6,26 +6,20 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use super::{ComponentConstruction, ComponentSerialization};
 
-#[derive(Debug, PartialEq, ReplicaSerde)]
-pub struct VendorInfo {
-	pub has_standard_items: bool,
-	pub has_multicost_items: bool,
-}
-
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct VendorConstruction {
-	pub vendor_info: Option<VendorInfo>,
+pub struct CollectibleConstruction {
+	pub collectible_id: u16,
 }
 
-impl ComponentConstruction for VendorConstruction {
+impl ComponentConstruction for CollectibleConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
 }
 
-pub type VendorSerialization = VendorConstruction;
+pub type CollectibleSerialization = CollectibleConstruction;
 
-impl ComponentSerialization for VendorSerialization {
+impl ComponentSerialization for CollectibleSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
