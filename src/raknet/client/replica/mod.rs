@@ -15,6 +15,7 @@ pub mod quickbuild;
 pub mod script;
 pub mod simple_physics;
 pub mod skill;
+pub mod vendor;
 
 use std::fmt::Debug;
 use std::io::{Read, Result as Res, Write};

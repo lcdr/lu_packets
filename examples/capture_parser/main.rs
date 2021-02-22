@@ -20,7 +20,7 @@ use self::zip_context::ZipContext;
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 18] = [1, 3, 40, 98, 7, 110, 109, 106, 4, 17, 5, 9, 60, 48, 6, 2, 44, 107];
+const COMP_ORDER : [u32; 19] = [1, 3, 40, 98, 7, 110, 109, 106, 4, 17, 5, 9, 60, 48, 16, 6, 2, 44, 107];
 
 pub struct Cdclient {
 	conn: Connection,
@@ -152,6 +152,7 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("[1647]")
 		&& !file.name().contains("[1648]"))
 		|| (file.name().contains("[24]")
+		&& !file.name().contains("(4930)")
 		&& !file.name().contains("(5958)")
 		&& !file.name().contains("(6267)")
 		&& !file.name().contains("(6010)")
