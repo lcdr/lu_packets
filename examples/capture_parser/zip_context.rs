@@ -16,6 +16,7 @@ use lu_packets::{
 		fx::FxConstruction,
 		inventory::{InventoryConstruction, InventorySerialization},
 		level_progression::{LevelProgressionConstruction, LevelProgressionSerialization},
+		moving_platform::{MovingPlatformConstruction, MovingPlatformSerialization},
 		phantom_physics::{PhantomPhysicsConstruction, PhantomPhysicsSerialization},
 		player_forced_movement::{PlayerForcedMovementConstruction, PlayerForcedMovementSerialization},
 		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
@@ -64,6 +65,7 @@ impl ReplicaContext for ZipContext<'_> {
 				16 =>  { constrs.push(|x| Ok(Box::new(VendorConstruction::deserialize(x)?))); }
 				17 =>  { constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?))); }
 				23 =>  { constrs.push(|x| Ok(Box::new(CollectibleConstruction::deserialize(x)?))); }
+				25 =>  { constrs.push(|x| Ok(Box::new(MovingPlatformConstruction::deserialize(x)?))); }
 				40 =>  { constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?))); }
 				44 =>  { constrs.push(|x| Ok(Box::new(FxConstruction::deserialize(x)?))); }
 				48 =>  { constrs.push(|x| Ok(Box::new(QuickbuildConstruction::deserialize(x)?))); }
@@ -73,7 +75,7 @@ impl ReplicaContext for ZipContext<'_> {
 				107 => { constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?))); }
 				109 => { constrs.push(|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?))); }
 				110 => { constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?))); }
-				2 | 31 | 35 | 55 | 56 | 64 | 68 | 73 => {},
+				2 | 27 | 31 | 35 | 55 | 56 | 64 | 68 | 73 => {},
 				x => panic!("{}", x),
 			}
 		}
@@ -97,6 +99,7 @@ impl ReplicaContext for ZipContext<'_> {
 					16 =>  { sers.push(|x| Ok(Box::new(VendorSerialization::deserialize(x)?))); }
 					17 =>  { sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?))); }
 					23 =>  { sers.push(|x| Ok(Box::new(CollectibleSerialization::deserialize(x)?))); }
+					25 =>  { sers.push(|x| Ok(Box::new(MovingPlatformSerialization::deserialize(x)?))); }
 					40 =>  { sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?))); }
 					48 =>  { sers.push(|x| Ok(Box::new(QuickbuildSerialization::deserialize(x)?))); }
 					60 =>  { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }
@@ -104,7 +107,7 @@ impl ReplicaContext for ZipContext<'_> {
 					107 => { sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?))); }
 					109 => { sers.push(|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?))); }
 					110 => { sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?))); }
-					2 | 5 | 9 | 31 | 35 | 44 | 55 | 56 | 64 | 68 | 73 | 98 => {},
+					2 | 5 | 9 | 27 | 31 | 35 | 44 | 55 | 56 | 64 | 68 | 73 | 98 => {},
 					x => panic!("{}", x),
 				}
 			}
