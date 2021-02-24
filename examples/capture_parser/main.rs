@@ -20,7 +20,7 @@ use self::zip_context::ZipContext;
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 22] = [1, 3, 40, 98, 7, 23, 110, 109, 106, 4, 17, 5, 9, 60, 48, 25, 16, 6, 39, 2, 44, 107];
+const COMP_ORDER : [u32; 23] = [1, 3, 40, 98, 7, 23, 110, 109, 106, 4, 17, 5, 9, 60, 11, 48, 25, 16, 6, 39, 2, 44, 107];
 
 pub struct Cdclient {
 	conn: Connection,

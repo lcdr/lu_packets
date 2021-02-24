@@ -8,6 +8,7 @@ pub mod controllable_physics;
 pub mod destroyable;
 pub mod fx;
 pub mod inventory;
+pub mod item;
 pub mod level_progression;
 pub mod moving_platform;
 pub mod phantom_physics;

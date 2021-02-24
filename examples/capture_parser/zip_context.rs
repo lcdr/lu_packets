@@ -15,6 +15,7 @@ use lu_packets::{
 		destroyable::{DestroyableConstruction, DestroyableSerialization},
 		fx::FxConstruction,
 		inventory::{InventoryConstruction, InventorySerialization},
+		item::{ItemConstruction, ItemSerialization},
 		level_progression::{LevelProgressionConstruction, LevelProgressionSerialization},
 		moving_platform::{MovingPlatformConstruction, MovingPlatformSerialization},
 		phantom_physics::{PhantomPhysicsConstruction, PhantomPhysicsSerialization},
@@ -56,13 +57,14 @@ impl ReplicaContext for ZipContext<'_> {
 		let mut constrs: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> = vec![];
 		for comp in comps {
 			match comp {
-				1 =>   { constrs.push(|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?))); }
-				3 =>   { constrs.push(|x| Ok(Box::new(SimplePhysicsConstruction::deserialize(x)?))); }
-				4 =>   { constrs.push(|x| Ok(Box::new(CharacterConstruction::deserialize(x)?))); }
-				5 =>   { constrs.push(|x| Ok(Box::new(ScriptConstruction::deserialize(x)?))); }
-				6 =>   { constrs.push(|x| Ok(Box::new(BouncerConstruction::deserialize(x)?))); }
-				7 =>   { constrs.push(|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?))); }
-				9 =>   { constrs.push(|x| Ok(Box::new(SkillConstruction::deserialize(x)?))); }
+				1  =>  { constrs.push(|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?))); }
+				3  =>  { constrs.push(|x| Ok(Box::new(SimplePhysicsConstruction::deserialize(x)?))); }
+				4  =>  { constrs.push(|x| Ok(Box::new(CharacterConstruction::deserialize(x)?))); }
+				5  =>  { constrs.push(|x| Ok(Box::new(ScriptConstruction::deserialize(x)?))); }
+				6  =>  { constrs.push(|x| Ok(Box::new(BouncerConstruction::deserialize(x)?))); }
+				7  =>  { constrs.push(|x| Ok(Box::new(DestroyableConstruction::deserialize(x)?))); }
+				9  =>  { constrs.push(|x| Ok(Box::new(SkillConstruction::deserialize(x)?))); }
+				11 =>  { constrs.push(|x| Ok(Box::new(ItemConstruction::deserialize(x)?))); }
 				16 =>  { constrs.push(|x| Ok(Box::new(VendorConstruction::deserialize(x)?))); }
 				17 =>  { constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?))); }
 				23 =>  { constrs.push(|x| Ok(Box::new(CollectibleConstruction::deserialize(x)?))); }
@@ -77,7 +79,7 @@ impl ReplicaContext for ZipContext<'_> {
 				107 => { constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?))); }
 				109 => { constrs.push(|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?))); }
 				110 => { constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?))); }
-				2 | 27 | 31 | 35 | 55 | 56 | 64 | 68 | 73 => {},
+				2 | 27 | 31 | 35 | 55 | 56 | 64 | 68 | 95 | 73 => {},
 				x => panic!("{}", x),
 			}
 		}
@@ -93,24 +95,25 @@ impl ReplicaContext for ZipContext<'_> {
 			let mut sers: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> = vec![];
 			for comp in comps {
 				match comp {
-					1 =>   { sers.push(|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?))); }
-					3 =>   { sers.push(|x| Ok(Box::new(SimplePhysicsSerialization::deserialize(x)?))); }
-					4 =>   { sers.push(|x| Ok(Box::new(CharacterSerialization::deserialize(x)?))); }
-					6 =>   { sers.push(|x| Ok(Box::new(BouncerSerialization::deserialize(x)?))); }
-					7 =>   { sers.push(|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?))); }
-					16 =>  { sers.push(|x| Ok(Box::new(VendorSerialization::deserialize(x)?))); }
-					17 =>  { sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?))); }
-					23 =>  { sers.push(|x| Ok(Box::new(CollectibleSerialization::deserialize(x)?))); }
-					25 =>  { sers.push(|x| Ok(Box::new(MovingPlatformSerialization::deserialize(x)?))); }
-					39 =>  { sers.push(|x| Ok(Box::new(ScriptedActivitySerialization::deserialize(x)?))); }
-					40 =>  { sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?))); }
-					48 =>  { sers.push(|x| Ok(Box::new(QuickbuildSerialization::deserialize(x)?))); }
-					60 =>  { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }
+					1   => { sers.push(|x| Ok(Box::new(ControllablePhysicsSerialization::deserialize(x)?))); }
+					3   => { sers.push(|x| Ok(Box::new(SimplePhysicsSerialization::deserialize(x)?))); }
+					4   => { sers.push(|x| Ok(Box::new(CharacterSerialization::deserialize(x)?))); }
+					6   => { sers.push(|x| Ok(Box::new(BouncerSerialization::deserialize(x)?))); }
+					7   => { sers.push(|x| Ok(Box::new(DestroyableSerialization::deserialize(x)?))); }
+					11  => { sers.push(|x| Ok(Box::new(ItemSerialization::deserialize(x)?))); }
+					16  => { sers.push(|x| Ok(Box::new(VendorSerialization::deserialize(x)?))); }
+					17  => { sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?))); }
+					23  => { sers.push(|x| Ok(Box::new(CollectibleSerialization::deserialize(x)?))); }
+					25  => { sers.push(|x| Ok(Box::new(MovingPlatformSerialization::deserialize(x)?))); }
+					39  => { sers.push(|x| Ok(Box::new(ScriptedActivitySerialization::deserialize(x)?))); }
+					40  => { sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?))); }
+					48  => { sers.push(|x| Ok(Box::new(QuickbuildSerialization::deserialize(x)?))); }
+					60  => { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }
 					106 => { sers.push(|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?))); }
 					107 => { sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?))); }
 					109 => { sers.push(|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?))); }
 					110 => { sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?))); }
-					2 | 5 | 9 | 27 | 31 | 35 | 44 | 55 | 56 | 64 | 68 | 73 | 98 => {},
+					2 | 5 | 9 | 27 | 31 | 35 | 44 | 55 | 56 | 64 | 68 | 73 | 95| 98 => {},
 					x => panic!("{}", x),
 				}
 			}
