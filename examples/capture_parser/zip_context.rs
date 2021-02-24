@@ -23,6 +23,7 @@ use lu_packets::{
 		quickbuild::{QuickbuildConstruction, QuickbuildSerialization},
 		simple_physics::{SimplePhysicsConstruction, SimplePhysicsSerialization},
 		script::ScriptConstruction,
+		scripted_activity::{ScriptedActivityConstruction, ScriptedActivitySerialization},
 		skill::SkillConstruction,
 		vendor::{VendorConstruction, VendorSerialization},
 	},
@@ -66,6 +67,7 @@ impl ReplicaContext for ZipContext<'_> {
 				17 =>  { constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?))); }
 				23 =>  { constrs.push(|x| Ok(Box::new(CollectibleConstruction::deserialize(x)?))); }
 				25 =>  { constrs.push(|x| Ok(Box::new(MovingPlatformConstruction::deserialize(x)?))); }
+				39 =>  { constrs.push(|x| Ok(Box::new(ScriptedActivityConstruction::deserialize(x)?))); }
 				40 =>  { constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?))); }
 				44 =>  { constrs.push(|x| Ok(Box::new(FxConstruction::deserialize(x)?))); }
 				48 =>  { constrs.push(|x| Ok(Box::new(QuickbuildConstruction::deserialize(x)?))); }
@@ -100,6 +102,7 @@ impl ReplicaContext for ZipContext<'_> {
 					17 =>  { sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?))); }
 					23 =>  { sers.push(|x| Ok(Box::new(CollectibleSerialization::deserialize(x)?))); }
 					25 =>  { sers.push(|x| Ok(Box::new(MovingPlatformSerialization::deserialize(x)?))); }
+					39 =>  { sers.push(|x| Ok(Box::new(ScriptedActivitySerialization::deserialize(x)?))); }
 					40 =>  { sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?))); }
 					48 =>  { sers.push(|x| Ok(Box::new(QuickbuildSerialization::deserialize(x)?))); }
 					60 =>  { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }

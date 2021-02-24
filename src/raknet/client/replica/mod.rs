@@ -15,6 +15,7 @@ pub mod player_forced_movement;
 pub mod possession_control;
 pub mod quickbuild;
 pub mod script;
+pub mod scripted_activity;
 pub mod simple_physics;
 pub mod skill;
 pub mod vendor;

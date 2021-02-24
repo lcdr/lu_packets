@@ -4,27 +4,11 @@ use endio::Serialize;
 use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
-use crate::common::{LVec, ObjId};
+use crate::common::LVec;
 use crate::world::Vector3;
 use crate::world::gm::client::RebuildChallengeState;
 use super::{ComponentConstruction, ComponentSerialization};
-
-#[derive(Debug, PartialEq, ReplicaSerde)]
-pub struct ActivityUserInfo {
-	pub user_object_id: ObjId,
-	// todo[min_const_generics]
-	// pub activity_values: [f32; 10],
-	pub activity_value_0: f32,
-	pub activity_value_1: f32,
-	pub activity_value_2: f32,
-	pub activity_value_3: f32,
-	pub activity_value_4: f32,
-	pub activity_value_5: f32,
-	pub activity_value_6: f32,
-	pub activity_value_7: f32,
-	pub activity_value_8: f32,
-	pub activity_value_9: f32,
-}
+use super::scripted_activity::ActivityUserInfo;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct QuickbuildConstructionInfo {

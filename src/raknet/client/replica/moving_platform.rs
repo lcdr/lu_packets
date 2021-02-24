@@ -71,7 +71,7 @@ impl<'a, W: Write> Serialize<LE, BEBitWriter<W>> for &'a MovingPlatformConstruct
 	fn serialize(self, writer: &mut BEBitWriter<W>) -> Res<()> {
 		writer.write_bit(self.subcomponent_infos.is_some())?;
 		if let Some(path_info) = &self.path_info {
-			if path_info.path_name.is_empty() {
+			if !path_info.path_name.is_empty() {
 				writer.write_bit(true)?;
 				writer.write_bit(true)?;
 				crate::raknet::client::replica::ReplicaS::serialize(path_info, writer)?;
