@@ -21,6 +21,7 @@ pub mod script;
 pub mod scripted_activity;
 pub mod simple_physics;
 pub mod skill;
+pub mod switch;
 pub mod vendor;
 
 use std::fmt::Debug;

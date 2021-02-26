@@ -28,6 +28,7 @@ use lu_packets::{
 		script::ScriptConstruction,
 		scripted_activity::{ScriptedActivityConstruction, ScriptedActivitySerialization},
 		skill::SkillConstruction,
+		switch::{SwitchConstruction, SwitchSerialization},
 		vendor::{VendorConstruction, VendorSerialization},
 	},
 	world::Lot,
@@ -76,6 +77,7 @@ impl ReplicaContext for ZipContext<'_> {
 				40 =>  { constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?))); }
 				44 =>  { constrs.push(|x| Ok(Box::new(FxConstruction::deserialize(x)?))); }
 				48 =>  { constrs.push(|x| Ok(Box::new(QuickbuildConstruction::deserialize(x)?))); }
+				49 =>  { constrs.push(|x| Ok(Box::new(SwitchConstruction::deserialize(x)?))); }
 				60 =>  { constrs.push(|x| Ok(Box::new(BaseCombatAiConstruction::deserialize(x)?))); }
 				98 =>  { constrs.push(|x| Ok(Box::new(BuffConstruction::deserialize(x)?))); }
 				106 => { constrs.push(|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?))); }
@@ -83,7 +85,7 @@ impl ReplicaContext for ZipContext<'_> {
 				108 => { constrs.push(|x| Ok(Box::new(PossessableConstruction::deserialize(x)?))); }
 				109 => { constrs.push(|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?))); }
 				110 => { constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?))); }
-				2 | 27 | 31 | 35 | 42 | 55 | 56 | 64 | 68 | 95 | 73 => {},
+				2 | 12 | 27 | 31 | 35 | 36 | 42 | 45 | 55 | 56 | 64 | 68 | 95 | 73 | 104 | 113 | 114 => {},
 				x => panic!("{}", x),
 			}
 		}
@@ -113,13 +115,14 @@ impl ReplicaContext for ZipContext<'_> {
 					39  => { sers.push(|x| Ok(Box::new(ScriptedActivitySerialization::deserialize(x)?))); }
 					40  => { sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?))); }
 					48  => { sers.push(|x| Ok(Box::new(QuickbuildSerialization::deserialize(x)?))); }
+					49  => { sers.push(|x| Ok(Box::new(SwitchSerialization::deserialize(x)?))); }
 					60  => { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }
 					106 => { sers.push(|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?))); }
 					107 => { sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?))); }
 					108 => { sers.push(|x| Ok(Box::new(PossessableSerialization::deserialize(x)?))); }
 					109 => { sers.push(|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?))); }
 					110 => { sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?))); }
-					2 | 5 | 9 | 27 | 31 | 35 | 42 | 44 | 55 | 56 | 64 | 68 | 73 | 95| 98 => {},
+					2 | 5 | 9 | 12 | 27 | 31 | 35 | 36 | 42 | 44 | 45 | 55 | 56 | 64 | 68 | 73 | 95 | 98 | 104 | 113 | 114 => {},
 					x => panic!("{}", x),
 				}
 			}
