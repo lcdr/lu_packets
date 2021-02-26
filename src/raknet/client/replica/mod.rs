@@ -5,6 +5,7 @@ pub mod buff;
 pub mod character;
 pub mod collectible;
 pub mod controllable_physics;
+pub mod donation_vendor;
 pub mod destroyable;
 pub mod fx;
 pub mod inventory;
