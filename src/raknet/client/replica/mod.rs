@@ -13,6 +13,7 @@ pub mod level_progression;
 pub mod moving_platform;
 pub mod phantom_physics;
 pub mod player_forced_movement;
+pub mod pet;
 pub mod possessable;
 pub mod possession_control;
 pub mod quickbuild;

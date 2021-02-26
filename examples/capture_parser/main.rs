@@ -20,7 +20,7 @@ use self::zip_context::ZipContext;
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 24] = [108, 1, 3, 40, 98, 7, 23, 110, 109, 106, 4, 17, 5, 9, 60, 11, 48, 25, 16, 6, 39, 2, 44, 107];
+const COMP_ORDER : [u32; 25] = [108, 1, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 6, 39, 2, 44, 107];
 
 pub struct Cdclient {
 	conn: Connection,
@@ -46,10 +46,12 @@ impl Cdclient {
 					_ => {},
 				}
 			}
-			dbg!(&comps);
+			// special case: utter bodge
+			if comps.contains(&26) {
+				comps.swap_remove(comps.iter().position(|&x| x == 11).unwrap());
+			}
 			comps.sort();
 			comps.dedup();
-			dbg!(&comps);
 			comps.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
 			dbg!(&comps);
 			self.comp_cache.insert(lot, comps);
@@ -153,9 +155,13 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("[1647]")
 		&& !file.name().contains("[1648]"))
 		|| (file.name().contains("[24]")
+		&& !file.name().contains("(2248)")
 		&& !file.name().contains("(2365)")
+		&& !file.name().contains("(4734)")
 		&& !file.name().contains("(4930)")
 		&& !file.name().contains("(5635)")
+		&& !file.name().contains("(5651)")
+		&& !file.name().contains("(5652)")
 		&& !file.name().contains("(5958)")
 		&& !file.name().contains("(6007)")
 		&& !file.name().contains("(6010)")
@@ -164,7 +170,8 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("(6289)")
 		&& !file.name().contains("(6319)")
 		&& !file.name().contains("(7282)")
-		&& !file.name().contains("(8304)"))
+		&& !file.name().contains("(8304)")
+		&& !file.name().contains("(10097)"))
 		|| file.name().contains("[27]")
 		{
 			let mut ctx = ZipContext { zip: file, lots: &mut lots, cdclient, assert_fully_read: true };
