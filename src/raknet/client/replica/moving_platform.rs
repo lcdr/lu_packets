@@ -7,6 +7,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 use crate::common::LuVarWString;
 use crate::world::Vector3;
 use super::{ComponentConstruction, ComponentSerialization, ReplicaD};
+use super::simple_physics::PositionRotationInfo;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct PlatformMoverInfo {
@@ -26,9 +27,24 @@ pub struct PlatformMoverInfo {
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
+pub struct PlatformSimpleMoverExtraInfo {
+	/// todo: bitfield
+	pub state: u32,
+	pub current_waypoint_index: u32,
+	pub is_in_reverse: bool,
+}
+
+#[derive(Debug, PartialEq, ReplicaSerde)]
+pub struct PlatformSimpleMoverInfo {
+	pub start_point_position_rotation_info: Option<Option<PositionRotationInfo>>,
+	pub extra_info: Option<PlatformSimpleMoverExtraInfo>,
+}
+
+#[derive(Debug, PartialEq, ReplicaSerde)]
 #[repr(u32)]
 pub enum PlatformSubcomponentInfo {
 	Mover(Option<PlatformMoverInfo>) = 4,
+	SimpleMover(PlatformSimpleMoverInfo) = 5,
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]

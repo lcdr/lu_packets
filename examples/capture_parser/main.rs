@@ -173,7 +173,14 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("(7796)")
 		&& !file.name().contains("(8304)")
 		&& !file.name().contains("(10042)")
-		&& !file.name().contains("(10097)"))
+		&& !file.name().contains("(10097)")
+		&& !file.name().contains("(14376)")
+		&& !file.name().contains("(14447)")
+		&& !file.name().contains("(14449)")
+		&& !file.name().contains("(14476)")
+		&& !file.name().contains("(14477)")
+		&& !file.name().contains("(14510)")
+		&& !file.name().contains("(14539)"))
 		|| file.name().contains("[27]")
 		{
 			let mut ctx = ZipContext { zip: file, lots: &mut lots, cdclient, assert_fully_read: true };
