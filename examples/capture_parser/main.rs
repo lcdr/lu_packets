@@ -20,7 +20,7 @@ use self::zip_context::ZipContext;
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 27] = [108, 1, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 39, 6, 49, 2, 44, 107];
+const COMP_ORDER : [u32; 28] = [108, 1, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 39, 42, 6, 49, 2, 44, 107];
 
 pub struct Cdclient {
 	conn: Connection,
@@ -31,28 +31,29 @@ impl Cdclient {
 	fn get_comps(&mut self, lot: Lot) -> &Vec<u32> {
 		if !self.comp_cache.contains_key(&lot) {
 			let mut stmt = self.conn.prepare("select component_type from componentsregistry where id = ?").unwrap();
-			let rows = stmt.query_map(params![lot], |row| row.get(0)).unwrap();
+			let mut rows: Vec<_> = stmt.query_map(params![lot], |row| row.get(0)).unwrap().map(|x| x.unwrap()).collect();
+			rows.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
 			let mut comps = vec![];
 			for row in rows {
-				let value = row.unwrap();
-				comps.push(value);
-				// special case: implied components
-				match value {
+				// special case: utter bodge
+				match row {
 					2  => { comps.push(44); }
 					4  => { comps.push(110); comps.push(109); comps.push(106); }
 					7  => { comps.push(98); }
-					23 => { comps.push(7); }
-					48 => { comps.push(7); }
+					23 | 48 => {
+						if !comps.contains(&7) {
+							comps.push(7);
+						}
+					}
 					_ => {},
 				}
+				comps.push(row);
 			}
 			// special case: utter bodge
 			if comps.contains(&26) {
-				comps.swap_remove(comps.iter().position(|&x| x == 11).unwrap());
+				comps.remove(comps.iter().position(|&x| x == 11).unwrap());
+				comps.remove(comps.iter().position(|&x| x == 42).unwrap());
 			}
-			comps.sort();
-			comps.dedup();
-			comps.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
 			dbg!(&comps);
 			self.comp_cache.insert(lot, comps);
 		}
@@ -159,20 +160,31 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("(2365)")
 		&& !file.name().contains("(4734)")
 		&& !file.name().contains("(4930)")
+		&& !file.name().contains("(4955)")
+		&& !file.name().contains("(4967)")
+		&& !file.name().contains("(4990)")
 		&& !file.name().contains("(5635)")
 		&& !file.name().contains("(5651)")
 		&& !file.name().contains("(5652)")
+		&& !file.name().contains("(5903)")
+		&& !file.name().contains("(5904)")
 		&& !file.name().contains("(5958)")
 		&& !file.name().contains("(6007)")
 		&& !file.name().contains("(6010)")
+		&& !file.name().contains("(6097)")
 		&& !file.name().contains("(6209)")
 		&& !file.name().contains("(6267)")
 		&& !file.name().contains("(6289)")
+		&& !file.name().contains("(6290)")
 		&& !file.name().contains("(6319)")
+		&& !file.name().contains("(7001)")
 		&& !file.name().contains("(7282)")
 		&& !file.name().contains("(7796)")
 		&& !file.name().contains("(8304)")
+		&& !file.name().contains("(9741)")
 		&& !file.name().contains("(10042)")
+		&& !file.name().contains("(10046)")
+		&& !file.name().contains("(10055)")
 		&& !file.name().contains("(10097)")
 		&& !file.name().contains("(13773)")
 		&& !file.name().contains("(14376)")
@@ -180,8 +192,17 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("(14449)")
 		&& !file.name().contains("(14476)")
 		&& !file.name().contains("(14477)")
+		&& !file.name().contains("(14505)")
 		&& !file.name().contains("(14510)")
-		&& !file.name().contains("(14539)"))
+		&& !file.name().contains("(14539)")
+		&& !file.name().contains("(14540)")
+		&& !file.name().contains("(14541)")
+		&& !file.name().contains("(14542)")
+		&& !file.name().contains("(14543)")
+		&& !file.name().contains("(14544)")
+		&& !file.name().contains("(14545)")
+		&& !file.name().contains("(14546)")
+		&& !file.name().contains("(14547)"))
 		|| file.name().contains("[27]")
 		{
 			let mut ctx = ZipContext { zip: file, lots: &mut lots, cdclient, assert_fully_read: true };

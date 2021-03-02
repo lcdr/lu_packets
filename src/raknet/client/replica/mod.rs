@@ -11,6 +11,7 @@ pub mod fx;
 pub mod inventory;
 pub mod item;
 pub mod level_progression;
+pub mod mutable_model_behavior;
 pub mod moving_platform;
 pub mod phantom_physics;
 pub mod player_forced_movement;
