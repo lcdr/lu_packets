@@ -98,7 +98,7 @@ pub trait ComponentSerialization: Debug {
 }
 
 pub trait ReplicaContext {
-	fn get_comp_constructions<R: Read>(&mut self, network_id: u16, lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>>;
+	fn get_comp_constructions<R: Read>(&mut self, network_id: u16, lot: Lot, config: &Option<LuNameValue>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>>;
 	fn get_comp_serializations<R: Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>>;
 }
 
@@ -163,7 +163,7 @@ impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaConstruction {
 		let gm_level          = ReplicaD::deserialize(&mut bit_reader)?;
 		let parent_child_info = ReplicaD::deserialize(&mut bit_reader)?;
 		let mut components = vec![];
-		for new in unsafe {bit_reader.get_mut_unchecked()}.get_comp_constructions(network_id, lot) {
+		for new in unsafe {bit_reader.get_mut_unchecked()}.get_comp_constructions(network_id, lot, &config) {
 			components.push(new(&mut bit_reader)?);
 		}
 
@@ -276,7 +276,7 @@ impl Read for DummyContext<'_> {
 
 #[cfg(test)]
 impl ReplicaContext for DummyContext<'_> {
-	fn get_comp_constructions<R: Read>(&mut self, _network_id: u16, _lot: Lot) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
+	fn get_comp_constructions<R: Read>(&mut self, _network_id: u16, _lot: Lot, config: &Option<LuNameValue>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		vec![]
 	}
 

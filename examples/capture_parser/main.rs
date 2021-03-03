@@ -20,8 +20,6 @@ use self::zip_context::ZipContext;
 
 static mut PRINT_PACKETS: bool = false;
 
-const COMP_ORDER : [u32; 28] = [108, 1, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 39, 42, 6, 49, 2, 44, 107];
-
 pub struct Cdclient {
 	conn: Connection,
 	comp_cache: HashMap<Lot, Vec<u32>>,
@@ -31,31 +29,8 @@ impl Cdclient {
 	fn get_comps(&mut self, lot: Lot) -> &Vec<u32> {
 		if !self.comp_cache.contains_key(&lot) {
 			let mut stmt = self.conn.prepare("select component_type from componentsregistry where id = ?").unwrap();
-			let mut rows: Vec<_> = stmt.query_map(params![lot], |row| row.get(0)).unwrap().map(|x| x.unwrap()).collect();
-			rows.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
-			let mut comps = vec![];
-			for row in rows {
-				// special case: utter bodge
-				match row {
-					2  => { comps.push(44); }
-					4  => { comps.push(110); comps.push(109); comps.push(106); }
-					7  => { comps.push(98); }
-					23 | 48 => {
-						if !comps.contains(&7) {
-							comps.push(7);
-						}
-					}
-					_ => {},
-				}
-				comps.push(row);
-			}
-			// special case: utter bodge
-			if comps.contains(&26) {
-				comps.remove(comps.iter().position(|&x| x == 11).unwrap());
-				comps.remove(comps.iter().position(|&x| x == 42).unwrap());
-			}
-			dbg!(&comps);
-			self.comp_cache.insert(lot, comps);
+			let rows: Vec<_> = stmt.query_map(params![lot], |row| row.get(0)).unwrap().map(|x| x.unwrap()).collect();
+			self.comp_cache.insert(lot, rows);
 		}
 		&self.comp_cache.get(&lot).unwrap()
 	}
@@ -81,7 +56,7 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 
 	let src = BufReader::new(File::open(path).unwrap());
 	let mut zip = ZipArchive::new(src).unwrap();
-	let mut lots = HashMap::new();
+	let mut comps = HashMap::new();
 	let mut i = 0;
 	let mut packet_count = 0;
 	while i < zip.len() {
@@ -178,14 +153,17 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("(6290)")
 		&& !file.name().contains("(6319)")
 		&& !file.name().contains("(7001)")
+		&& !file.name().contains("(7100)")
 		&& !file.name().contains("(7282)")
 		&& !file.name().contains("(7796)")
 		&& !file.name().contains("(8304)")
+		&& !file.name().contains("(8575)")
 		&& !file.name().contains("(9741)")
 		&& !file.name().contains("(10042)")
 		&& !file.name().contains("(10046)")
 		&& !file.name().contains("(10055)")
 		&& !file.name().contains("(10097)")
+		&& !file.name().contains("(12916)")
 		&& !file.name().contains("(13773)")
 		&& !file.name().contains("(14376)")
 		&& !file.name().contains("(14447)")
@@ -205,7 +183,7 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("(14547)"))
 		|| file.name().contains("[27]")
 		{
-			let mut ctx = ZipContext { zip: file, lots: &mut lots, cdclient, assert_fully_read: true };
+			let mut ctx = ZipContext { zip: file, comps: &mut comps, cdclient, assert_fully_read: true };
 			let msg: WorldClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.zip.name(), ctx.zip.size()));
 			file = ctx.zip;
 			if unsafe { PRINT_PACKETS } {
