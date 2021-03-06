@@ -69,14 +69,20 @@ impl ZipContext<'_> {
 	fn apply_config_overrides(comps: &mut Vec<u32>, config: &Option<LuNameValue>) {
 		if comps.contains(&42) {
 			if let Some(conf) = config {
-				if let Some(LnvValue::I32(m_type)) = conf.get(&lu!("modelType")) {
-					let new_phys = if *m_type == 0 { 1 } else { 3 };
-					if let Some(phys_index) = comps.iter().position(|&x| x == 1 || x == 3) {
-						comps[phys_index] = new_phys;
-					} else {
-						comps.push(new_phys);
+				if conf.contains_key(&lu!("modelBehaviors")) {
+					if let Some(LnvValue::I32(m_type)) = conf.get(&lu!("modelType")) {
+						let new_phys = if *m_type == 0 { 1 } else { 3 };
+						if let Some(phys_index) = comps.iter().position(|&x| x == 1 || x == 3) {
+							comps[phys_index] = new_phys;
+						} else {
+							comps.push(new_phys);
+						}
+						return;
 					}
 				}
+			}
+			if comps.iter().position(|&x| x == 1 || x == 3).is_none() {
+				comps.push(3);
 			}
 		}
 	}
