@@ -42,7 +42,7 @@ use zip::read::ZipFile;
 
 use super::Cdclient;
 
-const COMP_ORDER : [u32; 31] = [108, 61, 1, 30, 20, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 39, 42, 6, 49, 2, 44, 107];
+const COMP_ORDER : [u32; 32] = [108, 61, 1, 30, 20, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 102, 39, 42, 6, 49, 2, 44, 107];
 
 pub struct ZipContext<'a> {
 	pub zip: ZipFile<'a>,
@@ -134,6 +134,7 @@ impl ZipContext<'_> {
 				61 =>  { constrs.push(|x| Ok(Box::new(ModuleAssemblyConstruction::deserialize(x)?))); }
 				98 =>  { constrs.push(|x| Ok(Box::new(BuffConstruction::deserialize(x)?))); }
 				100 => { constrs.push(|x| Ok(Box::new(DonationVendorConstruction::deserialize(x)?))); }
+				102 => { constrs.push(|x| Ok(Box::new(VendorConstruction::deserialize(x)?))); }
 				106 => { constrs.push(|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?))); }
 				107 => { constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?))); }
 				108 => { constrs.push(|x| Ok(Box::new(PossessableConstruction::deserialize(x)?))); }
@@ -198,6 +199,7 @@ impl ReplicaContext for ZipContext<'_> {
 					49  => { sers.push(|x| Ok(Box::new(SwitchSerialization::deserialize(x)?))); }
 					60  => { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }
 					100 => { sers.push(|x| Ok(Box::new(DonationVendorSerialization::deserialize(x)?))); }
+					102 => { sers.push(|x| Ok(Box::new(VendorSerialization::deserialize(x)?))); }
 					106 => { sers.push(|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?))); }
 					107 => { sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?))); }
 					108 => { sers.push(|x| Ok(Box::new(PossessableSerialization::deserialize(x)?))); }
