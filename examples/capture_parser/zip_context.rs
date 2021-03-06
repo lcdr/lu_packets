@@ -19,6 +19,7 @@ use lu_packets::{
 		inventory::{InventoryConstruction, InventorySerialization},
 		item::{ItemConstruction, ItemSerialization},
 		level_progression::{LevelProgressionConstruction, LevelProgressionSerialization},
+		module_assembly::ModuleAssemblyConstruction,
 		moving_platform::{MovingPlatformConstruction, MovingPlatformSerialization},
 		mutable_model_behavior::{MutableModelBehaviorConstruction, MutableModelBehaviorSerialization},
 		phantom_physics::{PhantomPhysicsConstruction, PhantomPhysicsSerialization},
@@ -134,6 +135,7 @@ impl ZipContext<'_> {
 				48 =>  { constrs.push(|x| Ok(Box::new(QuickbuildConstruction::deserialize(x)?))); }
 				49 =>  { constrs.push(|x| Ok(Box::new(SwitchConstruction::deserialize(x)?))); }
 				60 =>  { constrs.push(|x| Ok(Box::new(BaseCombatAiConstruction::deserialize(x)?))); }
+				61 =>  { constrs.push(|x| Ok(Box::new(ModuleAssemblyConstruction::deserialize(x)?))); }
 				98 =>  { constrs.push(|x| Ok(Box::new(BuffConstruction::deserialize(x)?))); }
 				100 => { constrs.push(|x| Ok(Box::new(DonationVendorConstruction::deserialize(x)?))); }
 				106 => { constrs.push(|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?))); }
