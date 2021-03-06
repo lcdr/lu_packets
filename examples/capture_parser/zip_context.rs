@@ -54,16 +54,14 @@ pub struct ZipContext<'a> {
 impl ZipContext<'_> {
 	fn apply_whitelist(comps: &mut Vec<u32>, config: &Option<LuNameValue>) {
 		if let Some(conf) = config {
-			if let Some(whitelist_id) = conf.get(&lu!("componentWhitelist")) {
-				if let LnvValue::I32(1) = whitelist_id {
-					dbg!("applying whitelist");
-					comps.retain(|&x|
-						match x  {
-							1 | 2 | 3 | 7 | 10 | 11 | 24 | 42 => true,
-							_ => false,
-						}
-					);
-				}
+			if let Some(LnvValue::I32(1)) = conf.get(&lu!("componentWhitelist")) {
+				dbg!("applying whitelist");
+				comps.retain(|&x|
+					match x  {
+						1 | 2 | 3 | 7 | 10 | 11 | 24 | 42 => true,
+						_ => false,
+					}
+				);
 			}
 		}
 	}
@@ -71,14 +69,12 @@ impl ZipContext<'_> {
 	fn apply_config_overrides(comps: &mut Vec<u32>, config: &Option<LuNameValue>) {
 		if comps.contains(&42) {
 			if let Some(conf) = config {
-				if let Some(model_type) = conf.get(&lu!("modelType")) {
-					dbg!(model_type);
-					if let LnvValue::I32(m_type) = model_type {
-						if *m_type == 0 {
-							comps.push(1);
-						} else {
-							comps.push(3);
-						}
+				if let Some(LnvValue::I32(m_type)) = conf.get(&lu!("modelType")) {
+					let new_phys = if *m_type == 0 { 1 } else { 3 };
+					if let Some(phys_index) = comps.iter().position(|&x| x == 1 || x == 3) {
+						comps[phys_index] = new_phys;
+					} else {
+						comps.push(new_phys);
 					}
 				}
 			}
