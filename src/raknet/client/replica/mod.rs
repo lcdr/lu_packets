@@ -277,7 +277,7 @@ impl Read for DummyContext<'_> {
 
 #[cfg(test)]
 impl ReplicaContext for DummyContext<'_> {
-	fn get_comp_constructions<R: Read>(&mut self, _network_id: u16, _lot: Lot, config: &Option<LuNameValue>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
+	fn get_comp_constructions<R: Read>(&mut self, _network_id: u16, _lot: Lot, _config: &Option<LuNameValue>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		vec![]
 	}
 

@@ -41,7 +41,7 @@ use zip::read::ZipFile;
 
 use super::Cdclient;
 
-const COMP_ORDER : [u32; 29] = [108, 1, 20, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 39, 42, 6, 49, 2, 44, 107];
+const COMP_ORDER : [u32; 31] = [108, 61, 1, 30, 20, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 39, 42, 6, 49, 2, 44, 107];
 
 pub struct ZipContext<'a> {
 	pub zip: ZipFile<'a>,
@@ -50,61 +50,68 @@ pub struct ZipContext<'a> {
 	pub assert_fully_read: bool,
 }
 
-impl std::io::Read for ZipContext<'_> {
-	fn read(&mut self, buf: &mut [u8]) -> Res<usize> {
-		self.zip.read(buf)
+impl ZipContext<'_> {
+	fn apply_whitelist(comps: &mut Vec<u32>, config: &Option<LuNameValue>) {
+		if let Some(conf) = config {
+			if let Some(whitelist_id) = conf.get(&lu!("componentWhitelist")) {
+				if let LnvValue::I32(1) = whitelist_id {
+					dbg!("applying whitelist");
+					comps.retain(|&x|
+						match x  {
+							1 | 2 | 3 | 7 | 10 | 11 | 24 | 42 => true,
+							_ => false,
+						}
+					);
+				}
+			}
+		}
 	}
-}
 
-// hacky hardcoded components to be able to read player replicas without DB lookup
-impl ReplicaContext for ZipContext<'_> {
-	fn get_comp_constructions<R: std::io::Read>(&mut self, network_id: u16, lot: Lot, config: &Option<LuNameValue>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
-		use endio::Deserialize;
-
-		let mut rows = self.cdclient.get_comps(lot).clone();
-
-		if rows.contains(&42) {
+	fn apply_config_overrides(comps: &mut Vec<u32>, config: &Option<LuNameValue>) {
+		if comps.contains(&42) {
 			if let Some(conf) = config {
 				if let Some(model_type) = conf.get(&lu!("modelType")) {
 					dbg!(model_type);
 					if let LnvValue::I32(m_type) = model_type {
 						if *m_type == 0 {
-							rows.push(1);
+							comps.push(1);
 						} else {
-							rows.push(3);
+							comps.push(3);
 						}
 					}
 				}
 			}
 		}
+	}
 
-		rows.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
-
-		let mut comps = vec![];
-			for row in rows {
-				// special case: utter bodge
-				match row {
-					2  => { comps.push(44); }
-					4  => { comps.push(110); comps.push(109); comps.push(106); }
-					7  => { comps.push(98); }
-					23 | 48 => {
-						if !comps.contains(&7) {
-							comps.push(7);
-						}
-					}
-					_ => {},
-				}
-				comps.push(row);
-			}
+	fn apply_component_overrides(comps: &Vec<u32>, final_comps: &mut Vec<u32>) {
+		for comp in comps {
 			// special case: utter bodge
-			if comps.contains(&26) {
-				comps.remove(comps.iter().position(|&x| x == 11).unwrap());
-				comps.remove(comps.iter().position(|&x| x == 42).unwrap());
+			match comp {
+				2  => { final_comps.push(44); }
+				4  => { final_comps.push(110); final_comps.push(109); final_comps.push(106); }
+				7  => { final_comps.push(98); }
+				23 | 48 => {
+					if !final_comps.contains(&7) {
+						final_comps.push(7);
+					}
+				}
+				_ => {},
 			}
-			dbg!(&comps);
+			final_comps.push(*comp);
+		}
+		// special case: utter bodge
+		if final_comps.contains(&26) {
+			final_comps.remove(final_comps.iter().position(|&x| x == 11).unwrap());
+			final_comps.remove(final_comps.iter().position(|&x| x == 42).unwrap());
+		}
+	}
+
+	fn map_constrs<R: std::io::Read>(comps: &Vec<u32>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
+		use endio::Deserialize;
 
 		let mut constrs: Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> = vec![];
-		for comp in &comps {
+		for comp in comps {
 			match comp {
 				1  =>  { constrs.push(|x| Ok(Box::new(ControllablePhysicsConstruction::deserialize(x)?))); }
 				3  =>  { constrs.push(|x| Ok(Box::new(SimplePhysicsConstruction::deserialize(x)?))); }
@@ -134,11 +141,36 @@ impl ReplicaContext for ZipContext<'_> {
 				108 => { constrs.push(|x| Ok(Box::new(PossessableConstruction::deserialize(x)?))); }
 				109 => { constrs.push(|x| Ok(Box::new(LevelProgressionConstruction::deserialize(x)?))); }
 				110 => { constrs.push(|x| Ok(Box::new(PossessionControlConstruction::deserialize(x)?))); }
-				2 | 12 | 24 | 27 | 31 | 35 | 36 | 43 | 45 | 55 | 56 | 57 | 64 | 65 | 67 | 68 | 73 | 78 | 95 | 104 | 113 | 114 => {},
+				2 | 12 | 24 | 27 | 31 | 35 | 36 | 43 | 45 | 55 | 56 | 57 | 64 | 65 | 67 | 68 | 73 | 74 | 78 | 95 | 104 | 113 | 114 => {},
 				x => panic!("{}", x),
 			}
 		}
-		self.comps.insert(network_id, comps);
+		constrs
+	}
+}
+
+impl std::io::Read for ZipContext<'_> {
+	fn read(&mut self, buf: &mut [u8]) -> Res<usize> {
+		self.zip.read(buf)
+	}
+}
+
+// hacky hardcoded components to be able to read player replicas without DB lookup
+impl ReplicaContext for ZipContext<'_> {
+	fn get_comp_constructions<R: std::io::Read>(&mut self, network_id: u16, lot: Lot, config: &Option<LuNameValue>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
+		let mut comps = self.cdclient.get_comps(lot).clone();
+
+		Self::apply_whitelist(&mut comps, config);
+		Self::apply_config_overrides(&mut comps, config);
+
+		comps.sort_by_key(|x| COMP_ORDER.iter().position(|y| y == x).unwrap_or(usize::MAX));
+		comps.dedup();
+
+		let mut final_comps = vec![];
+		Self::apply_component_overrides(&comps, &mut final_comps);
+		dbg!(&final_comps);
+		let constrs = Self::map_constrs(&final_comps);
+		self.comps.insert(network_id, final_comps);
 		constrs
 	}
 
@@ -173,7 +205,7 @@ impl ReplicaContext for ZipContext<'_> {
 					108 => { sers.push(|x| Ok(Box::new(PossessableSerialization::deserialize(x)?))); }
 					109 => { sers.push(|x| Ok(Box::new(LevelProgressionSerialization::deserialize(x)?))); }
 					110 => { sers.push(|x| Ok(Box::new(PossessionControlSerialization::deserialize(x)?))); }
-					2 | 5 | 9 | 12 | 24 | 27 | 31 | 35 | 36 | 43 | 44 | 45 | 55 | 56 | 57 | 64 | 65 | 67 | 68 | 73 | 78 | 95 | 98 | 104 | 113 | 114 => {},
+					2 | 5 | 9 | 12 | 24 | 27 | 31 | 35 | 36 | 43 | 44 | 45 | 55 | 56 | 57 | 61 | 64 | 65 | 67 | 68 | 73 | 74 | 78 | 95 | 98 | 104 | 113 | 114 => {},
 					x => panic!("{}", x),
 				}
 			}
