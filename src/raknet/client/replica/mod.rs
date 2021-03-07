@@ -1,3 +1,4 @@
+pub mod achievement_vendor;
 pub mod base_combat_ai;
 pub mod bbb;
 pub mod bouncer;

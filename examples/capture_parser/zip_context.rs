@@ -6,6 +6,7 @@ use lu_packets::{
 	lu,
 	raknet::client::replica::{
 		ComponentConstruction, ComponentSerialization, ReplicaContext,
+		achievement_vendor::{AchievementVendorConstruction, AchievementVendorSerialization},
 		base_combat_ai::{BaseCombatAiConstruction, BaseCombatAiSerialization},
 		bbb::{BbbConstruction, BbbSerialization},
 		bouncer::{BouncerConstruction, BouncerSerialization},
@@ -142,7 +143,7 @@ impl ZipContext<'_> {
 				61 =>  { constrs.push(|x| Ok(Box::new(ModuleAssemblyConstruction::deserialize(x)?))); }
 				98 =>  { constrs.push(|x| Ok(Box::new(BuffConstruction::deserialize(x)?))); }
 				100 => { constrs.push(|x| Ok(Box::new(DonationVendorConstruction::deserialize(x)?))); }
-				102 => { constrs.push(|x| Ok(Box::new(VendorConstruction::deserialize(x)?))); }
+				102 => { constrs.push(|x| Ok(Box::new(AchievementVendorConstruction::deserialize(x)?))); }
 				106 => { constrs.push(|x| Ok(Box::new(PlayerForcedMovementConstruction::deserialize(x)?))); }
 				107 => { constrs.push(|x| Ok(Box::new(BbbConstruction::deserialize(x)?))); }
 				108 => { constrs.push(|x| Ok(Box::new(PossessableConstruction::deserialize(x)?))); }
@@ -208,7 +209,7 @@ impl ReplicaContext for ZipContext<'_> {
 					49  => { sers.push(|x| Ok(Box::new(SwitchSerialization::deserialize(x)?))); }
 					60  => { sers.push(|x| Ok(Box::new(BaseCombatAiSerialization::deserialize(x)?))); }
 					100 => { sers.push(|x| Ok(Box::new(DonationVendorSerialization::deserialize(x)?))); }
-					102 => { sers.push(|x| Ok(Box::new(VendorSerialization::deserialize(x)?))); }
+					102 => { sers.push(|x| Ok(Box::new(AchievementVendorSerialization::deserialize(x)?))); }
 					106 => { sers.push(|x| Ok(Box::new(PlayerForcedMovementSerialization::deserialize(x)?))); }
 					107 => { sers.push(|x| Ok(Box::new(BbbSerialization::deserialize(x)?))); }
 					108 => { sers.push(|x| Ok(Box::new(PossessableSerialization::deserialize(x)?))); }
