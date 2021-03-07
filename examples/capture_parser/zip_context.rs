@@ -29,9 +29,10 @@ use lu_packets::{
 		possession_control::{PossessionControlConstruction, PossessionControlSerialization},
 		quickbuild::{QuickbuildConstruction, QuickbuildSerialization},
 		rigid_body_phantom_physics::{RigidBodyPhantomPhysicsConstruction, RigidBodyPhantomPhysicsSerialization},
-		simple_physics::{SimplePhysicsConstruction, SimplePhysicsSerialization},
 		script::ScriptConstruction,
 		scripted_activity::{ScriptedActivityConstruction, ScriptedActivitySerialization},
+		shooting_gallery::{ShootingGalleryConstruction, ShootingGallerySerialization},
+		simple_physics::{SimplePhysicsConstruction, SimplePhysicsSerialization},
 		skill::SkillConstruction,
 		switch::{SwitchConstruction, SwitchSerialization},
 		vendor::{VendorConstruction, VendorSerialization},
@@ -42,7 +43,7 @@ use zip::read::ZipFile;
 
 use super::Cdclient;
 
-const COMP_ORDER : [u32; 32] = [108, 61, 1, 30, 20, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 102, 39, 42, 6, 49, 2, 44, 107];
+const COMP_ORDER: [u32; 33] = [108, 61, 1, 30, 20, 3, 40, 98, 7, 23, 110, 109, 106, 4, 26, 17, 5, 9, 60, 11, 48, 25, 16, 100, 102, 19, 39, 42, 6, 49, 2, 44, 107];
 
 pub struct ZipContext<'a> {
 	pub zip: ZipFile<'a>,
@@ -126,6 +127,7 @@ impl ZipContext<'_> {
 				11 =>  { constrs.push(|x| Ok(Box::new(ItemConstruction::deserialize(x)?))); }
 				16 =>  { constrs.push(|x| Ok(Box::new(VendorConstruction::deserialize(x)?))); }
 				17 =>  { constrs.push(|x| Ok(Box::new(InventoryConstruction::deserialize(x)?))); }
+				19 =>  { constrs.push(|x| Ok(Box::new(ShootingGalleryConstruction::deserialize(x)?))); }
 				20 =>  { constrs.push(|x| Ok(Box::new(RigidBodyPhantomPhysicsConstruction::deserialize(x)?))); }
 				23 =>  { constrs.push(|x| Ok(Box::new(CollectibleConstruction::deserialize(x)?))); }
 				25 =>  { constrs.push(|x| Ok(Box::new(MovingPlatformConstruction::deserialize(x)?))); }
@@ -194,6 +196,7 @@ impl ReplicaContext for ZipContext<'_> {
 					11  => { sers.push(|x| Ok(Box::new(ItemSerialization::deserialize(x)?))); }
 					16  => { sers.push(|x| Ok(Box::new(VendorSerialization::deserialize(x)?))); }
 					17  => { sers.push(|x| Ok(Box::new(InventorySerialization::deserialize(x)?))); }
+					19  => { sers.push(|x| Ok(Box::new(ShootingGallerySerialization::deserialize(x)?))); }
 					20  => { sers.push(|x| Ok(Box::new(RigidBodyPhantomPhysicsSerialization::deserialize(x)?))); }
 					23  => { sers.push(|x| Ok(Box::new(CollectibleSerialization::deserialize(x)?))); }
 					25  => { sers.push(|x| Ok(Box::new(MovingPlatformSerialization::deserialize(x)?))); }

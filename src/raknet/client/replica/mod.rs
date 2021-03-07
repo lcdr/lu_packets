@@ -23,6 +23,7 @@ pub mod quickbuild;
 pub mod rigid_body_phantom_physics;
 pub mod script;
 pub mod scripted_activity;
+pub mod shooting_gallery;
 pub mod simple_physics;
 pub mod skill;
 pub mod switch;
