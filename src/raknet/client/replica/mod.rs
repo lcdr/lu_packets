@@ -12,6 +12,7 @@ pub mod fx;
 pub mod inventory;
 pub mod item;
 pub mod level_progression;
+pub mod lup_exhibit;
 pub mod mutable_model_behavior;
 pub mod module_assembly;
 pub mod moving_platform;
