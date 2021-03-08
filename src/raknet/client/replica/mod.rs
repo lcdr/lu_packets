@@ -22,6 +22,7 @@ pub mod pet;
 pub mod possessable;
 pub mod possession_control;
 pub mod quickbuild;
+pub mod racing_control;
 pub mod rigid_body_phantom_physics;
 pub mod script;
 pub mod scripted_activity;
