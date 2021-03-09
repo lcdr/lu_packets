@@ -30,6 +30,7 @@ pub mod shooting_gallery;
 pub mod simple_physics;
 pub mod skill;
 pub mod switch;
+pub mod vehicle_physics;
 pub mod vendor;
 
 use std::fmt::Debug;

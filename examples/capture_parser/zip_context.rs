@@ -38,6 +38,7 @@ use lu_packets::{
 		simple_physics::{SimplePhysicsConstruction, SimplePhysicsSerialization},
 		skill::SkillConstruction,
 		switch::{SwitchConstruction, SwitchSerialization},
+		vehicle_physics::{VehiclePhysicsConstruction, VehiclePhysicsSerialization},
 		vendor::{VendorConstruction, VendorSerialization},
 	},
 	world::{Lot, LuNameValue, LnvValue},
@@ -59,7 +60,6 @@ impl ZipContext<'_> {
 	fn apply_whitelist(comps: &mut Vec<u32>, config: &Option<LuNameValue>) {
 		if let Some(conf) = config {
 			if let Some(LnvValue::I32(1)) = conf.get(&lu!("componentWhitelist")) {
-				dbg!("applying whitelist");
 				comps.retain(|&x|
 					match x  {
 						1 | 2 | 3 | 7 | 10 | 11 | 24 | 42 => true,
@@ -135,6 +135,7 @@ impl ZipContext<'_> {
 				23 =>  { constrs.push(|x| Ok(Box::new(CollectibleConstruction::deserialize(x)?))); }
 				25 =>  { constrs.push(|x| Ok(Box::new(MovingPlatformConstruction::deserialize(x)?))); }
 				26 =>  { constrs.push(|x| Ok(Box::new(PetConstruction::deserialize(x)?))); }
+				30 =>  { constrs.push(|x| Ok(Box::new(VehiclePhysicsConstruction::deserialize(x)?))); }
 				39 =>  { constrs.push(|x| Ok(Box::new(ScriptedActivityConstruction::deserialize(x)?))); }
 				40 =>  { constrs.push(|x| Ok(Box::new(PhantomPhysicsConstruction::deserialize(x)?))); }
 				42 =>  { constrs.push(|x| Ok(Box::new(MutableModelBehaviorConstruction::deserialize(x)?))); }
@@ -180,7 +181,6 @@ impl ReplicaContext for ZipContext<'_> {
 
 		let mut final_comps = vec![];
 		Self::apply_component_overrides(&comps, &mut final_comps);
-		dbg!(&final_comps);
 		let constrs = Self::map_constrs(&final_comps);
 		self.comps.insert(network_id, final_comps);
 		constrs
@@ -206,6 +206,7 @@ impl ReplicaContext for ZipContext<'_> {
 					23  => { sers.push(|x| Ok(Box::new(CollectibleSerialization::deserialize(x)?))); }
 					25  => { sers.push(|x| Ok(Box::new(MovingPlatformSerialization::deserialize(x)?))); }
 					26  => { sers.push(|x| Ok(Box::new(PetSerialization::deserialize(x)?))); }
+					30  => { sers.push(|x| Ok(Box::new(VehiclePhysicsSerialization::deserialize(x)?))); }
 					39  => { sers.push(|x| Ok(Box::new(ScriptedActivitySerialization::deserialize(x)?))); }
 					40  => { sers.push(|x| Ok(Box::new(PhantomPhysicsSerialization::deserialize(x)?))); }
 					42  => { sers.push(|x| Ok(Box::new(MutableModelBehaviorSerialization::deserialize(x)?))); }
