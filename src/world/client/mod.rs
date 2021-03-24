@@ -4,7 +4,7 @@ use std::io::Result as Res;
 
 use endio::{Deserialize, LERead, LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::{FromVariants, VariantTests};
+use lu_packets_derive::{MessageFromVariants, VariantTests};
 
 use crate::chat::ChatChannel;
 use crate::chat::client::ChatMessage;
@@ -17,7 +17,7 @@ use super::gm::client::SubjectGameMessage;
 pub type Message = crate::raknet::client::Message<LuMessage>;
 
 /// All client-received LU messages from a world server.
-#[derive(Debug, Deserialize, FromVariants, PartialEq, Serialize, VariantTests)]
+#[derive(Debug, Deserialize, MessageFromVariants, PartialEq, Serialize, VariantTests)]
 #[repr(u16)]
 pub enum LuMessage {
 	General(GeneralMessage) = ServiceId::General as u16,
@@ -44,7 +44,7 @@ impl From<DisconnectNotify> for Message {
 }
 
 /// All client-received world messages.
-#[derive(Debug, Deserialize, PartialEq, Serialize, FromVariants, VariantTests)]
+#[derive(Debug, Deserialize, PartialEq, Serialize, MessageFromVariants, VariantTests)]
 #[non_exhaustive]
 #[post_disc_padding=1]
 #[repr(u32)]

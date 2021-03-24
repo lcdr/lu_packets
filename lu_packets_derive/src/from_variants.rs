@@ -1,7 +1,7 @@
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident};
 
-pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn derive(input: proc_macro::TokenStream, opt_dest: Option<&Ident>) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 
 	let data = match &input.data {
@@ -10,6 +10,7 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	};
 
 	let name = &input.ident;
+	let dest = if let Some(dest) = opt_dest { dest } else { name };
 
 	let mut impls = vec![];
 	for v in &data.variants {
@@ -27,7 +28,7 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		let variant_ty = &first.ty;
 
 		let impl_ = quote! {
-			impl ::std::convert::From<#variant_ty> for Message {
+			impl ::std::convert::From<#variant_ty> for #dest {
 				fn from(msg: #variant_ty) -> Self {
 					#name::#variant(msg).into()
 				}

@@ -3,7 +3,7 @@ use std::io::Result as Res;
 
 use endio::{LEWrite, Serialize};
 use endio::LittleEndian as LE;
-use lu_packets_derive::FromVariants;
+use lu_packets_derive::MessageFromVariants;
 
 use crate::common::{LuString33, LuVarWString, LuWString33, ServiceId};
 use crate::general::client::{DisconnectNotify, Handshake, GeneralMessage};
@@ -12,7 +12,7 @@ use crate::general::client::{DisconnectNotify, Handshake, GeneralMessage};
 pub type Message = crate::raknet::client::Message<LuMessage>;
 
 /// All LU messages that can be received by a client from an auth server.
-#[derive(Debug, FromVariants, PartialEq, Serialize)]
+#[derive(Debug, MessageFromVariants, PartialEq, Serialize)]
 #[repr(u16)]
 pub enum LuMessage {
 	General(GeneralMessage) = ServiceId::General as u16,
@@ -38,7 +38,7 @@ impl From<DisconnectNotify> for Message {
 }
 
 /// All client-received auth messages.
-#[derive(Debug, FromVariants, PartialEq, Serialize)]
+#[derive(Debug, MessageFromVariants, PartialEq, Serialize)]
 #[post_disc_padding=1]
 #[repr(u32)]
 pub enum ClientMessage {

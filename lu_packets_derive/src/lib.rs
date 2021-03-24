@@ -5,7 +5,9 @@ mod replica_serde;
 mod variant_tests;
 
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::quote;
+use syn::Ident;
 
 #[proc_macro_derive(BitVariantTests, attributes(test_params))]
 pub fn derive_bit_variant_tests(input: TokenStream) -> TokenStream {
@@ -14,7 +16,7 @@ pub fn derive_bit_variant_tests(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(FromVariants)]
 pub fn derive_from_variants(input: TokenStream) -> TokenStream {
-	from_variants::derive(input)
+	from_variants::derive(input, None)
 }
 
 #[proc_macro_derive(GameMessage, attributes(default))]
@@ -25,6 +27,11 @@ pub fn derive_game_message_deserialize(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(GmParam)]
 pub fn derive_gm_type(input: TokenStream) -> TokenStream {
 	gm_type::derive(input)
+}
+
+#[proc_macro_derive(MessageFromVariants)]
+pub fn derive_message_from_variants(input: TokenStream) -> TokenStream {
+	from_variants::derive(input, Some(&Ident::new("Message", Span::call_site())))
 }
 
 #[proc_macro_derive(ReplicaSerde, attributes(padding, trailing_padding))]

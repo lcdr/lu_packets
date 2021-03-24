@@ -1,7 +1,7 @@
 use std::cmp::PartialEq;
 
 use endio::{Deserialize, Serialize};
-use lu_packets_derive::{GameMessage, GmParam, VariantTests};
+use lu_packets_derive::{FromVariants, GameMessage, GmParam, VariantTests};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
@@ -15,7 +15,7 @@ pub struct SubjectGameMessage {
 	pub message: GameMessage,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
+#[derive(Debug, Deserialize, FromVariants, PartialEq, Serialize, VariantTests)]
 #[repr(u16)]
 pub enum GameMessage {
 	Teleport(Teleport) = 19,
