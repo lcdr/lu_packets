@@ -15,6 +15,7 @@ pub enum ChatMessage {
 	GetFriendsList = 10,
 	AddIgnore(AddIgnore) = 11,
 	GetIgnoreList = 13,
+	TeamInvite(TeamInvite) = 15,
 	TeamInviteResponse(TeamInviteResponse) = 16,
 	TeamLeave(TeamLeave) = 18,
 	TeamGetStatus = 21,
@@ -54,6 +55,11 @@ pub enum TeamInviteResponseCode {
 	Accepted,
 	Rejected,
 	GeneralError,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct TeamInvite {
+	pub sender_name: LuWString33,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
