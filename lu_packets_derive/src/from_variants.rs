@@ -1,5 +1,5 @@
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, Generics, Ident};
 
 pub fn derive(input: proc_macro::TokenStream, opt_dest: Option<&Ident>) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
@@ -10,7 +10,16 @@ pub fn derive(input: proc_macro::TokenStream, opt_dest: Option<&Ident>) -> proc_
 	};
 
 	let name = &input.ident;
-	let dest = if let Some(dest) = opt_dest { dest } else { name };
+	let dest;
+	let generics;
+	if let Some(d) = opt_dest {
+		dest = d;
+		generics = Generics::default();
+	} else {
+		dest = name;
+		generics = input.generics;
+	}
+	let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
 	let mut impls = vec![];
 	for v in &data.variants {
@@ -28,7 +37,7 @@ pub fn derive(input: proc_macro::TokenStream, opt_dest: Option<&Ident>) -> proc_
 		let variant_ty = &first.ty;
 
 		let impl_ = quote! {
-			impl ::std::convert::From<#variant_ty> for #dest {
+			impl #impl_generics ::std::convert::From<#variant_ty> for #dest #ty_generics #where_clause {
 				fn from(msg: #variant_ty) -> Self {
 					#name::#variant(msg).into()
 				}
