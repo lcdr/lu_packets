@@ -111,13 +111,13 @@ pub trait ReplicaContext {
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct ParentInfo {
-	parent_id: ObjId,
-	update_position_with_parent: bool,
+	pub parent_id: ObjId,
+	pub update_position_with_parent: bool,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct ChildInfo {
-	child_ids: LVec<u16, ObjId>,
+	pub child_ids: LVec<u16, ObjId>,
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]

@@ -48,6 +48,6 @@ impl<'a, W: Write> Serialize<LE, W> for &'a ConnectionRequest {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct NewIncomingConnection {
-	peer_addr: SystemAddress,
-	local_addr: SystemAddress,
+	pub peer_addr: SystemAddress,
+	pub local_addr: SystemAddress,
 }

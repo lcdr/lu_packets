@@ -252,7 +252,7 @@ pub enum RouteMessage {
 
 #[derive(Debug, PartialEq)]
 pub struct PositionUpdate {
-	frame_stats: FrameStats,
+	pub frame_stats: FrameStats,
 }
 
 impl<R: Read> Deserialize<LE, R> for PositionUpdate {
@@ -306,7 +306,7 @@ pub enum Language {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct Top5IssuesRequest {
-	language: Language,
+	pub language: Language,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]

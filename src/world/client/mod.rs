@@ -315,8 +315,8 @@ pub enum AddFriendResponseType {
 
 #[derive(Debug, PartialEq)]
 pub struct AddFriendResponse {
-	char_name: LuWString33,
-	response_type: AddFriendResponseType,
+	pub char_name: LuWString33,
+	pub response_type: AddFriendResponseType,
 }
 
 impl<R: Read> Deserialize<LE, R> for AddFriendResponse {
@@ -387,13 +387,13 @@ impl<'a, W: Write> Serialize<LE, W> for &'a AddFriendResponse {
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[trailing_padding=6]
 pub struct FriendState {
-	is_online: bool,
-	is_best_friend: bool,
-	is_free_trial: bool,
+	pub is_online: bool,
+	pub is_best_friend: bool,
+	pub is_free_trial: bool,
 	#[padding=5]
-	location: ZoneId,
-	object_id: ObjId,
-	char_name: LuWString33,
+	pub location: ZoneId,
+	pub object_id: ObjId,
+	pub char_name: LuWString33,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -415,18 +415,18 @@ pub enum FriendUpdateType {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct FriendUpdateNotify {
-	update_type: FriendUpdateType,
-	char_name: LuWString33,
-	zone_id: ZoneId,
-	is_best_friend: bool,
-	is_free_trial: bool,
+	pub update_type: FriendUpdateType,
+	pub char_name: LuWString33,
+	pub zone_id: ZoneId,
+	pub is_best_friend: bool,
+	pub is_free_trial: bool,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[trailing_padding=6]
 pub struct IgnoreState {
-	object_id: ObjId,
-	char_name: LuWString33,
+	pub object_id: ObjId,
+	pub char_name: LuWString33,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
