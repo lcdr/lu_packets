@@ -32,7 +32,7 @@ impl ZoneId {
 	const INVALID: Self = Self { map_id: 0, instance_id: 0, clone_id: 0 };
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[derive(Copy, Clone, Debug, Deserialize, Serialize, PartialEq, GmParam)]
 pub struct Vector3 {
 	pub x: f32,
 	pub y: f32,
@@ -43,7 +43,7 @@ impl Vector3 {
 	pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[derive(Copy, Clone, Debug, Deserialize, Serialize, PartialEq, GmParam)]
 pub struct Quaternion {
 	pub x: f32,
 	pub y: f32,
