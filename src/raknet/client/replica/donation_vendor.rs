@@ -4,7 +4,7 @@ use endio::Serialize;
 use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 use super::vendor::VendorInfo;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -32,4 +32,11 @@ impl ComponentSerialization for DonationVendorSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct DonationVendorProtocol;
+
+impl ComponentProtocol for DonationVendorProtocol {
+	type Construction = DonationVendorConstruction;
+	type Serialization = DonationVendorSerialization;
 }

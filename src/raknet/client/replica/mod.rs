@@ -104,6 +104,11 @@ pub trait ComponentSerialization: Debug {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()>;
 }
 
+pub trait ComponentProtocol {
+	type Construction: ComponentConstruction;
+	type Serialization: ComponentSerialization;
+}
+
 pub trait ReplicaContext {
 	fn get_comp_constructions<R: Read>(&mut self, network_id: u16, lot: Lot, config: &Option<LuNameValue>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>>;
 	fn get_comp_serializations<R: Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>>;

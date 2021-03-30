@@ -4,7 +4,7 @@ use endio::Serialize;
 use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 use super::simple_physics::PositionRotationInfo;
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
@@ -24,4 +24,11 @@ impl ComponentSerialization for RigidBodyPhantomPhysicsSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		Serialize::serialize(self, writer)
 	}
+}
+
+pub struct RigidBodyPhantomPhysicsProtocol;
+
+impl ComponentProtocol for RigidBodyPhantomPhysicsProtocol {
+	type Construction = RigidBodyPhantomPhysicsConstruction;
+	type Serialization = RigidBodyPhantomPhysicsSerialization;
 }

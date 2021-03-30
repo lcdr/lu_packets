@@ -5,7 +5,7 @@ use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::world::{Vector3, Quaternion};
-use super::{ReplicaD, ReplicaS, ComponentConstruction, ComponentSerialization};
+use super::{ReplicaD, ReplicaS, ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u32)]
@@ -99,4 +99,11 @@ impl ComponentSerialization for SimplePhysicsSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		Serialize::serialize(self, writer)
 	}
+}
+
+pub struct SimplePhysicsProtocol;
+
+impl ComponentProtocol for SimplePhysicsProtocol {
+	type Construction = SimplePhysicsConstruction;
+	type Serialization = SimplePhysicsSerialization;
 }

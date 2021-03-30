@@ -4,7 +4,7 @@ use endio::Serialize;
 use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
 pub struct SwitchConstruction {
@@ -23,4 +23,11 @@ impl ComponentSerialization for SwitchSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct SwitchProtocol;
+
+impl ComponentProtocol for SwitchProtocol {
+	type Construction = SwitchConstruction;
+	type Serialization = SwitchSerialization;
 }

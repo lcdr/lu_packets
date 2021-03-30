@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::world::Lot;
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
 pub struct LupExhibitConstruction {
@@ -24,4 +24,11 @@ impl ComponentSerialization for LupExhibitSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct LupExhibitProtocol;
+
+impl ComponentProtocol for LupExhibitProtocol {
+	type Construction = LupExhibitConstruction;
+	type Serialization = LupExhibitSerialization;
 }

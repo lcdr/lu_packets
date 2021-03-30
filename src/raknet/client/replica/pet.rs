@@ -6,7 +6,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LuVarWString, ObjId};
 use crate::world::gm::client::{PetAbilityType, PetModerationStatus};
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
@@ -63,4 +63,11 @@ impl ComponentSerialization for PetSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct PetProtocol;
+
+impl ComponentProtocol for PetProtocol {
+	type Construction = PetConstruction;
+	type Serialization = PetSerialization;
 }

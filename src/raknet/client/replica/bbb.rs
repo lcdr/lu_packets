@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::ObjId;
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
 pub struct BbbConstruction {
@@ -24,4 +24,11 @@ impl ComponentSerialization for BbbSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct BbbProtocol;
+
+impl ComponentProtocol for BbbProtocol {
+	type Construction = BbbConstruction;
+	type Serialization = BbbSerialization;
 }

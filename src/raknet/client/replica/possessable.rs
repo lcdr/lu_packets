@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::ObjId;
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct PossessableInfo {
@@ -31,4 +31,11 @@ impl ComponentSerialization for PossessableSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct PossessableProtocol;
+
+impl ComponentProtocol for PossessableProtocol {
+	type Construction = PossessableConstruction;
+	type Serialization = PossessableSerialization;
 }

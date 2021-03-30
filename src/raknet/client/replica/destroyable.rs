@@ -5,7 +5,7 @@ use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::LVec;
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct StatusImmunityInfo {
@@ -162,4 +162,11 @@ impl ComponentSerialization for DestroyableSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct DestroyableProtocol;
+
+impl ComponentProtocol for DestroyableProtocol {
+	type Construction = DestroyableConstruction;
+	type Serialization = DestroyableSerialization;
 }

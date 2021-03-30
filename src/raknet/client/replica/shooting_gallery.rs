@@ -6,7 +6,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LVec, ObjId};
 use crate::world::Vector3;
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 use super::scripted_activity::ActivityUserInfo;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -46,4 +46,11 @@ impl ComponentSerialization for ShootingGallerySerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct ShootingGalleryProtocol;
+
+impl ComponentProtocol for ShootingGalleryProtocol {
+	type Construction = ShootingGalleryConstruction;
+	type Serialization = ShootingGallerySerialization;
 }

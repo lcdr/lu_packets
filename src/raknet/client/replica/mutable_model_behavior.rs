@@ -6,7 +6,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::ObjId;
 use crate::world::{Vector3, Quaternion};
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(i32)]
@@ -68,4 +68,11 @@ impl ComponentSerialization for MutableModelBehaviorSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct MutableModelBehaviorProtocol;
+
+impl ComponentProtocol for MutableModelBehaviorProtocol {
+	type Construction = MutableModelBehaviorConstruction;
+	type Serialization = MutableModelBehaviorSerialization;
 }

@@ -7,7 +7,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 use crate::common::LVec;
 use crate::world::Vector3;
 use crate::world::gm::client::RebuildChallengeState;
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 use super::scripted_activity::ActivityUserInfo;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -53,4 +53,11 @@ impl ComponentSerialization for QuickbuildSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct QuickbuildProtocol;
+
+impl ComponentProtocol for QuickbuildProtocol {
+	type Construction = QuickbuildConstruction;
+	type Serialization = QuickbuildSerialization;
 }

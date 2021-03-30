@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::world::{Vector3, Quaternion};
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 use super::controllable_physics::{LocalSpaceInfo};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -72,4 +72,11 @@ impl ComponentSerialization for VehiclePhysicsSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct VehiclePhysicsProtocol;
+
+impl ComponentProtocol for VehiclePhysicsProtocol {
+	type Construction = VehiclePhysicsConstruction;
+	type Serialization = VehiclePhysicsSerialization;
 }

@@ -5,7 +5,7 @@ use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LVec, ObjId};
-use super::{ReplicaD, ComponentConstruction};
+use super::{ReplicaD, ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 // so close to being able to do serialization automatically...if not for the irregularity with `added_by_teammate`...
 #[derive(Debug, PartialEq)]
@@ -90,8 +90,25 @@ pub struct BuffConstruction {
 	pub immunities: Option<LVec<u32, BuffInfo>>,
 }
 
+#[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
+pub struct BuffSerialization {
+}
+
 impl ComponentConstruction for BuffConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+impl ComponentSerialization for BuffSerialization {
+	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
+		self.serialize(writer)
+	}
+}
+
+pub struct BuffProtocol;
+
+impl ComponentProtocol for BuffProtocol {
+	type Construction = BuffConstruction;
+	type Serialization = BuffSerialization;
 }

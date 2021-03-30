@@ -5,7 +5,7 @@ use endio_bit::BEBitWriter;
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LuVarWString, ObjId};
-use super::{ComponentConstruction, ComponentSerialization};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization};
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct ModuleAssemblyInfo {
@@ -31,4 +31,11 @@ impl ComponentSerialization for ModuleAssemblySerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct ModuleAssemblyProtocol;
+
+impl ComponentProtocol for ModuleAssemblyProtocol {
+	type Construction = ModuleAssemblyConstruction;
+	type Serialization = ModuleAssemblySerialization;
 }
