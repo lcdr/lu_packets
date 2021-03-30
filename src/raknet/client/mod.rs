@@ -31,9 +31,16 @@ impl<U> From<ConnectionRequestAccepted> for Message<U> {
 		Message::ConnectionRequestAccepted(msg)
 	}
 }
+
 impl<U> From<ReplicaConstruction> for Message<U> {
 	fn from(msg: ReplicaConstruction) -> Self {
 		Message::ReplicaConstruction(msg)
+	}
+}
+
+impl<U> From<ReplicaSerialization> for Message<U> {
+	fn from(msg: ReplicaSerialization) -> Self {
+		Message::ReplicaSerialization(msg)
 	}
 }
 
