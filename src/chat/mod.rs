@@ -10,7 +10,7 @@ use endio::LittleEndian as LE;
 
 use crate::common::{LuVarWString, LuWString33, ObjId};
 
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
 pub enum ChatChannel {
 	SystemNotify,

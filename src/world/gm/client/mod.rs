@@ -7,7 +7,8 @@ use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, LuNameValue, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
 use crate::world::amf3::Amf3;
-use super::{EquipInventory, GmString, GmWString, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, SetIgnoreProjectileCollision};
+pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, SetIgnoreProjectileCollision};
+use super::{GmString, GmWString};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct SubjectGameMessage {

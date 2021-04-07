@@ -3,7 +3,7 @@ use lu_packets_derive::{MessageFromVariants, VariantTests};
 
 use crate::common::{LuWString33, ObjId};
 use crate::world::client::Message;
-use super::{GeneralChatMessage, PrivateChatMessage};
+pub use super::{GeneralChatMessage, PrivateChatMessage};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize, MessageFromVariants, VariantTests)]
 #[non_exhaustive]

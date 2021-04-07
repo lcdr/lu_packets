@@ -2,7 +2,8 @@ use endio::{Deserialize, Serialize};
 use lu_packets_derive::VariantTests;
 
 use crate::common::{LuWString33, ObjId};
-use super::{ChatChannel, GeneralChatMessage, PrivateChatMessage};
+pub use super::{GeneralChatMessage, PrivateChatMessage};
+use super::ChatChannel;
 
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
 #[post_disc_padding=9]
