@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BuffConstruction",""],["BuffInfo",""],["BuffProtocol",""],["BuffSerialization",""]]});

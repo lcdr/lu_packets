@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CheatInfo",""],["ControllablePhysicsConstruction",""],["ControllablePhysicsProtocol",""],["ControllablePhysicsSerialization",""],["FrameStats",""],["FrameStatsTeleportInfo",""],["JetpackInfo",""],["LocalSpaceInfo",""],["StunImmunityInfo",""],["Unknown1",""],["Unknown2",""]]});

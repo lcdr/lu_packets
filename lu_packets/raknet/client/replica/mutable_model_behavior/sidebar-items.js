@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["PhysicsBehaviorType",""]],"struct":[["ModelBehaviorInfo",""],["ModelEditingInfo",""],["MutableModelBehaviorConstruction",""],["MutableModelBehaviorConstructionInfo",""],["MutableModelBehaviorProtocol",""],["MutableModelBehaviorSerialization",""],["MutableModelBehaviorSerializationInfo",""]]});

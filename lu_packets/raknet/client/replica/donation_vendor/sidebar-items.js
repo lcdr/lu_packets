@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DonationVendorConstruction",""],["DonationVendorInfo",""],["DonationVendorProtocol",""]],"type":[["DonationVendorSerialization",""]]});

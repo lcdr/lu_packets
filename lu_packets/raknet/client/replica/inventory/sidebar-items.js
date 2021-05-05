@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EquippedItemInfo",""],["EquippedModelTransform",""],["InventoryConstruction",""],["InventoryProtocol",""]],"type":[["InventorySerialization",""]]});

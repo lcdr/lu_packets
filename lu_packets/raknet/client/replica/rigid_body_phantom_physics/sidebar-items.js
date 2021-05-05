@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RigidBodyPhantomPhysicsConstruction",""],["RigidBodyPhantomPhysicsProtocol",""]],"type":[["RigidBodyPhantomPhysicsSerialization",""]]});

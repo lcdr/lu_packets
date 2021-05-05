@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Amf3","A type that can be (de-)serialized in the AMF3 format."]],"struct":[["Amf3Array","Both a dense and associative array at the same time."],["Amf3String","A string with a maximum length of 2^29-1."],["U29Error","An error returned when an integer is too large to be represented by an `U29`."]]});

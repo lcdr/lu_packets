@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["client","Client-received raknet messages."],["server","Server-received raknet messages."]],"struct":[["SystemAddress","A combination of Ipv4Addr and port. todo: just use SocketAddrV4"]]});

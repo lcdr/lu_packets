@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["PossessionType",""]],"struct":[["PetConstruction",""],["PetConstructionInfo",""],["PetProtocol",""],["PetSerialization",""],["PetSerializationInfo",""],["TamedPetInfo",""]]});

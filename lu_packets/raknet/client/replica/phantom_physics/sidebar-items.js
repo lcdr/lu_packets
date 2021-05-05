@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["PhysicsEffectType",""]],"struct":[["ActivePhysicsEffectInfo",""],["DistanceInfo",""],["PhantomPhysicsConstruction",""],["PhantomPhysicsProtocol",""],["PhysicsEffectInfo",""]],"type":[["PhantomPhysicsSerialization",""]]});

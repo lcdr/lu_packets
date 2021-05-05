@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ActivityUserInfo",""],["ScriptedActivityConstruction",""],["ScriptedActivityProtocol",""]],"type":[["ScriptedActivitySerialization",""]]});

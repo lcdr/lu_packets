@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Mail",""]],"struct":[["ContentCollectRequest",""],["CreateRequest",""],["DeleteRequest",""],["MarkAsReadRequest",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["AddFriendResponseCode",""],["ChatMessage",""],["TeamInviteResponseCode",""]],"struct":[["AddFriendRequest",""],["AddFriendResponse",""],["AddIgnore",""],["RequestMinimumChatMode",""],["RequestMinimumChatModePrivate",""],["TeamInvite",""],["TeamInviteResponse",""],["TeamLeave",""]]});

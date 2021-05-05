@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["InventoryType",""],["KillType",""],["MissionState",""],["PetNotificationType",""]],"mod":[["client",""],["server",""]],"struct":[["EquipInventory",""],["MoveInventoryBatch",""],["MoveItemInInventory",""],["RemoveSkill",""],["SetIgnoreProjectileCollision",""],["UnEquipInventory",""]]});

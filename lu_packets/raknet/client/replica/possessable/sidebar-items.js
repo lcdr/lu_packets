@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PossessableConstruction",""],["PossessableInfo",""],["PossessableProtocol",""]],"type":[["PossessableSerialization",""]]});

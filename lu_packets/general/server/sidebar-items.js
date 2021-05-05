@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["GeneralMessage",""]],"struct":[["Handshake","Provides the client's network version."]]});

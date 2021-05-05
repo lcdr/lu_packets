@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["AiCombatState",""]],"struct":[["BaseCombatAiConstruction",""],["BaseCombatAiProtocol",""],["CombatAiInfo",""]],"type":[["BaseCombatAiSerialization",""]]});

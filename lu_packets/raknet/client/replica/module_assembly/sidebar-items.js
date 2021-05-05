@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ModuleAssemblyConstruction",""],["ModuleAssemblyInfo",""],["ModuleAssemblyProtocol",""]],"type":[["ModuleAssemblySerialization",""]]});
