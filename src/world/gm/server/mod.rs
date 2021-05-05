@@ -133,6 +133,7 @@ pub enum GameMessage {
 	SetEmotesEnabled(SetEmotesEnabled) = 1577,
 	VehicleNotifyHitImaginationServer(VehicleNotifyHitImaginationServer) = 1606,
 	CelebrationCompleted = 1632,
+	RequestMoveItemBetweenInventoryTypes(RequestMoveItemBetweenInventoryTypes) = 1666,
 	NotifyServerLevelProcessingComplete = 1734,
 	ServerCancelMoveSkill = 1746,
 	DismountComplete(DismountComplete) = 1756,
@@ -893,6 +894,28 @@ pub struct VehicleNotifyHitImaginationServer {
 	pub pickup_spawner_index: i32,
 	#[default(Vector3::ZERO)]
 	pub vehicle_position: Vector3,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct RequestMoveItemBetweenInventoryTypes {
+	#[default(true)]
+	pub allow_partial: bool,
+	#[default(-1)]
+	pub dest_slot: i32,
+	#[default(1)]
+	pub stack_count: u32,
+	#[default(InventoryType::Default)]
+	pub inv_type_dst: InventoryType,
+	#[default(InventoryType::Default)]
+	pub inv_type_src: InventoryType,
+	#[default(OBJID_EMPTY)]
+	pub object_id: ObjId,
+	#[default(true)]
+	pub show_flying_loot: bool,
+	#[default(OBJID_EMPTY)]
+	pub subkey: ObjId,
+	#[default(LOT_NULL)]
+	pub template_id: Lot,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

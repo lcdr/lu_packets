@@ -5,7 +5,7 @@ use endio_bit::{BEBitReader, BEBitWriter};
 use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::{LuVarWString, LVec, ObjId};
-use super::{ComponentConstruction, ComponentSerialization, ReplicaD};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization, ReplicaD};
 use super::scripted_activity::ActivityUserInfo;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -136,4 +136,11 @@ impl ComponentSerialization for RacingControlSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct RacingControlProtocol;
+
+impl ComponentProtocol for RacingControlProtocol {
+	type Construction = RacingControlConstruction;
+	type Serialization = RacingControlSerialization;
 }

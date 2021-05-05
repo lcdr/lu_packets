@@ -159,6 +159,7 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("(8304)")
 		&& !file.name().contains("(8575)")
 		&& !file.name().contains("(9741)")
+		&& !file.name().contains("(10039)")
 		&& !file.name().contains("(10042)")
 		&& !file.name().contains("(10046)")
 		&& !file.name().contains("(10055)")

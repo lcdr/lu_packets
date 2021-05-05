@@ -174,6 +174,7 @@ pub enum GameMessage {
 	StartCelebrationEffect(StartCelebrationEffect) = 1618,
 	SetLocalTeam(SetLocalTeam) = 1636,
 	ServerDoneLoadingAllObjects = 1642,
+	ResponseMoveItemBetweenInventoryTypes(ResponseMoveItemBetweenInventoryTypes) = 1667,
 	PlayerSetCameraCyclingMode(PlayerSetCameraCyclingMode) = 1676,
 	SetMountInventoryId(SetMountInventoryId) = 1726,
 	NotifyLevelRewards(NotifyLevelRewards) = 1735,
@@ -1618,6 +1619,33 @@ pub struct StartCelebrationEffect {
 pub struct SetLocalTeam {
 	#[default(false)]
 	pub is_local: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum ResponseMoveItemResponseCode {
+	Success,
+	FailGeneric,
+	FailInvFull,
+	FailItemNotFound,
+	FailCantMoveToThatInvType,
+	FailNotNearBank,
+	FailCantSwapItems,
+	FailSourceType,
+	FailWrongDestType,
+	FailSwapDestType,
+	FailCantMoveThinkingHat,
+	FailDismountBeforeMoving,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct ResponseMoveItemBetweenInventoryTypes {
+	#[default(InventoryType::Default)]
+	pub inv_type_dst: InventoryType,
+	#[default(InventoryType::Default)]
+	pub inv_type_src: InventoryType,
+	#[default(ResponseMoveItemResponseCode::FailGeneric)]
+	pub response_code: ResponseMoveItemResponseCode,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

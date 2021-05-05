@@ -6,7 +6,7 @@ use lu_packets_derive::{BitVariantTests, ReplicaSerde};
 
 use crate::common::LuVarWString;
 use crate::world::Vector3;
-use super::{ComponentConstruction, ComponentSerialization, ReplicaD};
+use super::{ComponentConstruction, ComponentProtocol, ComponentSerialization, ReplicaD};
 use super::simple_physics::PositionRotationInfo;
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -120,4 +120,11 @@ impl ComponentSerialization for MovingPlatformSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
 		self.serialize(writer)
 	}
+}
+
+pub struct MovingPlatformProtocol;
+
+impl ComponentProtocol for MovingPlatformProtocol {
+	type Construction = MovingPlatformConstruction;
+	type Serialization = MovingPlatformSerialization;
 }
