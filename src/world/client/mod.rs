@@ -56,6 +56,7 @@ pub enum ClientMessage {
 	CharacterDeleteResponse(CharacterDeleteResponse) = 11,
 	SubjectGameMessage(SubjectGameMessage) = 12,
 	TransferToWorld(TransferToWorld) = 14,
+	BlueprintSaveResponse(BlueprintSaveResponse) = 21,
 	BlueprintLoadItemResponse(BlueprintLoadItemResponse) = 23,
 	AddFriendRequest(AddFriendRequest) = 27,
 	AddFriendResponse(AddFriendResponse) = 28,
@@ -256,6 +257,39 @@ pub struct TransferToWorld {
 	pub redirect_port: u16,
 	/// If this is `true`, the original LU client displays a "Mythran dimensional shift succeeded" announcement.
 	pub is_maintenance_transfer: bool,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[repr(u32)]
+pub enum BlueprintSaveResponseType {
+	EverythingWorked,
+	SaveCancelled,
+	CantBeginTransaction,
+	SaveBlueprintFailed,
+	SaveUgobjectFailed,
+	CantEndTransaction,
+	SaveFilesFailed,
+	BadInput,
+	NotEnoughBricks,
+	InventoryFull,
+	ModelGenerationFailed,
+	PlacementFailed,
+	GmLevelInsufficient,
+	WaitForPreviousSave,
+	FindMatchesFailed,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct BlueprintSaveResponseModel {
+	pub blueprint_id: ObjId,
+	pub lxfml_compressed: LVec<u32, u8>,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct BlueprintSaveResponse {
+	pub local_id: ObjId,
+	pub reason_code: BlueprintSaveResponseType,
+	pub models: LVec<u32, BlueprintSaveResponseModel>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
