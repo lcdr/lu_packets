@@ -35,7 +35,7 @@ pub struct CheatInfo {
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct Unknown1 {
-	pub unknown_1: f32,
+	pub loot_pickup_radius: f32,
 	pub unknown_2: bool,
 }
 
