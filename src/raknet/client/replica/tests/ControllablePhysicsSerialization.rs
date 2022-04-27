@@ -4,12 +4,12 @@ ControllablePhysicsSerialization {
 		run_multiplier: 9.0,
 	}),
 	unknown_1: Some(Unknown1 {
-		unknown_1: 10.0,
+		loot_pickup_radius: 10.0,
 		unknown_2: true,
 	}),
 	unknown_2: Some(Unknown2 {
 		unknown_1: Some(Unknown1 {
-			unknown_1: 11.0,
+			loot_pickup_radius: 11.0,
 			unknown_2: true,
 	}),
 	}),
