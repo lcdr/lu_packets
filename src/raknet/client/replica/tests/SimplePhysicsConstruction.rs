@@ -1,5 +1,6 @@
 SimplePhysicsConstruction {
-	climbing_property: Some(ClimbingProperty::ClimbWallStick),
+	is_climbable: true,
+	climbing_property: ClimbingProperty::ClimbWallStick,
 	velocity_info: Some(
 		VelocityInfo {
 			linear_velocity: Vector3 {
