@@ -220,7 +220,7 @@ fn main() {
 	unsafe { PRINT_PACKETS = args.get(3).is_some(); }
 
 	let start = Instant::now();
-	let packet_count = if capture.ends_with(".zip") {
+	let packet_count = if !capture.is_dir() &&  capture.extension().unwrap() == "zip" {
 		parse(&capture, &mut cdclient)
 	} else {
 		visit_dirs(&capture, &mut cdclient, 0)
