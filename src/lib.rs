@@ -1,8 +1,6 @@
 /*!
 	Documentation and (de-)serialization support for LU's network protocol.
 */
-#![feature(arbitrary_enum_discriminant)]
-#![feature(min_const_generics)]
 #![feature(specialization)]
 #![allow(incomplete_features)]
 
