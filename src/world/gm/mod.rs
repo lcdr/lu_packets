@@ -51,7 +51,7 @@ impl GmParam for Vec<u8> {
         unsafe {
             vec.set_len(str_len);
         }
-        Read::read(reader, &mut vec)?;
+        Read::read_exact(reader, &mut vec)?;
         Ok(vec)
     }
 

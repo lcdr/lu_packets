@@ -3,6 +3,9 @@
 */
 #![feature(specialization)]
 #![allow(incomplete_features)]
+#![allow(clippy::large_enum_variant)]
+#![allow(clippy::uninlined_format_args)]
+#![allow(clippy::type_complexity)]
 
 /**
     Creates an [`Amf3::Array`](crate::world::amf3::Amf3::Array) containing the arguments.

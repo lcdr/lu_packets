@@ -47,7 +47,7 @@ macro_rules! abstract_lu_str {
         impl<R: Read> Deserialize<LE, R> for $name {
             fn deserialize(reader: &mut R) -> Res<Self> {
                 let mut bytes = [0u8; $n * std::mem::size_of::<$c>()];
-                reader.read(&mut bytes)?;
+                reader.read_exact(&mut bytes)?;
                 Ok(Self(unsafe { std::mem::transmute(bytes) }))
             }
         }

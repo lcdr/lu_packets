@@ -9,25 +9,25 @@ pub type LuVarWString<L> = LVec<L, Ucs2Char>;
 
 impl<L> std::fmt::Debug for LuVarString<L> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        (&**self).fmt(f)
+        (**self).fmt(f)
     }
 }
 
 impl<L> std::fmt::Debug for LuVarWString<L> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        (&**self).fmt(f)
+        (**self).fmt(f)
     }
 }
 
 impl<L> From<&LuVarString<L>> for String {
     fn from(string: &LuVarString<L>) -> String {
-        (&**string).to_string()
+        (**string).to_string()
     }
 }
 
 impl<L> From<&LuVarWString<L>> for String {
     fn from(string: &LuVarWString<L>) -> String {
-        (&**string).to_string()
+        (**string).to_string()
     }
 }
 

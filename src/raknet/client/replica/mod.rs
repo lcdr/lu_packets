@@ -174,7 +174,7 @@ impl<R: Read + ReplicaContext> Deserialize<LE, R> for ReplicaConstruction {
     fn deserialize(reader: &mut R) -> Res<Self> {
         let mut bit_reader = BEBitReader::new(reader);
         let bit = bit_reader.read_bit()?;
-        assert_eq!(bit, true);
+        assert!(bit);
         let network_id = LERead::read(&mut bit_reader)?;
         let object_id = LERead::read(&mut bit_reader)?;
         let lot = LERead::read(&mut bit_reader)?;

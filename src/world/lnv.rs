@@ -29,7 +29,7 @@ pub enum LnvValue {
 impl LnvValue {
     fn parse_ty_val(wstr: &LuWStr) -> Self {
         let string: String = wstr.to_string();
-        let (ty, val) = string.split_at(string.find(":").unwrap());
+        let (ty, val) = string.split_at(string.find(':').unwrap());
         let val = val.split_at(1).1;
         match ty {
             "0" => LnvValue::WString(val.try_into().unwrap()),
@@ -129,12 +129,12 @@ impl<const N: usize> From<&[u8; N]> for LnvValue {
 }
 
 /// A hash map with values being one of multiple possible types.
-#[derive(PartialEq)]
+#[derive(PartialEq, Default)]
 pub struct LuNameValue(HashMap<LuVarWString<u32>, LnvValue>);
 
 impl LuNameValue {
     pub fn new() -> Self {
-        LuNameValue(HashMap::new())
+        Self::default()
     }
 }
 
@@ -260,7 +260,7 @@ impl From<&LuNameValue> for LuVarWString<u32> {
         let mut key_value: Vec<_> = lnv.0.iter().collect();
         key_value.sort_unstable_by(|(k1, _), (k2, _)| k1.cmp(k2));
         for (key, value) in key_value {
-            wstr.extend_from_slice(&key);
+            wstr.extend_from_slice(key);
             wstr.push(b'='.into());
             let (disc, val_str) = match value {
                 LnvValue::WString(val) => ("0", val.to_string()),

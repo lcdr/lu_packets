@@ -148,7 +148,7 @@ impl<R: Read> Deserialize<LE, Amf3Reader<'_, R>> for Amf3String {
                 Ok(x) => x,
                 Err(_) => return Err(Error::new(InvalidData, "string is not valid utf8")),
             };
-            if string != "" {
+            if !string.is_empty() {
                 reader.string_ref_table.push(Self(string.clone()));
             }
             string
@@ -160,7 +160,7 @@ impl<R: Read> Deserialize<LE, Amf3Reader<'_, R>> for Amf3String {
 
 impl<'a, W: Write> Serialize<LE, Amf3Writer<'_, W>> for &'a Amf3String {
     fn serialize(self, writer: &mut Amf3Writer<'_, W>) -> Res<()> {
-        if self.0 == "" {
+        if self.0.is_empty() {
             let length_and_is_inline = U29(1);
             return LEWrite::write(writer, &length_and_is_inline);
         }
@@ -184,7 +184,7 @@ impl<'a, W: Write> Serialize<LE, Amf3Writer<'_, W>> for &'a Amf3String {
 
     [See spec section 3.11 for more](https://wwwimages2.adobe.com/content/dam/acom/en/devnet/pdf/amf-file-format-spec.pdf#%5B%7B%22num%22%3A24%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C88%2C720%2C0%5D).
 */
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Default, PartialEq)]
 pub struct Amf3Array {
     pub map: HashMap<Amf3String, Amf3>,
     pub vec: Vec<Amf3>,
@@ -192,10 +192,7 @@ pub struct Amf3Array {
 
 impl Amf3Array {
     pub fn new() -> Self {
-        Self {
-            map: HashMap::new(),
-            vec: vec![],
-        }
+        Self::default()
     }
 }
 
@@ -262,7 +259,7 @@ impl<R: Read> Deserialize<LE, Amf3Reader<'_, R>> for Amf3Array {
         let mut map = HashMap::new();
         loop {
             let key: Amf3String = LERead::read(reader)?;
-            if key.0 == "" {
+            if key.0.is_empty() {
                 break;
             }
             let value = deser_amf3(reader)?;

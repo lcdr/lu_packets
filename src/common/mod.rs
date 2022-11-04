@@ -19,6 +19,12 @@ pub use self::str::*;
 #[derive(Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct LVec<L, T>(Vec<T>, PhantomData<L>);
 
+impl<L, T> Default for LVec<L, T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<L, T> LVec<L, T> {
     pub fn new() -> Self {
         Self(Vec::new(), PhantomData)
