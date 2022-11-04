@@ -12,46 +12,46 @@ use replica::{ReplicaConstruction, ReplicaSerialization};
 #[non_exhaustive]
 #[repr(u8)]
 pub enum Message<U> {
-	ConnectedPong(ConnectedPong) = 3,
-	ConnectionRequestAccepted(ConnectionRequestAccepted) = 14,
-	DisconnectionNotification = 19,
-	ReplicaConstruction(ReplicaConstruction) = 36,
-	ReplicaSerialization(ReplicaSerialization) = 39,
-	UserMessage(U) = 83,
+    ConnectedPong(ConnectedPong) = 3,
+    ConnectionRequestAccepted(ConnectionRequestAccepted) = 14,
+    DisconnectionNotification = 19,
+    ReplicaConstruction(ReplicaConstruction) = 36,
+    ReplicaSerialization(ReplicaSerialization) = 39,
+    UserMessage(U) = 83,
 }
 
 impl<U> From<ConnectedPong> for Message<U> {
-	fn from(msg: ConnectedPong) -> Self {
-		Message::ConnectedPong(msg)
-	}
+    fn from(msg: ConnectedPong) -> Self {
+        Message::ConnectedPong(msg)
+    }
 }
 
 impl<U> From<ConnectionRequestAccepted> for Message<U> {
-	fn from(msg: ConnectionRequestAccepted) -> Self {
-		Message::ConnectionRequestAccepted(msg)
-	}
+    fn from(msg: ConnectionRequestAccepted) -> Self {
+        Message::ConnectionRequestAccepted(msg)
+    }
 }
 
 impl<U> From<ReplicaConstruction> for Message<U> {
-	fn from(msg: ReplicaConstruction) -> Self {
-		Message::ReplicaConstruction(msg)
-	}
+    fn from(msg: ReplicaConstruction) -> Self {
+        Message::ReplicaConstruction(msg)
+    }
 }
 
 impl<U> From<ReplicaSerialization> for Message<U> {
-	fn from(msg: ReplicaSerialization) -> Self {
-		Message::ReplicaSerialization(msg)
-	}
+    fn from(msg: ReplicaSerialization) -> Self {
+        Message::ReplicaSerialization(msg)
+    }
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct ConnectedPong {
-	pub ping_send_time: u32,
+    pub ping_send_time: u32,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct ConnectionRequestAccepted {
-	pub peer_addr: SystemAddress,
-	#[padding=2]
-	pub local_addr: SystemAddress,
+    pub peer_addr: SystemAddress,
+    #[padding = 2]
+    pub local_addr: SystemAddress,
 }
