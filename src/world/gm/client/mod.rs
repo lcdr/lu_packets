@@ -7,7 +7,7 @@ use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, LuNameValue, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
 use crate::world::amf3::Amf3;
-pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, SetIgnoreProjectileCollision};
+pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, LootType, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, RemoveItemFromInventory, SetIgnoreProjectileCollision};
 use super::{GmString, GmWString};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -38,6 +38,7 @@ pub enum GameMessage {
 	EnableRebuild(EnableRebuild) = 213,
 	MoveItemInInventory(MoveItemInInventory) = 224,
 	AddItemToInventoryClientSync(AddItemToInventoryClientSync) = 227,
+	RemoveItemFromInventory(RemoveItemFromInventory) = 230,
 	EquipInventory(EquipInventory) = 231,
 	UnEquipInventory(UnEquipInventory) = 233,
 	OfferMission(OfferMission) = 248,
@@ -295,33 +296,6 @@ pub struct SetCurrency {
 	pub source_trade_id: ObjId,
 	#[default(LootType::None)]
 	pub source_type: LootType,
-}
-
-#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
-#[repr(u32)]
-pub enum LootType {
-	None,
-	Chest,
-	Mission,
-	Mail,
-	Currency,
-	Achievement,
-	Trade,
-	Quickbuild,
-	Deletion,
-	Vendor,
-	Activity,
-	Pickup,
-	Brick,
-	Property,
-	Moderation,
-	Exhibit,
-	Inventory,
-	Claimcode,
-	Consumption,
-	Crafting,
-	LevelReward,
-	Relocate,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

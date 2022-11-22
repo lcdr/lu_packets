@@ -7,7 +7,7 @@ use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{Lot, LOT_NULL, Quaternion, Vector3};
 use crate::world::amf3::Amf3;
-pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, SetIgnoreProjectileCollision};
+pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveItemFromInventory, SetIgnoreProjectileCollision};
 use super::{GmString, GmWString};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -32,6 +32,7 @@ pub enum GameMessage {
 	PopEquippedItemsState = 192,
 	RebuildCancel(RebuildCancel) = 209,
 	MoveItemInInventory(MoveItemInInventory) = 224,
+	RemoveItemFromInventory(RemoveItemFromInventory) = 230,
 	EquipInventory(EquipInventory) = 231,
 	UnEquipInventory(UnEquipInventory) = 233,
 	RespondToMission(RespondToMission) = 249,

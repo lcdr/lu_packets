@@ -8,6 +8,7 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{LuVarString, LuVarWString, ObjId, OBJID_EMPTY};
+use crate::world::LuNameValue;
 use super::{Lot, LOT_NULL};
 
 type GmString = LuVarString<u32>;
@@ -78,6 +79,7 @@ pub enum InventoryType {
 	Donation,
 	BankModel,
 	BankBehavior,
+	All,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
@@ -127,6 +129,66 @@ pub struct RemoveSkill {
 	#[default(false)]
 	pub from_skill_set: bool,
 	pub skill_id: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(u32)]
+pub enum LootType {
+	None,
+	Chest,
+	Mission,
+	Mail,
+	Currency,
+	Achievement,
+	Trade,
+	Quickbuild,
+	Deletion,
+	Vendor,
+	Activity,
+	Pickup,
+	Brick,
+	Property,
+	Moderation,
+	Exhibit,
+	Inventory,
+	Claimcode,
+	Consumption,
+	Crafting,
+	LevelReward,
+	Relocate,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct RemoveItemFromInventory {
+	#[default(false)]
+	pub confirmed: bool,
+	#[default(true)]
+	pub delete_item: bool,
+	#[default(false)]
+	pub out_success: bool,
+	#[default(InventoryType::All)]
+	pub inv_type: InventoryType,
+	#[default(LootType::None)]
+	pub loot_type_source: LootType,
+	pub extra_info: LuNameValue,
+	#[default(true)]
+	pub force_deletion: bool,
+	#[default(OBJID_EMPTY)]
+	pub loot_type_source_id: ObjId,
+	#[default(OBJID_EMPTY)]
+	pub obj_id: ObjId,
+	#[default(LOT_NULL)]
+	pub obj_template: Lot,
+	#[default(OBJID_EMPTY)]
+	pub requesting_obj_id: ObjId,
+	#[default(1)]
+	pub stack_count: u32,
+	#[default(0)]
+	pub stack_remaining: u32,
+	#[default(OBJID_EMPTY)]
+	pub subkey: ObjId,
+	#[default(OBJID_EMPTY)]
+	pub trade_id: ObjId,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
