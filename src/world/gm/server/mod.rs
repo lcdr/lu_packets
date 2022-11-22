@@ -3,7 +3,7 @@ use std::cmp::PartialEq;
 use endio::{Deserialize, Serialize};
 use lu_packets_derive::{GameMessage, GmParam, VariantTests};
 
-use crate::common::{ObjId, OBJID_EMPTY};
+use crate::common::{ObjId, OBJID_EMPTY, LuVarWString};
 
 use crate::world::{Lot, LOT_NULL, Quaternion, Vector3};
 use crate::world::amf3::Amf3;
@@ -79,6 +79,7 @@ pub enum GameMessage {
 	PropertyEntranceSync(PropertyEntranceSync) = 842,
 	ParseChatMessage(ParseChatMessage) = 850,
 	SetMissionTypeState(SetMissionTypeState) = 851,
+	UpdatePropertyOrModelForFilterCheck(UpdatePropertyOrModelForFilterCheck) = 863,
 	ClientTradeRequest(ClientTradeRequest) = 868,
 	ClientTradeCancel = 878,
 	ClientTradeAccept(ClientTradeAccept) = 880,
@@ -570,6 +571,16 @@ pub enum MissionLockState {
 	Locked,
 	New,
 	Unlocked,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct UpdatePropertyOrModelForFilterCheck {
+	pub is_property: bool,
+	pub ugc_id: ObjId,
+	pub player_id: ObjId,
+	pub world_id: ObjId,
+	pub new_description: LuVarWString<u32>,
+	pub new_name: LuVarWString<u32>
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
