@@ -3,7 +3,7 @@ use std::cmp::PartialEq;
 use endio::{Deserialize, Serialize};
 use lu_packets_derive::{GameMessage, GmParam, VariantTests};
 
-use crate::common::{ObjId, OBJID_EMPTY, LuVarWString};
+use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{Lot, LOT_NULL, Quaternion, Vector3};
 use crate::world::amf3::Amf3;
@@ -579,8 +579,8 @@ pub struct UpdatePropertyOrModelForFilterCheck {
 	pub ugc_id: ObjId,
 	pub player_id: ObjId,
 	pub world_id: ObjId,
-	pub new_description: LuVarWString<u32>,
-	pub new_name: LuVarWString<u32>
+	pub new_description: GmWString,
+	pub new_name: GmWString,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
