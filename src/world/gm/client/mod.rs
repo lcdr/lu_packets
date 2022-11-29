@@ -118,7 +118,6 @@ pub enum GameMessage {
 	ObjectActivatedClient(ObjectActivatedClient) = 980,
 	NotifyClientObject(NotifyClientObject) = 1042,
 	DisplayZoneSummary(DisplayZoneSummary) = 1043,
-	ModifyPlayerZoneStatistic(ModifyPlayerZoneStatistic) = 1046,
 	StartArrangingWithItem(StartArrangingWithItem) = 1061,
 	FinishArrangingWithItem(FinishArrangingWithItem) = 1062,
 	SetBuildModeConfirmed(SetBuildModeConfirmed) = 1073,
@@ -1105,17 +1104,6 @@ pub struct DisplayZoneSummary {
 	pub is_zone_start: bool,
 	#[default(OBJID_EMPTY)]
 	pub sender: ObjId,
-}
-
-#[derive(Debug, GameMessage, PartialEq)]
-pub struct ModifyPlayerZoneStatistic {
-	#[default(false)]
-	pub set: bool,
-	pub stat_name: GmWString,
-	#[default(0)]
-	pub stat_value: i32,
-	#[default(MAP_ID_INVALID)]
-	pub zone_id: MapId,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

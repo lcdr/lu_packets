@@ -5,7 +5,7 @@ use lu_packets_derive::{GameMessage, GmParam, VariantTests};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use crate::world::{Lot, LOT_NULL, Quaternion, Vector3};
+use crate::world::{Lot, LOT_NULL, MapId, MAP_ID_INVALID, Quaternion, Vector3};
 use crate::world::amf3::Amf3;
 pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveItemFromInventory, SetIgnoreProjectileCollision};
 use super::{GmString, GmWString};
@@ -95,6 +95,7 @@ pub enum GameMessage {
 	BbbSaveRequest(BbbSaveRequest) = 1001,
 	BbbResetMetadataSourceItem = 1004,
 	ZoneSummaryDismissed(ZoneSummaryDismissed) = 1044,
+	ModifyPlayerZoneStatistic(ModifyPlayerZoneStatistic) = 1046,
 	ActivityStateChangeRequest(ActivityStateChangeRequest) = 1053,
 	StartBuildingWithItem(StartBuildingWithItem) = 1057,
 	DoneArrangingWithItem(DoneArrangingWithItem) = 1063,
@@ -643,6 +644,17 @@ pub struct BbbSaveRequest {
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct ZoneSummaryDismissed {
 	pub player_id: ObjId,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct ModifyPlayerZoneStatistic {
+	#[default(false)]
+	pub set: bool,
+	pub stat_name: GmWString,
+	#[default(0)]
+	pub stat_value: i32,
+	#[default(MAP_ID_INVALID)]
+	pub zone_id: MapId,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
