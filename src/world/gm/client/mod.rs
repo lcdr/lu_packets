@@ -158,7 +158,6 @@ pub enum GameMessage {
 	StartRailMovement(StartRailMovement) = 1472,
 	NotifyRailActivatorStateChange(NotifyRailActivatorStateChange) = 1478,
 	NotifyRewardMailed(NotifyRewardMailed) = 1480,
-	UpdatePlayerStatistic(UpdatePlayerStatistic) = 1481,
 	RequeryPropertyModels = 1491,
 	NotifyNotEnoughInvSpace(NotifyNotEnoughInvSpace) = 1516,
 	NotifyPropertyOfEditMode(NotifyPropertyOfEditMode) = 1546,
@@ -1464,13 +1463,6 @@ pub struct NotifyRewardMailed {
 	pub start_point: Vector3,
 	pub subkey: ObjId,
 	pub template_id: Lot,
-}
-
-#[derive(Debug, GameMessage, PartialEq)]
-pub struct UpdatePlayerStatistic {
-	pub update_id: i32,
-	#[default(1)]
-	pub update_value: i64,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

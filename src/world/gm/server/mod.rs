@@ -129,6 +129,7 @@ pub enum GameMessage {
 	ClientRailMovementReady = 1476,
 	PlayerRailArrivedNotification(PlayerRailArrivedNotification) = 1477,
 	RequestRailActivatorState = 1479,
+	UpdatePlayerStatistic(UpdatePlayerStatistic) = 1481,
 	ModifyGhostingDistance(ModifyGhostingDistance) = 1485,
 	ModularAssemblyNifCompleted(ModularAssemblyNifCompleted) = 1498,
 	GetHotPropertyData = 1511,
@@ -883,6 +884,13 @@ pub struct CancelRailMovement {
 pub struct PlayerRailArrivedNotification {
 	pub path_name: GmWString,
 	pub waypoint_number: i32,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct UpdatePlayerStatistic {
+	pub update_id: i32,
+	#[default(1)]
+	pub update_value: i64,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
