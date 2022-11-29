@@ -886,9 +886,41 @@ pub struct PlayerRailArrivedNotification {
 	pub waypoint_number: i32,
 }
 
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(i32)]
+pub enum StatisticID {
+	CurrencyCollected = 1,
+	BricksCollected,
+	SmashablesSmashed,
+	QuickBuildsCompleted,
+	EnemiesSmashed,
+	RocketsUsed,
+	MissionsCompleted,
+	PetsTamed,
+	ImaginationPowerUpsCollected,
+	LifePowerUpsCollected,
+	ArmorPowerUpsCollected,
+	MetersTraveled,
+	TimesSmashed,
+	TotalDamageTaken,
+	TotalDamageHealed,
+	TotalArmorRepaired,
+	TotalImaginationRestored,
+	TotalImaginationUsed,
+	DistanceDriven,
+	TimeAirborneInCar,
+	RacingImaginationPowerUpsCollected,
+	RacingImaginationCratesSmashed,
+	RacingCarBoostsActivated,
+	RacingTimesWrecked,
+	RacingSmashablesSmashed,
+	RacesFinished,
+	FirstPlaceRaceFinishes,
+}
+
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct UpdatePlayerStatistic {
-	pub update_id: i32,
+	pub update_id: StatisticID,
 	#[default(1)]
 	pub update_value: i64,
 }
