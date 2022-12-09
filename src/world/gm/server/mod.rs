@@ -5,9 +5,9 @@ use lu_packets_derive::{GameMessage, GmParam, VariantTests};
 
 use crate::common::{ObjId, OBJID_EMPTY};
 
-use crate::world::{Lot, LOT_NULL, MapId, MAP_ID_INVALID, Quaternion, Vector3};
+use crate::world::{Lot, LOT_NULL, Quaternion, Vector3};
 use crate::world::amf3::Amf3;
-pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveItemFromInventory, SetIgnoreProjectileCollision};
+pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveItemFromInventory, SetIgnoreProjectileCollision, ModifyPlayerZoneStatistic};
 use super::{GmString, GmWString};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -129,7 +129,6 @@ pub enum GameMessage {
 	ClientRailMovementReady = 1476,
 	PlayerRailArrivedNotification(PlayerRailArrivedNotification) = 1477,
 	RequestRailActivatorState = 1479,
-	UpdatePlayerStatistic(UpdatePlayerStatistic) = 1481,
 	ModifyGhostingDistance(ModifyGhostingDistance) = 1485,
 	ModularAssemblyNifCompleted(ModularAssemblyNifCompleted) = 1498,
 	GetHotPropertyData = 1511,
@@ -648,17 +647,6 @@ pub struct ZoneSummaryDismissed {
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
-pub struct ModifyPlayerZoneStatistic {
-	#[default(false)]
-	pub set: bool,
-	pub stat_name: GmWString,
-	#[default(0)]
-	pub stat_value: i32,
-	#[default(MAP_ID_INVALID)]
-	pub zone_id: MapId,
-}
-
-#[derive(Debug, GameMessage, PartialEq)]
 pub struct ActivityStateChangeRequest {
 	pub obj_id: ObjId,
 	pub num_value_1: i32,
@@ -884,45 +872,6 @@ pub struct CancelRailMovement {
 pub struct PlayerRailArrivedNotification {
 	pub path_name: GmWString,
 	pub waypoint_number: i32,
-}
-
-#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
-#[repr(i32)]
-pub enum StatisticID {
-	CurrencyCollected = 1,
-	BricksCollected,
-	SmashablesSmashed,
-	QuickBuildsCompleted,
-	EnemiesSmashed,
-	RocketsUsed,
-	MissionsCompleted,
-	PetsTamed,
-	ImaginationPowerUpsCollected,
-	LifePowerUpsCollected,
-	ArmorPowerUpsCollected,
-	MetersTraveled,
-	TimesSmashed,
-	TotalDamageTaken,
-	TotalDamageHealed,
-	TotalArmorRepaired,
-	TotalImaginationRestored,
-	TotalImaginationUsed,
-	DistanceDriven,
-	TimeAirborneInCar,
-	RacingImaginationPowerUpsCollected,
-	RacingImaginationCratesSmashed,
-	RacingCarBoostsActivated,
-	RacingTimesWrecked,
-	RacingSmashablesSmashed,
-	RacesFinished,
-	FirstPlaceRaceFinishes,
-}
-
-#[derive(Debug, GameMessage, PartialEq)]
-pub struct UpdatePlayerStatistic {
-	pub update_id: StatisticID,
-	#[default(1)]
-	pub update_value: i64,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

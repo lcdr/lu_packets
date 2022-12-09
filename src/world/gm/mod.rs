@@ -8,7 +8,7 @@ use endio::{Deserialize, LERead, LEWrite, Serialize};
 use lu_packets_derive::{GameMessage, GmParam};
 
 use crate::common::{LuVarString, LuVarWString, ObjId, OBJID_EMPTY};
-use crate::world::LuNameValue;
+use crate::world::{LuNameValue, MapId, MAP_ID_INVALID};
 use super::{Lot, LOT_NULL};
 
 type GmString = LuVarString<u32>;
@@ -249,4 +249,15 @@ pub struct MoveInventoryBatch {
 	pub src_bag: InventoryType,
 	#[default(OBJID_EMPTY)]
 	pub start_object_id: ObjId,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct ModifyPlayerZoneStatistic {
+	#[default(false)]
+	pub set: bool,
+	pub stat_name: GmWString,
+	#[default(0)]
+	pub stat_value: i32,
+	#[default(MAP_ID_INVALID)]
+	pub zone_id: MapId,
 }

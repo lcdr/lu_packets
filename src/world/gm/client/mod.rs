@@ -7,7 +7,7 @@ use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, LuNameValue, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
 use crate::world::amf3::Amf3;
-pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, LootType, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, RemoveItemFromInventory, SetIgnoreProjectileCollision};
+pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, LootType, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, RemoveItemFromInventory, SetIgnoreProjectileCollision, ModifyPlayerZoneStatistic};
 use super::{GmString, GmWString};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -118,6 +118,7 @@ pub enum GameMessage {
 	ObjectActivatedClient(ObjectActivatedClient) = 980,
 	NotifyClientObject(NotifyClientObject) = 1042,
 	DisplayZoneSummary(DisplayZoneSummary) = 1043,
+	ModifyPlayerZoneStatistic(ModifyPlayerZoneStatistic) = 1046,
 	StartArrangingWithItem(StartArrangingWithItem) = 1061,
 	FinishArrangingWithItem(FinishArrangingWithItem) = 1062,
 	SetBuildModeConfirmed(SetBuildModeConfirmed) = 1073,
@@ -158,6 +159,7 @@ pub enum GameMessage {
 	StartRailMovement(StartRailMovement) = 1472,
 	NotifyRailActivatorStateChange(NotifyRailActivatorStateChange) = 1478,
 	NotifyRewardMailed(NotifyRewardMailed) = 1480,
+	UpdatePlayerStatistic(UpdatePlayerStatistic) = 1481,
 	RequeryPropertyModels = 1491,
 	NotifyNotEnoughInvSpace(NotifyNotEnoughInvSpace) = 1516,
 	NotifyPropertyOfEditMode(NotifyPropertyOfEditMode) = 1546,
@@ -1463,6 +1465,45 @@ pub struct NotifyRewardMailed {
 	pub start_point: Vector3,
 	pub subkey: ObjId,
 	pub template_id: Lot,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(i32)]
+pub enum StatisticId {
+	CurrencyCollected = 1,
+	BricksCollected,
+	SmashablesSmashed,
+	QuickBuildsCompleted,
+	EnemiesSmashed,
+	RocketsUsed,
+	MissionsCompleted,
+	PetsTamed,
+	ImaginationPowerUpsCollected,
+	LifePowerUpsCollected,
+	ArmorPowerUpsCollected,
+	MetersTraveled,
+	TimesSmashed,
+	TotalDamageTaken,
+	TotalDamageHealed,
+	TotalArmorRepaired,
+	TotalImaginationRestored,
+	TotalImaginationUsed,
+	DistanceDriven,
+	TimeAirborneInCar,
+	RacingImaginationPowerUpsCollected,
+	RacingImaginationCratesSmashed,
+	RacingCarBoostsActivated,
+	RacingTimesWrecked,
+	RacingSmashablesSmashed,
+	RacesFinished,
+	FirstPlaceRaceFinishes,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct UpdatePlayerStatistic {
+	pub update_id: StatisticId,
+	#[default(1)]
+	pub update_value: i64,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
