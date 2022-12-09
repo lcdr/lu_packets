@@ -7,12 +7,7 @@ GameMessage::StartSkill(
 		last_clicked_posit: Vector3::ZERO,
 		optional_originator_id: 0,
 		optional_target_id: 0,
-		originator_rot: Quaternion {
-			x: 0.0,
-			y: 0.0,
-			z: 0.0,
-			w: 0.0,
-		},
+		originator_rot: Quaternion::IDENTITY,
 		bitstream: vec![
 			1, 0, 0, 0, 1, 0, 0, 0, 128, 128, 0, 0, 50, 138, 129, 0, 0, 32, 0, 2, 61, 0, 0, 0, 0,
 		],
