@@ -1,6 +1,6 @@
 GameMessage::UpdatePlayerStatistic(
 	UpdatePlayerStatistic {
-		update_id: 12,
+		update_id: StatisticId::MetersTraveled,
 		update_value: 29,
 	},
 )

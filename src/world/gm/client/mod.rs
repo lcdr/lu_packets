@@ -7,7 +7,7 @@ use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{CloneId, CLONE_ID_INVALID, Lot, LOT_NULL, LuNameValue, MapId, MAP_ID_INVALID, Quaternion, Vector3, ZoneId};
 use crate::world::amf3::Amf3;
-pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, LootType, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, RemoveItemFromInventory, SetIgnoreProjectileCollision};
+pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, LootType, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveSkill, RemoveItemFromInventory, SetIgnoreProjectileCollision, ModifyPlayerZoneStatistic};
 use super::{GmString, GmWString};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -1108,17 +1108,6 @@ pub struct DisplayZoneSummary {
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
-pub struct ModifyPlayerZoneStatistic {
-	#[default(false)]
-	pub set: bool,
-	pub stat_name: GmWString,
-	#[default(0)]
-	pub stat_value: i32,
-	#[default(MAP_ID_INVALID)]
-	pub zone_id: MapId,
-}
-
-#[derive(Debug, GameMessage, PartialEq)]
 pub struct StartArrangingWithItem {
 	#[default(true)]
 	pub first_time: bool,
@@ -1478,9 +1467,41 @@ pub struct NotifyRewardMailed {
 	pub template_id: Lot,
 }
 
+#[derive(Debug, Deserialize, Serialize, PartialEq, GmParam)]
+#[repr(i32)]
+pub enum StatisticId {
+	CurrencyCollected = 1,
+	BricksCollected,
+	SmashablesSmashed,
+	QuickBuildsCompleted,
+	EnemiesSmashed,
+	RocketsUsed,
+	MissionsCompleted,
+	PetsTamed,
+	ImaginationPowerUpsCollected,
+	LifePowerUpsCollected,
+	ArmorPowerUpsCollected,
+	MetersTraveled,
+	TimesSmashed,
+	TotalDamageTaken,
+	TotalDamageHealed,
+	TotalArmorRepaired,
+	TotalImaginationRestored,
+	TotalImaginationUsed,
+	DistanceDriven,
+	TimeAirborneInCar,
+	RacingImaginationPowerUpsCollected,
+	RacingImaginationCratesSmashed,
+	RacingCarBoostsActivated,
+	RacingTimesWrecked,
+	RacingSmashablesSmashed,
+	RacesFinished,
+	FirstPlaceRaceFinishes,
+}
+
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct UpdatePlayerStatistic {
-	pub update_id: i32,
+	pub update_id: StatisticId,
 	#[default(1)]
 	pub update_value: i64,
 }

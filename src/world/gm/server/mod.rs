@@ -7,7 +7,7 @@ use crate::common::{ObjId, OBJID_EMPTY};
 
 use crate::world::{Lot, LOT_NULL, Quaternion, Vector3};
 use crate::world::amf3::Amf3;
-pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveItemFromInventory, SetIgnoreProjectileCollision};
+pub use super::{EquipInventory, InventoryType, KillType, UnEquipInventory, MissionState, PetNotificationType, MoveItemInInventory, MoveInventoryBatch, RemoveItemFromInventory, SetIgnoreProjectileCollision, ModifyPlayerZoneStatistic};
 use super::{GmString, GmWString};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -95,6 +95,7 @@ pub enum GameMessage {
 	BbbSaveRequest(BbbSaveRequest) = 1001,
 	BbbResetMetadataSourceItem = 1004,
 	ZoneSummaryDismissed(ZoneSummaryDismissed) = 1044,
+	ModifyPlayerZoneStatistic(ModifyPlayerZoneStatistic) = 1046,
 	ActivityStateChangeRequest(ActivityStateChangeRequest) = 1053,
 	StartBuildingWithItem(StartBuildingWithItem) = 1057,
 	DoneArrangingWithItem(DoneArrangingWithItem) = 1063,
