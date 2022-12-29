@@ -25,6 +25,7 @@ pub enum GameMessage {
 	PreloadAnimation(PreloadAnimation) = 42,
 	PlayAnimation(PlayAnimation) = 43,
 	SetName(SetName) = 72,
+	EchoStartSkill(EchoStartSkill) = 118,
 	AddSkill(AddSkill) = 127,
 	RemoveSkill(RemoveSkill) = 128,
 	SetCurrency(SetCurrency) = 133,
@@ -261,6 +262,27 @@ const SECONDARY_PRIORITY: f32 = 0.4;
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct SetName {
 	pub name: GmWString,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct EchoStartSkill {
+	#[default(false)]
+	pub used_mouse: bool,
+	#[default(0.0)]
+	pub caster_latency: f32,
+	#[default(0)]
+	pub cast_type: i32, // todo: type
+	#[default(Vector3::ZERO)]
+	pub last_clicked_posit: Vector3,
+	pub optional_originator_id: ObjId,
+	#[default(OBJID_EMPTY)]
+	pub optional_target_id: ObjId,
+	#[default(Quaternion::IDENTITY)]
+	pub originator_rot: Quaternion,
+	pub bitstream: Vec<u8>,
+	pub skill_id: u32, // todo: type
+	#[default(0)]
+	pub skill_handle: u32	
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

@@ -14,11 +14,6 @@ GameMessage::NotifyPetTamingMinigame(
 			y: 0.0,
 			z: 0.0,
 		},
-		tele_rot: Quaternion {
-			x: 0.0,
-			y: 0.0,
-			z: 0.0,
-			w: 0.0,
-		},
+		tele_rot: Quaternion::IDENTITY,
 	},
 )

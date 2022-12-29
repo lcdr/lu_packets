@@ -94,7 +94,6 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 		&& !file.name().contains("[53-05-00-00]")
 		&& !file.name().contains("[53-05-00-15]")
 		&& !file.name().contains("[53-05-00-31]")
-		&& !file.name().contains("[76-00]")
 		&& !file.name().contains("[e6-00]")
 		&& !file.name().contains("[ff-00]")
 		&& !file.name().contains("[a1-01]")
