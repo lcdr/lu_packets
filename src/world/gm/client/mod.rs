@@ -141,6 +141,7 @@ pub enum GameMessage {
 	RacingSetPlayerResetInfo(RacingSetPlayerResetInfo) = 1254,
 	LockNodeRotation(LockNodeRotation) = 1260,
 	NotifyVehicleOfRacingObject(NotifyVehicleOfRacingObject) = 1276,
+	SetNameBillboardState(SetNameBillboardState) = 1284,
 	PlayerReachedRespawnCheckpoint(PlayerReachedRespawnCheckpoint) = 1296,
 	HandleUgcEquipPostDeleteBasedOnEditMode(HandleUgcEquipPostDeleteBasedOnEditMode) = 1300,
 	HandleUgcEquipPreCreateBasedOnEditMode(HandleUgcEquipPreCreateBasedOnEditMode) = 1301,
@@ -1312,6 +1313,13 @@ pub struct LockNodeRotation {
 pub struct NotifyVehicleOfRacingObject {
 	#[default(OBJID_EMPTY)]
 	pub racing_object_id: ObjId,
+}
+
+#[derive(Debug, GameMessage, PartialEq)]
+pub struct SetNameBillboardState {
+	#[default(false)]
+	pub override_default: bool,
+	pub state: bool,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
