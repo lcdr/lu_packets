@@ -70,10 +70,14 @@ pub enum ClientMessage {
 pub enum LoginResponse {
 	/// The login was successful.
 	Ok {
+		/// Used for version gating.
+		version: (u16, u16, u16),
 		/// The session key to be used for authenticating with world servers (to be passed in [`ClientValidation::session_key`](crate::world::server::ClientValidation::session_key)).
 		session_key: LuWString33,
 		/// The address of a world server available for further service.
 		redirect_address: (LuString33, u16),
+		/// Whether the account is in free trial mode.
+		is_ftp: bool,
 	} = 1,
 	/// The login failed in an unusual way. More information can be found in the attached message.
 	CustomMessage(LuVarWString<u16>) = 5,
@@ -85,6 +89,7 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a LoginResponse
 	where       u8: Serialize<LE, W>,
 	           u16: Serialize<LE, W>,
 	           u32: Serialize<LE, W>,
+	      &'a bool: Serialize<LE, W>,
 	      &'a [u8]: Serialize<LE, W>,
 	   &'a LuString33: Serialize<LE, W>,
 	  &'a LuWString33: Serialize<LE, W>,
@@ -93,16 +98,18 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a LoginResponse
 		let disc = unsafe { *(self as *const LoginResponse as *const u8) };
 		writer.write(disc)?;
 		match self {
-			LoginResponse::Ok { session_key, redirect_address } => {
+			LoginResponse::Ok { version, session_key, redirect_address, is_ftp } => {
 				writer.write(&[0; 264][..])?;
-				writer.write(1u16)?;
-				writer.write(10u16)?;
-				writer.write(64u16)?;
+				writer.write(version.0)?;
+				writer.write(version.1)?;
+				writer.write(version.2)?;
 				writer.write(session_key)?;
 				writer.write(&redirect_address.0)?;
 				writer.write(&[0; 33][..])?;
 				writer.write(redirect_address.1)?;
-				writer.write(&[0; 91][..])?;
+				writer.write(&[0; 81][..])?;
+				writer.write(is_ftp)?;
+				writer.write(&[0; 10][..])?;
 			}
 			LoginResponse::CustomMessage(msg) => {
 				writer.write(&[0; 493][..])?;
