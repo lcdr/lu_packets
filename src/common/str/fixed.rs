@@ -118,7 +118,9 @@ macro_rules! lu_wstr {
 	}
 }
 
+lu_str!(LuString3, 3);
 lu_str!(LuString33, 33);
+lu_str!(LuString37, 37);
 lu_wstr!(LuWString32, 32);
 lu_wstr!(LuWString33, 33);
 lu_wstr!(LuWString41, 41);
