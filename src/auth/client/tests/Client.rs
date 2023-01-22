@@ -1,6 +1,16 @@
 LuMessage::Client(
     ClientMessage::LoginResponse(
         LoginResponse::Ok {
+            events: (
+                lu!(b"Talk_Like_A_Pirate"),
+                lu!(b""),
+                lu!(b""),
+                lu!(b""),
+                lu!(b""),
+                lu!(b""),
+                lu!(b""),
+                lu!(b""),
+            ),
             version: (
                 1,
                 10,
@@ -11,8 +21,15 @@ LuMessage::Client(
                 lu!(b"171.20.35.43"),
                 2006,
             ),
+            chat_server_address: (
+                lu!(b""),
+                0,
+            ),
+            cdn_key: lu!(b""),
+            cdn_ticket: lu!(b"00000000-0000-0000-0000-000000000000"),
             is_ftp: true,
             just_upgraded_from_ftp: false,
+            time_remaining_in_ftp: 0,
             language: Language::en_US,
             country_code: lu!(b"US"),
             stamps: vec![

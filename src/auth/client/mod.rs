@@ -72,18 +72,29 @@ pub enum ClientMessage {
 pub enum LoginResponse {
 	/// The login was successful.
 	Ok {
+		// Strings used for event gating.
+		events: (LuString33, LuString33, LuString33, LuString33, LuString33, LuString33, LuString33, LuString33),
 		/// Used for version gating.
 		version: (u16, u16, u16),
 		/// The session key to be used for authenticating with world servers (to be passed in [`ClientValidation::session_key`](crate::world::server::ClientValidation::session_key)).
 		session_key: LuWString33,
 		/// The address of a world server available for further service.
 		redirect_address: (LuString33, u16),
-		/// Whether the account is in free trial mode.
-		is_ftp: bool,
+		/// The address of the chat server (unused).
+		chat_server_address: (LuString33, u16),
+		cdn_key: LuString33,
+		cdn_ticket: LuString37,
+		/// Language of the server.
+		language: Language,
+		/// Used for the cdclient SubscriptionPricing table.
+		country_code: LuString3,
 		/// Whether the account is connecting as a paid account for the first time.
 		just_upgraded_from_ftp: bool,
-		language: Language,
-		country_code: LuString3,
+		/// Whether the account is in free trial mode.
+		is_ftp: bool,
+		/// Time remaining in seconds for free-to-play (unused).
+		time_remaining_in_ftp: u64,
+		/// Logs from the auth server.
 		stamps: Vec<Stamp>,
 	} = 1,
 	/// The login failed in an unusual way. More information can be found in the attached message.
@@ -121,40 +132,43 @@ where
         writer.write(disc)?;
         match self {
             LoginResponse::Ok {
+				events,
                 version,
                 session_key,
                 redirect_address,
-                is_ftp,
-                just_upgraded_from_ftp,
-                language,
-                country_code,
-                stamps,
+				chat_server_address,
+				cdn_key,
+				cdn_ticket,
+				language,
+				country_code,
+				just_upgraded_from_ftp,
+				is_ftp,
+				time_remaining_in_ftp,
+				stamps,
             } => {
-                // event strings
-                writer.write(&b"Talk_Like_A_Pirate\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"[..])?;
-                for _i in 0..7 {
-                    writer.write(&[0; 33][..])?;
-                }
+				writer.write(&events.0)?;
+				writer.write(&events.1)?;
+				writer.write(&events.2)?;
+				writer.write(&events.3)?;
+				writer.write(&events.4)?;
+				writer.write(&events.5)?;
+				writer.write(&events.6)?;
+				writer.write(&events.7)?;
                 writer.write(version.0)?;
                 writer.write(version.1)?;
                 writer.write(version.2)?;
                 writer.write(session_key)?;
                 writer.write(&redirect_address.0)?;
-                // Chat server address
-                writer.write(&[0; 33][..])?;
+                writer.write(&chat_server_address.0)?;
                 writer.write(redirect_address.1)?;
-                // Chat server port
-                writer.write(0u16)?;
-                // cdn key
-                writer.write(&[0; 33][..])?;
-                // cdn ticket
-                writer.write(&b"00000000-0000-0000-0000-000000000000\0"[..])?;
+				writer.write(chat_server_address.1)?;
+				writer.write(cdn_key)?;
+				writer.write(cdn_ticket)?;
                 writer.write(language)?;
                 writer.write(country_code)?;
                 writer.write(just_upgraded_from_ftp)?;
                 writer.write(is_ftp)?;
-                // ftp time remaining
-                writer.write(0u64)?;
+                writer.write(*time_remaining_in_ftp)?;
                 // custom message
                 writer.write(0u16)?;
                 writer.write((stamps.len() * 16) as u32 + 4)?;
@@ -181,9 +195,9 @@ impl<R: Read + LERead> Deserialize<LE, R> for LoginResponse {
         let disc = LERead::read::<u8>(reader)?;
         match disc {
             1 => {
-                for _i in 0..8 {
-                    let _event_string: LuString33 = LERead::read(reader)?;
-                }
+				let events: (LuString33, LuString33, LuString33, LuString33, LuString33, LuString33, LuString33, LuString33) 
+					= (LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?, 
+					LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?);
                 let version: (u16, u16, u16) = (
                     LERead::read(reader)?,
                     LERead::read(reader)?,
@@ -191,16 +205,16 @@ impl<R: Read + LERead> Deserialize<LE, R> for LoginResponse {
                 );
                 let session_key: LuWString33 = LERead::read(reader)?;
                 let redirect_address: LuString33 = LERead::read(reader)?;
-                let _chat_address: LuString33 = LERead::read(reader)?;
+                let chat_address: LuString33 = LERead::read(reader)?;
                 let redirect_port: u16 = LERead::read(reader)?;
-                let _chat_port: u16 = LERead::read(reader)?;
-                let _cdn_key: LuString33 = LERead::read(reader)?;
-                let _cdn_ticket: LuString37 = LERead::read(reader)?;
+                let chat_port: u16 = LERead::read(reader)?;
+                let cdn_key: LuString33 = LERead::read(reader)?;
+                let cdn_ticket: LuString37 = LERead::read(reader)?;
                 let language: Language = LERead::read(reader)?;
                 let country_code: LuString3 = LERead::read(reader)?;
                 let just_upgraded_from_ftp: bool = LERead::read(reader)?;
                 let is_ftp: bool = LERead::read(reader)?;
-                let _time_remaining_in_ftp: u64 = LERead::read(reader)?;
+                let time_remaining_in_ftp: u64 = LERead::read(reader)?;
                 let _custom_message: LuVarWString<u16> = LERead::read(reader)?;
                 let buffer_len_plus_four: u32 = LERead::read(reader)?;
                 let mut stamps: Vec<Stamp> = Vec::new();
@@ -210,13 +224,18 @@ impl<R: Read + LERead> Deserialize<LE, R> for LoginResponse {
                     stamps.push(stamp);
                 }
                 Ok(Self::Ok {
+					events,
                     version,
                     session_key,
                     redirect_address: (redirect_address, redirect_port),
+					chat_server_address: (chat_address, chat_port),
+					cdn_key,
+					cdn_ticket,
                     language,
                     country_code,
-                    is_ftp,
                     just_upgraded_from_ftp,
+                    is_ftp,
+					time_remaining_in_ftp,
                     stamps,
                 })
             }
