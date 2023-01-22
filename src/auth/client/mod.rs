@@ -105,37 +105,37 @@ pub enum LoginResponse {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Stamp {
-    pub type_: u32,
-    pub value: u32,
-    pub timestamp: u64,
+	pub type_: u32,
+	pub value: u32,
+	pub timestamp: u64,
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a LoginResponse
 where
-    u8: Serialize<LE, W>,
-    u16: Serialize<LE, W>,
-    u32: Serialize<LE, W>,
-    u64: Serialize<LE, W>,
-    &'a bool: Serialize<LE, W>,
-    &'a [u8]: Serialize<LE, W>,
-    &'a LuString33: Serialize<LE, W>,
-    &'a LuString33: Serialize<LE, W>,
-    &'a LuWString33: Serialize<LE, W>,
-    &'a LuString37: Serialize<LE, W>,
-    &'a LuString3: Serialize<LE, W>,
-    &'a Language: Serialize<LE, W>,
-    &'a Stamp: Serialize<LE, W>,
-    &'a LuVarWString<u16>: Serialize<LE, W>,
+	u8: Serialize<LE, W>,
+	u16: Serialize<LE, W>,
+	u32: Serialize<LE, W>,
+	u64: Serialize<LE, W>,
+	&'a bool: Serialize<LE, W>,
+	&'a [u8]: Serialize<LE, W>,
+	&'a LuString33: Serialize<LE, W>,
+	&'a LuString33: Serialize<LE, W>,
+	&'a LuWString33: Serialize<LE, W>,
+	&'a LuString37: Serialize<LE, W>,
+	&'a LuString3: Serialize<LE, W>,
+	&'a Language: Serialize<LE, W>,
+	&'a Stamp: Serialize<LE, W>,
+	&'a LuVarWString<u16>: Serialize<LE, W>,
 {
-    fn serialize(self, writer: &mut W) -> Res<()> {
-        let disc = unsafe { *(self as *const LoginResponse as *const u8) };
-        writer.write(disc)?;
-        match self {
-            LoginResponse::Ok {
+	fn serialize(self, writer: &mut W) -> Res<()> {
+		let disc = unsafe { *(self as *const LoginResponse as *const u8) };
+		writer.write(disc)?;
+		match self {
+			LoginResponse::Ok {
 				events,
-                version,
-                session_key,
-                redirect_address,
+				version,
+				session_key,
+				redirect_address,
 				chat_server_address,
 				cdn_key,
 				cdn_ticket,
@@ -145,7 +145,7 @@ where
 				is_ftp,
 				time_remaining_in_ftp,
 				stamps,
-            } => {
+			} => {
 				writer.write(&events.0)?;
 				writer.write(&events.1)?;
 				writer.write(&events.2)?;
@@ -154,103 +154,103 @@ where
 				writer.write(&events.5)?;
 				writer.write(&events.6)?;
 				writer.write(&events.7)?;
-                writer.write(version.0)?;
-                writer.write(version.1)?;
-                writer.write(version.2)?;
-                writer.write(session_key)?;
-                writer.write(&redirect_address.0)?;
-                writer.write(&chat_server_address.0)?;
-                writer.write(redirect_address.1)?;
+				writer.write(version.0)?;
+				writer.write(version.1)?;
+				writer.write(version.2)?;
+				writer.write(session_key)?;
+				writer.write(&redirect_address.0)?;
+				writer.write(&chat_server_address.0)?;
+				writer.write(redirect_address.1)?;
 				writer.write(chat_server_address.1)?;
 				writer.write(cdn_key)?;
 				writer.write(cdn_ticket)?;
-                writer.write(language)?;
-                writer.write(country_code)?;
-                writer.write(just_upgraded_from_ftp)?;
-                writer.write(is_ftp)?;
-                writer.write(*time_remaining_in_ftp)?;
-                // custom message
-                writer.write(0u16)?;
-                writer.write((stamps.len() * 16) as u32 + 4)?;
-                for stamp in stamps {
-                    writer.write(stamp)?;
-                }
-            }
-            LoginResponse::CustomMessage(msg) => {
-                writer.write(&[0; 493][..])?;
-                writer.write(msg)?;
-                writer.write(4u32)?;
-            }
-            LoginResponse::InvalidUsernamePassword => {
-                writer.write(&[0; 495][..])?;
-                writer.write(4u32)?;
-            }
-        }
-        Ok(())
-    }
+				writer.write(language)?;
+				writer.write(country_code)?;
+				writer.write(just_upgraded_from_ftp)?;
+				writer.write(is_ftp)?;
+				writer.write(*time_remaining_in_ftp)?;
+				// custom message
+				writer.write(0u16)?;
+				writer.write((stamps.len() * 16) as u32 + 4)?;
+				for stamp in stamps {
+					writer.write(stamp)?;
+				}
+			}
+			LoginResponse::CustomMessage(msg) => {
+				writer.write(&[0; 493][..])?;
+				writer.write(msg)?;
+				writer.write(4u32)?;
+			}
+			LoginResponse::InvalidUsernamePassword => {
+				writer.write(&[0; 495][..])?;
+				writer.write(4u32)?;
+			}
+		}
+		Ok(())
+	}
 }
 
 impl<R: Read + LERead> Deserialize<LE, R> for LoginResponse {
-    fn deserialize(reader: &mut R) -> Res<Self> {
-        let disc = LERead::read::<u8>(reader)?;
-        match disc {
-            1 => {
+	fn deserialize(reader: &mut R) -> Res<Self> {
+		let disc = LERead::read::<u8>(reader)?;
+		match disc {
+			1 => {
 				let events: (LuString33, LuString33, LuString33, LuString33, LuString33, LuString33, LuString33, LuString33) 
 					= (LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?, 
 					LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?, LERead::read(reader)?);
-                let version: (u16, u16, u16) = (
-                    LERead::read(reader)?,
-                    LERead::read(reader)?,
-                    LERead::read(reader)?,
-                );
-                let session_key: LuWString33 = LERead::read(reader)?;
-                let redirect_address: LuString33 = LERead::read(reader)?;
-                let chat_address: LuString33 = LERead::read(reader)?;
-                let redirect_port: u16 = LERead::read(reader)?;
-                let chat_port: u16 = LERead::read(reader)?;
-                let cdn_key: LuString33 = LERead::read(reader)?;
-                let cdn_ticket: LuString37 = LERead::read(reader)?;
-                let language: Language = LERead::read(reader)?;
-                let country_code: LuString3 = LERead::read(reader)?;
-                let just_upgraded_from_ftp: bool = LERead::read(reader)?;
-                let is_ftp: bool = LERead::read(reader)?;
-                let time_remaining_in_ftp: u64 = LERead::read(reader)?;
-                let _custom_message: LuVarWString<u16> = LERead::read(reader)?;
-                let buffer_len_plus_four: u32 = LERead::read(reader)?;
-                let mut stamps: Vec<Stamp> = Vec::new();
-                let stamp_count = (buffer_len_plus_four - 4) / 16;
-                for _i in 0..stamp_count {
-                    let stamp: Stamp = LERead::read(reader)?;
-                    stamps.push(stamp);
-                }
-                Ok(Self::Ok {
+				let version: (u16, u16, u16) = (
+					LERead::read(reader)?,
+					LERead::read(reader)?,
+					LERead::read(reader)?,
+				);
+				let session_key: LuWString33 = LERead::read(reader)?;
+				let redirect_address: LuString33 = LERead::read(reader)?;
+				let chat_address: LuString33 = LERead::read(reader)?;
+				let redirect_port: u16 = LERead::read(reader)?;
+				let chat_port: u16 = LERead::read(reader)?;
+				let cdn_key: LuString33 = LERead::read(reader)?;
+				let cdn_ticket: LuString37 = LERead::read(reader)?;
+				let language: Language = LERead::read(reader)?;
+				let country_code: LuString3 = LERead::read(reader)?;
+				let just_upgraded_from_ftp: bool = LERead::read(reader)?;
+				let is_ftp: bool = LERead::read(reader)?;
+				let time_remaining_in_ftp: u64 = LERead::read(reader)?;
+				let _custom_message: LuVarWString<u16> = LERead::read(reader)?;
+				let buffer_len_plus_four: u32 = LERead::read(reader)?;
+				let mut stamps: Vec<Stamp> = Vec::new();
+				let stamp_count = (buffer_len_plus_four - 4) / 16;
+				for _i in 0..stamp_count {
+					let stamp: Stamp = LERead::read(reader)?;
+					stamps.push(stamp);
+				}
+				Ok(Self::Ok {
 					events,
-                    version,
-                    session_key,
-                    redirect_address: (redirect_address, redirect_port),
+					version,
+					session_key,
+					redirect_address: (redirect_address, redirect_port),
 					chat_server_address: (chat_address, chat_port),
 					cdn_key,
 					cdn_ticket,
-                    language,
-                    country_code,
-                    just_upgraded_from_ftp,
-                    is_ftp,
+					language,
+					country_code,
+					just_upgraded_from_ftp,
+					is_ftp,
 					time_remaining_in_ftp,
-                    stamps,
-                })
-            }
-            5 => {
-                let mut padding = [0; 493];
-                Read::read_exact(reader, &mut padding)?;
-                let msg = LERead::read::<LuVarWString<u16>>(reader)?;
-                Ok(Self::CustomMessage(msg))
-            }
-            6 => {
-                let mut padding = [0; 495];
-                Read::read_exact(reader, &mut padding)?;
-                Ok(Self::InvalidUsernamePassword)
-            }
-            _ => Err(Error::new(InvalidData, "invalid login response type")),
-        }
-    }
+					stamps,
+				})
+			}
+			5 => {
+				let mut padding = [0; 493];
+				Read::read_exact(reader, &mut padding)?;
+				let msg = LERead::read::<LuVarWString<u16>>(reader)?;
+				Ok(Self::CustomMessage(msg))
+			}
+			6 => {
+				let mut padding = [0; 495];
+				Read::read_exact(reader, &mut padding)?;
+				Ok(Self::InvalidUsernamePassword)
+			}
+			_ => Err(Error::new(InvalidData, "invalid login response type")),
+		}
+	}
 }
