@@ -84,7 +84,7 @@ pub enum LoginResponse {
 		just_upgraded_from_ftp: bool,
 		language: Language,
 		country_code: LuString3,
-		auth_logs: Vec<LogEntry>,
+		stamps: Vec<Stamp>,
 	} = 1,
 	/// The login failed in an unusual way. More information can be found in the attached message.
 	CustomMessage(LuVarWString<u16>) = 5,
@@ -93,7 +93,7 @@ pub enum LoginResponse {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct LogEntry {
+pub struct Stamp {
     pub type_: u32,
     pub value: u32,
     pub timestamp: u64,
@@ -113,7 +113,7 @@ where
     &'a LuString37: Serialize<LE, W>,
     &'a LuString3: Serialize<LE, W>,
     &'a Language: Serialize<LE, W>,
-    &'a LogEntry: Serialize<LE, W>,
+    &'a Stamp: Serialize<LE, W>,
     &'a LuVarWString<u16>: Serialize<LE, W>,
 {
     fn serialize(self, writer: &mut W) -> Res<()> {
@@ -128,7 +128,7 @@ where
                 just_upgraded_from_ftp,
                 language,
                 country_code,
-                auth_logs,
+                stamps,
             } => {
                 // event strings
                 writer.write(&b"Talk_Like_A_Pirate\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"[..])?;
@@ -157,10 +157,9 @@ where
                 writer.write(0u64)?;
                 // custom message
                 writer.write(0u16)?;
-                // auth logs
-                writer.write((auth_logs.len() * 16) as u32 + 4)?;
-                for entry in auth_logs {
-                    writer.write(entry)?;
+                writer.write((stamps.len() * 16) as u32 + 4)?;
+                for stamp in stamps {
+                    writer.write(stamp)?;
                 }
             }
             LoginResponse::CustomMessage(msg) => {
@@ -204,11 +203,11 @@ impl<R: Read + LERead> Deserialize<LE, R> for LoginResponse {
                 let _time_remaining_in_ftp: u64 = LERead::read(reader)?;
                 let _custom_message: LuVarWString<u16> = LERead::read(reader)?;
                 let buffer_len_plus_four: u32 = LERead::read(reader)?;
-                let mut buffer: Vec<LogEntry> = Vec::new();
-                let buffer_entries = (buffer_len_plus_four - 4) / 16;
-                for _i in 0..buffer_entries {
-                    let entry: LogEntry = LERead::read(reader)?;
-                    buffer.push(entry);
+                let mut stamps: Vec<Stamp> = Vec::new();
+                let stamp_count = (buffer_len_plus_four - 4) / 16;
+                for _i in 0..stamp_count {
+                    let stamp: Stamp = LERead::read(reader)?;
+                    stamps.push(stamp);
                 }
                 Ok(Self::Ok {
                     version,
@@ -218,7 +217,7 @@ impl<R: Read + LERead> Deserialize<LE, R> for LoginResponse {
                     country_code,
                     is_ftp,
                     just_upgraded_from_ftp,
-                    auth_logs: buffer,
+                    stamps,
                 })
             }
             5 => {
