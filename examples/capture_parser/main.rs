@@ -71,7 +71,7 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 				dbg!(msg);
 			}
 			packet_count += 1
-		} else if file.name().contains("[53-05-") {
+		} else if file.name().contains("[53-05-00-00]") {
 			let mut ctx = ZipContext { zip: file, comps: &mut comps, cdclient, assert_fully_read: true };
 			let msg: AuthClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.zip.name(), ctx.zip.size()));
 			file = ctx.zip;
