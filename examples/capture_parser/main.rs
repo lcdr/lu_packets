@@ -180,11 +180,6 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 			}
 			i += 1; continue
 		} else { i += 1; continue }
-		// assert fully read
-		let mut rest = vec![];
-		std::io::Read::read_to_end(&mut file, &mut rest).unwrap();
-		assert_eq!(rest, vec![], "Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), file.name(), file.size());
-		i += 1;
 	}
 	Ok(packet_count)
 }
