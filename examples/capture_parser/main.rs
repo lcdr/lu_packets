@@ -10,6 +10,7 @@ use std::time::Instant;
 
 use lu_packets::{
 	auth::server::Message as AuthServerMessage,
+	auth::client::Message as AuthClientMessage,
 	world::Lot,
 	world::server::Message as WorldServerMessage,
 	world::client::Message as WorldClientMessage,
@@ -70,6 +71,22 @@ fn parse(path: &Path, cdclient: &mut Cdclient) -> Res<usize> {
 				dbg!(msg);
 			}
 			packet_count += 1
+		} else if file.name().contains("[53-05-00-00]") {
+			let mut ctx = ZipContext { zip: file, comps: &mut comps, cdclient, assert_fully_read: true };
+			let msg: AuthClientMessage = ctx.read().expect(&format!("Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), ctx.zip.name(), ctx.zip.size()));
+			file = ctx.zip;
+			if unsafe { PRINT_PACKETS } {
+				dbg!(&msg);
+			}
+			packet_count += 1;
+
+			if ctx.assert_fully_read {
+				// assert fully read
+				let mut rest = vec![];
+				std::io::Read::read_to_end(&mut file, &mut rest).unwrap();
+				assert_eq!(rest, vec![], "Zip: {}, Filename: {}, {} bytes", path.to_str().unwrap(), file.name(), file.size());
+			}
+			i += 1; continue
 		} else if file.name().contains("[53-04-")
 			&& !file.name().contains("[53-04-00-16]")
 			&& !file.name().contains("[e6-00]")
