@@ -8,7 +8,6 @@ use crate::chat::server::{
 };
 use crate::chat::{GeneralChatMessage, PrivateChatMessage};
 use crate::common::ServiceId;
-use crate::general::client::{DisconnectNotify, Handshake};
 use crate::general::client::GeneralMessage;
 use crate::raknet::client::{
     replica::{ReplicaConstruction, ReplicaSerialization},
@@ -27,7 +26,7 @@ use crate::world::server::WorldMessage;
 use endio::{Deserialize, Serialize};
 use lu_packets_derive::MessageFromVariants;
 
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, MessageFromVariants)]
 #[non_exhaustive]
 #[repr(u8)]
 pub enum Message {
@@ -42,7 +41,7 @@ pub enum Message {
     UserMessage(UserMessage) = 83,
 }
 
-#[derive(Debug, MessageFromVariants, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, MessageFromVariants)]
 #[repr(u16)]
 pub enum UserMessage {
     General(GeneralMessage) = ServiceId::General as u16,
@@ -52,15 +51,7 @@ pub enum UserMessage {
     Auth(AuthMessage) = ServiceId::Auth as u16,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
-#[post_disc_padding = 1]
-#[repr(u32)]
-pub enum AnyGeneralMessage {
-    Handshake(Handshake),
-    DisconnectNotify(DisconnectNotify),
-}
-
-#[derive(Debug, Deserialize, PartialEq, Serialize, MessageFromVariants)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, MessageFromVariants)]
 #[non_exhaustive]
 #[post_disc_padding = 1]
 #[repr(u32)]
@@ -87,7 +78,7 @@ pub enum AnyClientMessage {
     UpdateFreeTrialStatus(UpdateFreeTrialStatus) = 62,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Serialize, MessageFromVariants)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, MessageFromVariants)]
 #[non_exhaustive]
 #[post_disc_padding = 9]
 #[repr(u32)]
@@ -106,22 +97,4 @@ pub enum AnyChatMessage {
     RequestMinimumChatMode(RequestMinimumChatMode) = 50,
     RequestMinimumChatModePrivate(RequestMinimumChatModePrivate) = 51,
     AchievementNotify(AchievementNotify) = 59,
-}
-
-impl From<UserMessage> for Message {
-    fn from(msg: UserMessage) -> Self {
-        Message::UserMessage(msg)
-    }
-}
-
-impl From<Handshake> for Message {
-    fn from(msg: Handshake) -> Self {
-        GeneralMessage::Handshake(msg).into()
-    }
-}
-
-impl From<DisconnectNotify> for Message {
-    fn from(msg: DisconnectNotify) -> Self {
-        GeneralMessage::DisconnectNotify(msg).into()
-    }
 }
