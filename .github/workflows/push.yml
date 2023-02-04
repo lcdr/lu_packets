@@ -36,6 +36,12 @@ jobs:
           key: target-debug-${{ github.run_number }}
           restore-keys: |
             target-debug-
+      
+      - name: Install rustfmt
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          components: rustfmt
 
       - name: Check formatting
         uses: actions-rs/cargo@v1
