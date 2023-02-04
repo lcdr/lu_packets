@@ -60,12 +60,10 @@ impl ZipContext<'_> {
 	fn apply_whitelist(comps: &mut Vec<u32>, config: &Option<LuNameValue>) {
 		if let Some(conf) = config {
 			if let Some(LnvValue::I32(1)) = conf.get(&lu!("componentWhitelist")) {
-				comps.retain(|&x|
-					match x  {
-						1 | 2 | 3 | 7 | 10 | 11 | 24 | 42 => true,
-						_ => false,
-					}
-				);
+				comps.retain(|&x| match x {
+					1 | 2 | 3 | 7 | 10 | 11 | 24 | 42 => true,
+					_ => false,
+				});
 			}
 		}
 	}
@@ -95,15 +93,23 @@ impl ZipContext<'_> {
 		for comp in comps {
 			// special case: utter bodge
 			match comp {
-				2  => { final_comps.push(44); }
-				4  => { final_comps.push(110); final_comps.push(109); final_comps.push(106); }
-				7  => { final_comps.push(98); }
+				2 => {
+					final_comps.push(44);
+				}
+				4 => {
+					final_comps.push(110);
+					final_comps.push(109);
+					final_comps.push(106);
+				}
+				7 => {
+					final_comps.push(98);
+				}
 				23 | 48 => {
 					if !final_comps.contains(&7) {
 						final_comps.push(7);
 					}
 				}
-				_ => {},
+				_ => {}
 			}
 			final_comps.push(*comp);
 		}

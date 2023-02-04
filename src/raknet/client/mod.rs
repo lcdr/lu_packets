@@ -52,6 +52,6 @@ pub struct ConnectedPong {
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct ConnectionRequestAccepted {
 	pub peer_addr: SystemAddress,
-	#[padding=2]
+	#[padding = 2]
 	pub local_addr: SystemAddress,
 }

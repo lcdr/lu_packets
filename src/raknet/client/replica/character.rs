@@ -21,7 +21,7 @@ impl<R: Read> Deserialize<LE, BEBitReader<R>> for TransitionState {
 			0 => TransitionState::None,
 			1 => TransitionState::Arrive { last_custom_build_parts: LERead::read(reader)? },
 			2 => TransitionState::Leave,
-			_ => { return Err(Error::new(InvalidData, "invalid discriminant for TransitionState")) }
+			_ => return Err(Error::new(InvalidData, "invalid discriminant for TransitionState")),
 		})
 	}
 }
@@ -30,7 +30,10 @@ impl<'a, W: Write> Serialize<LE, BEBitWriter<W>> for &'a TransitionState {
 	fn serialize(self, writer: &mut BEBitWriter<W>) -> Res<()> {
 		match self {
 			TransitionState::None => writer.write_bits(0, 2),
-			TransitionState::Arrive { last_custom_build_parts } => { writer.write_bits(1, 2)?; LEWrite::write(writer, last_custom_build_parts) },
+			TransitionState::Arrive { last_custom_build_parts } => {
+				writer.write_bits(1, 2)?;
+				LEWrite::write(writer, last_custom_build_parts)
+			}
 			TransitionState::Leave => writer.write_bits(2, 2),
 		}
 	}
@@ -57,7 +60,7 @@ pub enum GameActivity {
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
-#[trailing_padding=4] // country code, unused
+#[trailing_padding = 4] // country code, unused
 pub struct SocialInfo {
 	pub guild_id: ObjId,
 	pub guild_name: LuVarWString<u8>,
@@ -73,11 +76,11 @@ pub struct CharacterConstruction {
 	// todo: type for each of the below
 	pub hair_color: u32,
 	pub hair_style: u32,
-	#[padding=4] // head style, unused
+	#[padding = 4] // head style, unused
 	pub torso_color: u32,
 	pub legs_color: u32,
 	pub torso_decal: u32,
-	#[padding=4] // head color, unused
+	#[padding = 4] // head color, unused
 	pub eyebrows_style: u32,
 	pub eyes_style: u32,
 	pub mouth_style: u32,

@@ -19,10 +19,10 @@ pub enum LuMessage {
 
 /// All server-received auth messages.
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
-#[post_disc_padding=1]
+#[post_disc_padding = 1]
 #[repr(u32)]
 pub enum AuthMessage {
-	LoginRequest(LoginRequest)
+	LoginRequest(LoginRequest),
 }
 
 /**

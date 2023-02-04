@@ -138,7 +138,7 @@ impl<R: Read> Deserialize<LE, Amf3Reader<'_, R>> for Amf3String {
 			let index = value;
 			match reader.string_ref_table.get(index as usize) {
 				Some(x) => x.0.clone(),
-				None => { return Err(Error::new(InvalidData, "invalid reference index")) }
+				None => return Err(Error::new(InvalidData, "invalid reference index")),
 			}
 		} else {
 			let length = value;
@@ -148,7 +148,7 @@ impl<R: Read> Deserialize<LE, Amf3Reader<'_, R>> for Amf3String {
 
 			let string = match String::from_utf8(vec) {
 				Ok(x) => x,
-				Err(_) => { return Err(Error::new(InvalidData, "string is not valid utf8")) }
+				Err(_) => return Err(Error::new(InvalidData, "string is not valid utf8")),
 			};
 			if string != "" {
 				reader.string_ref_table.push(Self(string.clone()));
@@ -251,7 +251,9 @@ impl<R: Read> Deserialize<LE, Amf3Reader<'_, R>> for Amf3Array {
 		let length_and_is_inline: U29 = LERead::read(reader)?;
 		let is_inline = length_and_is_inline.0 & 0x01 == 1;
 		let length = length_and_is_inline.0 >> 1;
-		if !is_inline { todo!() }
+		if !is_inline {
+			todo!()
+		}
 		let mut map = HashMap::new();
 		loop {
 			let key: Amf3String = LERead::read(reader)?;
@@ -336,8 +338,8 @@ fn deser_amf3<R: Read>(reader: &mut Amf3Reader<R>) -> Res<Amf3> {
 		3 => Amf3::True,
 		5 => Amf3::Double(LERead::read(reader)?),
 		6 => Amf3::String(LERead::read(reader)?),
-		9 => Amf3::Array (LERead::read(reader)?),
-		_ => { return Err(Error::new(InvalidData, format!("invalid discriminant value for Amf3: {}", disc))) }
+		9 => Amf3::Array(LERead::read(reader)?),
+		_ => return Err(Error::new(InvalidData, format!("invalid discriminant value for Amf3: {}", disc))),
 	})
 }
 
@@ -361,7 +363,11 @@ fn ser_amf3<W: Write>(writer: &mut Amf3Writer<W>, amf3: &Amf3) -> Res<()> {
 
 impl From<bool> for Amf3 {
 	fn from(b: bool) -> Self {
-		if b { Self::True } else { Self::False }
+		if b {
+			Self::True
+		} else {
+			Self::False
+		}
 	}
 }
 

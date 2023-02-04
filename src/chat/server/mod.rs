@@ -6,7 +6,7 @@ pub use super::{GeneralChatMessage, PrivateChatMessage};
 use super::ChatChannel;
 
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
-#[post_disc_padding=9]
+#[post_disc_padding = 9]
 #[repr(u32)]
 pub enum ChatMessage {
 	GeneralChatMessage(GeneralChatMessage) = 1,

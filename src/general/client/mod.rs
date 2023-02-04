@@ -6,7 +6,7 @@ use crate::common::ServiceId;
 
 /// Client-received general messages.
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
-#[post_disc_padding=1]
+#[post_disc_padding = 1]
 #[repr(u32)]
 pub enum GeneralMessage {
 	Handshake(Handshake),
@@ -29,12 +29,12 @@ pub enum GeneralMessage {
 	As the version confirm process was designed with more than just client-server in mind, it sends the server's network version and service id as well, even though this isn't really needed by the client (even the service id isn't needed, since you usually only connect to auth once, and it's the very first connection). This could be simplified if the protocol is ever revised.
 */
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-#[trailing_padding=41]
+#[trailing_padding = 41]
 pub struct Handshake {
 	/// The network protocol version of the server. For servers compatible with live, this is `171022`. This was relevant mainly back when LU was actively updated. Server projects making modifications to the network protocol should set this to a different value.
 	pub network_version: u32,
 	/// Service ID of the server, [`ServiceId::Auth`] for auth servers, [`ServiceId::World`] for world servers.
-	#[padding=4]
+	#[padding = 4]
 	pub service_id: ServiceId,
 }
 

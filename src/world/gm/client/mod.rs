@@ -283,7 +283,7 @@ pub struct EchoStartSkill {
 	pub bitstream: Vec<u8>,
 	pub skill_id: u32, // todo: type
 	#[default(0)]
-	pub skill_handle: u32	
+	pub skill_handle: u32,
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
@@ -795,13 +795,13 @@ pub struct UseItemResult {
 pub struct PetResponse {
 	pub obj_id_pet: ObjId,
 	pub pet_command_type: i32, // todo: type
-	pub response: i32, // todo: type
-	pub type_id: i32, // todo: type
+	pub response: i32,         // todo: type
+	pub type_id: i32,          // todo: type
 }
 
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct SendActivitySummaryLeaderboardData {
-	pub game_id: i32, // todo: type
+	pub game_id: i32,   // todo: type
 	pub info_type: i32, // todo: type
 	pub leaderboard_data: LuNameValue,
 	pub throttled: bool,
@@ -1388,7 +1388,7 @@ pub struct ChangeIdleFlags {
 
 #[derive(Debug, GameMessage, PartialEq)]
 pub struct NotifyRacingClient {
-#[default(RacingClientNotificationType::Invalid)]
+	#[default(RacingClientNotificationType::Invalid)]
 	pub event_type: RacingClientNotificationType,
 	pub param1: i32,
 	pub param_obj: ObjId,

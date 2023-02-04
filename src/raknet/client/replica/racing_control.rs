@@ -80,14 +80,7 @@ impl<R: Read> Deserialize<LE, BEBitReader<R>> for RacingControlConstruction {
 		} else {
 			None
 		};
-		Ok(Self {
-			activity_user_infos,
-			expected_player_count,
-			pre_race_player_infos,
-			post_race_player_infos,
-			race_info,
-			during_race_player_infos,
-		})
+		Ok(Self { activity_user_infos, expected_player_count, pre_race_player_infos, post_race_player_infos, race_info, during_race_player_infos })
 	}
 }
 

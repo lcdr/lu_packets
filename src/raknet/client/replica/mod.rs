@@ -57,7 +57,10 @@ impl<R: Read, T: Deserialize<LE, BEBitReader<R>>> ReplicaD<R> for T {
 	}
 }
 
-impl<'a, W: Write, T> ReplicaS<W> for &'a T where &'a T: Serialize<LE, BEBitWriter<W>> {
+impl<'a, W: Write, T> ReplicaS<W> for &'a T
+where
+	&'a T: Serialize<LE, BEBitWriter<W>>,
+{
 	default fn serialize(self, writer: &mut BEBitWriter<W>) -> Res<()> {
 		Serialize::serialize(self, writer)
 	}
@@ -75,18 +78,17 @@ impl<'a, W: Write> ReplicaS<W> for &'a bool {
 	}
 }
 
-impl<R: Read, T: ReplicaD<R>+Deserialize<LE, BEBitReader<R>>> ReplicaD<R> for Option<T> {
+impl<R: Read, T: ReplicaD<R> + Deserialize<LE, BEBitReader<R>>> ReplicaD<R> for Option<T> {
 	fn deserialize(reader: &mut BEBitReader<R>) -> Res<Self> {
 		let bit = reader.read_bit()?;
-		Ok(if !bit {
-			None
-		} else {
-			Some(ReplicaD::deserialize(reader)?)
-		})
+		Ok(if !bit { None } else { Some(ReplicaD::deserialize(reader)?) })
 	}
 }
 
-impl<W: Write, T> ReplicaS<W> for &Option<T> where for<'a> &'a T: ReplicaS<W>+Serialize<LE, BEBitWriter<W>> {
+impl<W: Write, T> ReplicaS<W> for &Option<T>
+where
+	for<'a> &'a T: ReplicaS<W> + Serialize<LE, BEBitWriter<W>>,
+{
 	fn serialize(self, writer: &mut BEBitWriter<W>) -> Res<()> {
 		writer.write_bit(self.is_some())?;
 		if let Some(x) = self {
@@ -144,7 +146,7 @@ pub struct ReplicaConstruction {
 	pub spawner_node_id: Option<i32>,
 	pub scale: Option<f32>,
 	pub world_state: Option<u8>, // todo: type
-	pub gm_level: Option<u8>, // todo: type
+	pub gm_level: Option<u8>,    // todo: type
 	pub parent_child_info: Option<ParentChildInfo>,
 	pub components: Vec<Box<dyn ComponentConstruction>>,
 }
@@ -156,7 +158,7 @@ impl PartialEq<ReplicaConstruction> for ReplicaConstruction {
 	}
 }
 
-impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaConstruction {
+impl<R: Read + ReplicaContext> Deserialize<LE, R> for ReplicaConstruction {
 	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let mut bit_reader = BEBitReader::new(reader);
@@ -240,7 +242,7 @@ impl PartialEq<ReplicaSerialization> for ReplicaSerialization {
 	}
 }
 
-impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaSerialization {
+impl<R: Read + ReplicaContext> Deserialize<LE, R> for ReplicaSerialization {
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let network_id = LERead::read(reader)?;
 		let comp_desers = reader.get_comp_serializations(network_id);
@@ -251,11 +253,7 @@ impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaSerialization {
 			components.push(new(&mut bit_reader)?);
 		}
 
-		Ok(Self {
-			network_id,
-			parent_child_info,
-			components,
-		})
+		Ok(Self { network_id, parent_child_info, components })
 	}
 }
 
@@ -277,7 +275,7 @@ impl<'a, W: Write> Serialize<LE, W> for &'a ReplicaSerialization {
 #[cfg(test)]
 #[derive(Debug)]
 pub(super) struct DummyContext<'a> {
-	pub(super) inner: &'a mut &'a[u8],
+	pub(super) inner: &'a mut &'a [u8],
 }
 
 #[cfg(test)]

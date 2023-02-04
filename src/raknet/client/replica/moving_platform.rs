@@ -64,11 +64,7 @@ impl<R: Read> Deserialize<LE, BEBitReader<R>> for MovingPlatformConstruction {
 	fn deserialize(reader: &mut BEBitReader<R>) -> Res<Self> {
 		let has_subcomponent_infos = reader.read_bit()?;
 		let flag = reader.read_bit()?;
-		let path_info = if flag {
-			ReplicaD::deserialize(reader)?
-		} else {
-			None
-		};
+		let path_info = if flag { ReplicaD::deserialize(reader)? } else { None };
 		let subcomponent_infos = if has_subcomponent_infos {
 			let mut infos = vec![];
 			while reader.read_bit()? {

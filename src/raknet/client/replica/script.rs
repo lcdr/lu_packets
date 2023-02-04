@@ -13,8 +13,7 @@ pub struct ScriptConstruction {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct ScriptSerialization {
-}
+pub struct ScriptSerialization {}
 
 impl ComponentConstruction for ScriptConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {

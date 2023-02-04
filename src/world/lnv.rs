@@ -65,47 +65,69 @@ impl std::fmt::Debug for LnvValue {
 }
 
 impl From<LuVarWString<u32>> for LnvValue {
-	fn from(val: LuVarWString<u32>) -> Self { LnvValue::WString(val) }
+	fn from(val: LuVarWString<u32>) -> Self {
+		LnvValue::WString(val)
+	}
 }
 
 impl From<&str> for LnvValue {
-	fn from(val: &str) -> Self { LnvValue::WString(val.try_into().unwrap()) }
+	fn from(val: &str) -> Self {
+		LnvValue::WString(val.try_into().unwrap())
+	}
 }
 
 impl From<i32> for LnvValue {
-	fn from(val: i32) -> Self { LnvValue::I32(val) }
+	fn from(val: i32) -> Self {
+		LnvValue::I32(val)
+	}
 }
 
 impl From<f32> for LnvValue {
-	fn from(val: f32) -> Self { LnvValue::F32(val) }
+	fn from(val: f32) -> Self {
+		LnvValue::F32(val)
+	}
 }
 
 impl From<f64> for LnvValue {
-	fn from(val: f64) -> Self { LnvValue::F64(val) }
+	fn from(val: f64) -> Self {
+		LnvValue::F64(val)
+	}
 }
 
 impl From<u32> for LnvValue {
-	fn from(val: u32) -> Self { LnvValue::U32(val) }
+	fn from(val: u32) -> Self {
+		LnvValue::U32(val)
+	}
 }
 
 impl From<bool> for LnvValue {
-	fn from(val: bool) -> Self { LnvValue::Bool(val) }
+	fn from(val: bool) -> Self {
+		LnvValue::Bool(val)
+	}
 }
 
 impl From<i64> for LnvValue {
-	fn from(val: i64) -> Self { LnvValue::I64(val) }
+	fn from(val: i64) -> Self {
+		LnvValue::I64(val)
+	}
 }
 
 impl From<u64> for LnvValue {
-	fn from(val: u64) -> Self { LnvValue::U64(val) }
+	fn from(val: u64) -> Self {
+		LnvValue::U64(val)
+	}
 }
 
 impl From<&[u8]> for LnvValue {
-	fn from(val: &[u8]) -> Self { LnvValue::String(val.try_into().unwrap()) }
+	fn from(val: &[u8]) -> Self {
+		LnvValue::String(val.try_into().unwrap())
+	}
 }
 
 impl<const N: usize> From<&[u8; N]> for LnvValue {
-	fn from(val: &[u8; N]) -> Self { LnvValue::String(val.try_into().unwrap()) }
+	fn from(val: &[u8; N]) -> Self {
+		LnvValue::String(val.try_into().unwrap())
+	}
 }
 
 /// A hash map with values being one of multiple possible types.
@@ -156,7 +178,7 @@ impl<R: Read> Deserialize<LE, R> for LuNameValue {
 			assert_eq!(uncomp.len(), uncomp_len as usize);
 			uncomp
 		} else {
-			let mut uncomp = vec![0; len as usize -1];
+			let mut uncomp = vec![0; len as usize - 1];
 			reader.read_exact(&mut uncomp)?;
 			uncomp
 		};
@@ -211,7 +233,7 @@ impl<'a, W: Write> Serialize<LE, W> for &'a LuNameValue {
 impl From<&LuVarWString<u32>> for LuNameValue {
 	fn from(wstr: &LuVarWString<u32>) -> Self {
 		if wstr.is_empty() {
-			return LuNameValue(HashMap::new())
+			return LuNameValue(HashMap::new());
 		}
 		let mut map = HashMap::new();
 		for name_type_val in wstr.split(|c| *c == b'\n'.into()) {
