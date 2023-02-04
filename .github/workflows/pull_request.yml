@@ -37,6 +37,12 @@ jobs:
           restore-keys: |
             target-debug-
 
+      - name: Check formatting
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check
+
       - name: Compile
         uses: actions-rs/cargo@v1
         with:
