@@ -49,6 +49,7 @@ pub struct StatsInfo {
 }
 
 impl<R: Read> Deserialize<LE, BEBitReader<R>> for StatsInfo {
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut BEBitReader<R>) -> Res<Self> {
 		let cur_health = LERead::read(reader)?;
 		let max_health = LERead::read(reader)?;

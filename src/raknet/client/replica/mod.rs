@@ -157,6 +157,7 @@ impl PartialEq<ReplicaConstruction> for ReplicaConstruction {
 }
 
 impl<R: Read+ReplicaContext> Deserialize<LE, R> for ReplicaConstruction {
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let mut bit_reader = BEBitReader::new(reader);
 		let bit = bit_reader.read_bit()?;

@@ -27,6 +27,7 @@ pub enum LnvValue {
 }
 
 impl LnvValue {
+	#[rustfmt::skip]
 	fn parse_ty_val(wstr: &LuWStr) -> Self {
 		let string: String = wstr.to_string();
 		let (ty, val) = string.split_at(string.find(":").unwrap());
@@ -47,6 +48,7 @@ impl LnvValue {
 }
 
 impl std::fmt::Debug for LnvValue {
+	#[rustfmt::skip]
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
 		match self {
 			LnvValue::WString(x) => write!(f, "{:?}", x),
@@ -233,6 +235,7 @@ impl From<&LuNameValue> for LuVarWString<u32> {
 		for (key, value) in key_value {
 			wstr.extend_from_slice(&key);
 			wstr.push(b'='.into());
+			#[rustfmt::skip]
 			let (disc, val_str) = match value {
 				LnvValue::WString(val) => ("0",  val.to_string()),
 				LnvValue::I32    (val) => ("1",  val.to_string()),

@@ -54,6 +54,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
 	       u32: Deserialize<LE, R>,
 	  LuWString33: Deserialize<LE, R>,
 	     ObjId: Deserialize<LE, R> {
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let chat_channel     = LERead::read(reader)?;
 		let mut str_len: u32 = LERead::read(reader)?;
@@ -124,6 +125,7 @@ impl<R: Read+LERead> Deserialize<LE, R> for PrivateChatMessage
 	  LuWString33: Deserialize<LE, R>,
 	     ObjId: Deserialize<LE, R>,
 	  PrivateChatMessageResponseCode: Deserialize<LE, R> {
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let chat_channel       = LERead::read(reader)?;
 		let mut str_len: u32       = LERead::read(reader)?;

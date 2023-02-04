@@ -84,11 +84,13 @@ impl<'a, W: Write> Serialize<LE, W> for &'a U29 {
 			LEWrite::write(writer, v as u8 & 0x7f)
 		} else if v <= 0x1fffff {
 			LEWrite::write(writer, (v >> 14) as u8 | 0x80)?;
+			#[rustfmt::skip]
 			LEWrite::write(writer, (v >> 7 ) as u8 | 0x80)?;
 			LEWrite::write(writer, v as u8 & 0x7f)
 		} else {
 			LEWrite::write(writer, (v >> 22) as u8 | 0x80)?;
 			LEWrite::write(writer, (v >> 15) as u8 | 0x80)?;
+			#[rustfmt::skip]
 			LEWrite::write(writer, (v >> 8 ) as u8 | 0x80)?;
 			LEWrite::write(writer, v as u8)
 		}
@@ -308,6 +310,7 @@ pub enum Amf3 {
 }
 
 impl Debug for Amf3 {
+	#[rustfmt::skip]
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		match self {
 			Self::False     => write!(f, "false"),
@@ -345,6 +348,7 @@ impl<'a, W: Write> Serialize<LE, W> for &'a Amf3 {
 	}
 }
 
+#[rustfmt::skip]
 fn ser_amf3<W: Write>(writer: &mut Amf3Writer<W>, amf3: &Amf3) -> Res<()> {
 	match amf3 {
 		Amf3::False     =>   LEWrite::write(writer, 2u8),

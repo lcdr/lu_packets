@@ -114,6 +114,7 @@ impl ZipContext<'_> {
 		}
 	}
 
+	#[rustfmt::skip]
 	fn map_constrs<R: std::io::Read>(comps: &Vec<u32>) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentConstruction>>> {
 		use endio::Deserialize;
 
@@ -186,6 +187,7 @@ impl ReplicaContext for ZipContext<'_> {
 		constrs
 	}
 
+	#[rustfmt::skip]
 	fn get_comp_serializations<R: std::io::Read>(&mut self, network_id: u16) -> Vec<fn(&mut BEBitReader<R>) -> Res<Box<dyn ComponentSerialization>>> {
 		use endio::Deserialize;
 

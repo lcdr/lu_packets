@@ -354,6 +354,7 @@ pub struct AddFriendResponse {
 }
 
 impl<R: Read> Deserialize<LE, R> for AddFriendResponse {
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self>	{
 		let disc: u8       = LERead::read(reader)?;
 		let is_online      = LERead::read(reader)?;

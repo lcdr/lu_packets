@@ -84,6 +84,7 @@ pub struct ClientValidation {
 impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
 	where   u8: Deserialize<LE, R>,
 	  LuWString33: Deserialize<LE, R> {
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let username         = LERead::read(reader)?;
 		let session_key      = LERead::read(reader)?;
