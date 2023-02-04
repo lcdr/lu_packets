@@ -40,9 +40,9 @@ jobs:
       - name: Install rustfmt
         uses: actions-rs/toolchain@v1
         with:
-            profile: minimal
-        toolchain: ${{ hashFiles('rust-toolchain') }}
-        components: rustfmt
+          profile: minimal
+          toolchain: ${{ hashFiles('rust-toolchain') }}
+          components: rustfmt
 
       - name: Check formatting
         uses: actions-rs/cargo@v1
