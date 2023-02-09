@@ -25,8 +25,8 @@ pub struct BehaviorInfo {
 #[derive(Debug, PartialEq, ReplicaSerde)]
 pub struct SkillInfo {
 	pub unknown_1: u32,
-	pub skill_id: u32, // todo: type
-	pub cast_type: u32, // todo: type
+	pub skill_id: u32,    // todo: type
+	pub cast_type: u32,   // todo: type
 	pub cancel_type: u32, // todo: type
 	pub behaviors: LVec<u32, BehaviorInfo>,
 }

@@ -15,12 +15,12 @@ pub enum Mail {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-#[trailing_padding=4]
+#[trailing_padding = 4]
 pub struct CreateRequest {
 	pub subject: LuWString50,
 	pub body: LuWString400,
 	pub receiver_name: LuWString32,
-	#[padding=8] // money: i64, unused
+	#[padding = 8] // money: i64, unused
 	pub attachment_id: ObjId,
 	pub attachment_count: u16,
 	pub locale_id: u16,
@@ -28,20 +28,20 @@ pub struct CreateRequest {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct ContentCollectRequest {
-	#[padding=4]
+	#[padding = 4]
 	pub mail_id: ObjId,
 	pub receiver_id: ObjId,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct DeleteRequest {
-	#[padding=4]
+	#[padding = 4]
 	pub mail_id: ObjId,
 	pub receiver_id: ObjId,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct MarkAsReadRequest {
-	#[padding=4]
+	#[padding = 4]
 	pub mail_id: ObjId,
 }

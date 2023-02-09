@@ -22,8 +22,7 @@ pub struct FxConstruction {
 }
 
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct FxSerialization {
-}
+pub struct FxSerialization {}
 
 impl ComponentConstruction for FxConstruction {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {

@@ -46,7 +46,7 @@ impl From<DisconnectNotify> for Message {
 /// All client-received world messages.
 #[derive(Debug, Deserialize, PartialEq, Serialize, MessageFromVariants, VariantTests)]
 #[non_exhaustive]
-#[post_disc_padding=1]
+#[post_disc_padding = 1]
 #[repr(u32)]
 pub enum ClientMessage {
 	LoadStaticZone(LoadStaticZone) = 2,
@@ -108,7 +108,7 @@ pub struct LoadStaticZone {
 	/// Checksum on the map on the server side. The original LU client will refuse to load any map where the client side checksum doesn't match the server checksum, to prevent inconsistencies and cheating.
 	pub map_checksum: u32,
 	// editor enabled and editor level, unused
-	#[padding=2]
+	#[padding = 2]
 	/// The position of the player in the new world, likely used to be able to load the right part of the world.
 	pub player_position: Vector3,
 	/// The instance type of the zone being loaded.
@@ -144,23 +144,27 @@ pub struct CharacterListResponse {
 }
 
 impl<R: LERead> Deserialize<LE, R> for CharacterListResponse
-	where       u8: Deserialize<LE, R>,
-	  CharListChar: Deserialize<LE, R> {
-	fn deserialize(reader: &mut R) -> Res<Self>	{
+where
+	u8: Deserialize<LE, R>,
+	CharListChar: Deserialize<LE, R>,
+{
+	fn deserialize(reader: &mut R) -> Res<Self> {
 		let len: u8 = reader.read()?;
 		let selected_char = reader.read()?;
 		let mut chars = Vec::with_capacity(len as usize);
 		for _ in 0..len {
 			chars.push(reader.read()?);
 		}
-		Ok(Self { selected_char, chars } )
+		Ok(Self { selected_char, chars })
 	}
 }
 
 impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
-	where           u8: Serialize<LE, W>,
-	  &'a CharListChar: Serialize<LE, W> {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
+where
+	u8: Serialize<LE, W>,
+	&'a CharListChar: Serialize<LE, W>,
+{
+	fn serialize(self, writer: &mut W) -> Res<()> {
 		writer.write(self.chars.len() as u8)?;
 		writer.write(self.selected_char)?;
 		for chr in self.chars.iter() {
@@ -174,24 +178,24 @@ impl<'a, W: LEWrite> Serialize<LE, W> for &'a CharacterListResponse
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct CharListChar {
 	pub obj_id: ObjId,
-	#[padding=4]
+	#[padding = 4]
 	pub char_name: LuWString33,
 	pub pending_name: LuWString33,
 	pub requires_rename: bool,
 	pub is_free_trial: bool,
-	#[padding=10]
+	#[padding = 10]
 	pub torso_color: u32,
-	#[padding=4]
+	#[padding = 4]
 	pub legs_color: u32,
 	pub hair_style: u32,
 	pub hair_color: u32,
-	#[padding=8]
+	#[padding = 8]
 	pub eyebrows_style: u32,
 	pub eyes_style: u32,
 	pub mouth_style: u32,
-	#[padding=4]
+	#[padding = 4]
 	pub last_location: ZoneId,
-	#[padding=8]
+	#[padding = 8]
 	pub equipped_items: LVec<u16, Lot>,
 }
 
@@ -322,20 +326,10 @@ pub struct AddFriendRequest {
 #[derive(Debug, PartialEq)]
 #[repr(u8)]
 pub enum AddFriendResponseType {
-	Accepted {
-		is_online: bool,
-		sender_id: ObjId,
-		zone_id: ZoneId,
-		is_best_friend: bool,
-		is_free_trial: bool,
-	},
-	AlreadyFriend {
-		is_best_friend: bool,
-	},
+	Accepted { is_online: bool, sender_id: ObjId, zone_id: ZoneId, is_best_friend: bool, is_free_trial: bool },
+	AlreadyFriend { is_best_friend: bool },
 	InvalidCharacter,
-	GeneralError {
-		is_best_friend: bool,
-	},
+	GeneralError { is_best_friend: bool },
 	YourFriendListFull,
 	TheirFriendListFull,
 	Declined,
@@ -354,6 +348,7 @@ pub struct AddFriendResponse {
 }
 
 impl<R: Read> Deserialize<LE, R> for AddFriendResponse {
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self>	{
 		let disc: u8       = LERead::read(reader)?;
 		let is_online      = LERead::read(reader)?;
@@ -384,7 +379,7 @@ impl<R: Read> Deserialize<LE, R> for AddFriendResponse {
 }
 
 impl<'a, W: Write> Serialize<LE, W> for &'a AddFriendResponse {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
+	fn serialize(self, writer: &mut W) -> Res<()> {
 		let disc = unsafe { *(&self.response_type as *const AddFriendResponseType as *const u8) };
 		LEWrite::write(writer, disc)?;
 		let mut is_online_x = &false;
@@ -406,7 +401,7 @@ impl<'a, W: Write> Serialize<LE, W> for &'a AddFriendResponse {
 			AddFriendResponseType::GeneralError { is_best_friend } => {
 				is_best_friend_x = is_best_friend;
 			}
-			_ => {},
+			_ => {}
 		}
 		LEWrite::write(writer, is_online_x)?;
 		LEWrite::write(writer, &self.char_name)?;
@@ -419,12 +414,12 @@ impl<'a, W: Write> Serialize<LE, W> for &'a AddFriendResponse {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-#[trailing_padding=6]
+#[trailing_padding = 6]
 pub struct FriendState {
 	pub is_online: bool,
 	pub is_best_friend: bool,
 	pub is_free_trial: bool,
-	#[padding=5]
+	#[padding = 5]
 	pub location: ZoneId,
 	pub object_id: ObjId,
 	pub char_name: LuWString33,
@@ -432,7 +427,7 @@ pub struct FriendState {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
-#[post_disc_padding=2]
+#[post_disc_padding = 2]
 pub enum GetFriendsListResponse {
 	Ok(LVec<u16, FriendState>),
 	GeneralError,
@@ -457,7 +452,7 @@ pub struct FriendUpdateNotify {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-#[trailing_padding=6]
+#[trailing_padding = 6]
 pub struct IgnoreState {
 	pub object_id: ObjId,
 	pub char_name: LuWString33,
@@ -465,7 +460,7 @@ pub struct IgnoreState {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 #[repr(u8)]
-#[post_disc_padding=2]
+#[post_disc_padding = 2]
 pub enum GetIgnoreListResponse {
 	Ok(LVec<u16, IgnoreState>),
 	GeneralError,
@@ -520,8 +515,8 @@ pub struct ChatModerationString {
 	pub spans: Vec<ModerationSpan>,
 }
 
-impl<R: Read+LERead> Deserialize<LE, R> for ChatModerationString {
-	fn deserialize(reader: &mut R) -> Res<Self>	{
+impl<R: Read + LERead> Deserialize<LE, R> for ChatModerationString {
+	fn deserialize(reader: &mut R) -> Res<Self> {
 		let _string_okay: bool = LERead::read(reader)?;
 		let _source_id: u16 = LERead::read(reader)?; // unused
 		let request_id = LERead::read(reader)?;
@@ -544,8 +539,8 @@ impl<R: Read+LERead> Deserialize<LE, R> for ChatModerationString {
 	}
 }
 
-impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ChatModerationString {
-	fn serialize(self, writer: &mut W) -> Res<()>	{
+impl<'a, W: Write + LEWrite> Serialize<LE, W> for &'a ChatModerationString {
+	fn serialize(self, writer: &mut W) -> Res<()> {
 		LEWrite::write(writer, self.spans.is_empty())?;
 		LEWrite::write(writer, 0u16)?;
 		LEWrite::write(writer, self.request_id)?;

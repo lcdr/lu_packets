@@ -46,7 +46,7 @@ macro_rules! abstract_lu_str {
 
 		impl<R: Read> Deserialize<LE, R> for $name {
 			fn deserialize(reader: &mut R) -> Res<Self> {
-				let mut bytes = [0u8; $n*std::mem::size_of::<$c>()];
+				let mut bytes = [0u8; $n * std::mem::size_of::<$c>()];
 				reader.read(&mut bytes)?;
 				Ok(Self(unsafe { std::mem::transmute(bytes) }))
 			}
@@ -54,11 +54,11 @@ macro_rules! abstract_lu_str {
 
 		impl<W: Write> Serialize<LE, W> for &$name {
 			fn serialize(self, writer: &mut W) -> Res<()> {
-				let x: [u8; $n*std::mem::size_of::<$c>()] = unsafe { std::mem::transmute(self.0) };
+				let x: [u8; $n * std::mem::size_of::<$c>()] = unsafe { std::mem::transmute(self.0) };
 				writer.write_all(&x)
 			}
 		}
-	}
+	};
 }
 
 macro_rules! lu_str {
@@ -90,7 +90,7 @@ macro_rules! lu_str {
 				Self::try_from(&string[..])
 			}
 		}
-	}
+	};
 }
 
 macro_rules! lu_wstr {
@@ -102,7 +102,7 @@ macro_rules! lu_wstr {
 
 			fn try_from(string: &str) -> Result<Self, Self::Error> {
 				let mut bytes = [0u16; $n];
-				for (i, chr) in string.encode_utf16().take($n-1).enumerate() {
+				for (i, chr) in string.encode_utf16().take($n - 1).enumerate() {
 					bytes[i] = chr;
 				}
 				let bytes = unsafe { std::mem::transmute(bytes) };
@@ -112,10 +112,10 @@ macro_rules! lu_wstr {
 
 		impl From<&$name> for String {
 			fn from(wstr: &$name) -> Self {
-				String::from_utf16(unsafe {&*(&**wstr as *const [Ucs2Char] as *const [<Ucs2Char as LuChar>::Int])}).unwrap()
+				String::from_utf16(unsafe { &*(&**wstr as *const [Ucs2Char] as *const [<Ucs2Char as LuChar>::Int]) }).unwrap()
 			}
 		}
-	}
+	};
 }
 
 lu_str!(LuString3, 3);

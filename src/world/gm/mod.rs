@@ -31,7 +31,7 @@ macro_rules! gm_param {
 				::endio::LEWrite::write(writer, self)
 			}
 		}
-	}
+	};
 }
 
 gm_param!(u8);
@@ -49,7 +49,9 @@ impl GmParam for Vec<u8> {
 		let str_len: u32 = LERead::read(reader)?;
 		let str_len = str_len as usize;
 		let mut vec = Vec::with_capacity(str_len);
-		unsafe { vec.set_len(str_len); }
+		unsafe {
+			vec.set_len(str_len);
+		}
 		Read::read(reader, &mut vec)?;
 		Ok(vec)
 	}
@@ -226,7 +228,7 @@ pub struct MoveItemInInventory {
 	pub obj_id: ObjId,
 	pub inventory_type: InventoryType,
 	pub response_code: i32, // todo: type
-	pub slot: i32, // todo: unsigned?
+	pub slot: i32,          // todo: unsigned?
 }
 
 #[derive(Debug, GameMessage, PartialEq)]

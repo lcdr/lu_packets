@@ -22,12 +22,12 @@ pub enum Message<U> {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct InternalPing {
-	pub send_time: u32
+	pub send_time: u32,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct ConnectionRequest {
-	pub password: Box<[u8]>
+	pub password: Box<[u8]>,
 }
 
 impl<R: Read> Deserialize<LE, R> for ConnectionRequest {

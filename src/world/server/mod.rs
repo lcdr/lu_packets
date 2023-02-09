@@ -32,7 +32,7 @@ pub enum LuMessage {
 
 /// All server-received world messages.
 #[derive(Debug, Deserialize, PartialEq, Serialize, VariantTests)]
-#[post_disc_padding=1]
+#[post_disc_padding = 1]
 #[repr(u32)]
 pub enum WorldMessage {
 	ClientValidation(ClientValidation) = 1,
@@ -81,9 +81,12 @@ pub struct ClientValidation {
 	pub fdb_checksum: [u8; 32],
 }
 
-impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
-	where   u8: Deserialize<LE, R>,
-	  LuWString33: Deserialize<LE, R> {
+impl<R: Read + LERead> Deserialize<LE, R> for ClientValidation
+where
+	u8: Deserialize<LE, R>,
+	LuWString33: Deserialize<LE, R>,
+{
+	#[rustfmt::skip]
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let username         = LERead::read(reader)?;
 		let session_key      = LERead::read(reader)?;
@@ -99,9 +102,11 @@ impl<R: Read+LERead> Deserialize<LE, R> for ClientValidation
 	}
 }
 
-impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ClientValidation
-	where       u8: Serialize<LE, W>,
-	  &'a LuWString33: Serialize<LE, W> {
+impl<'a, W: Write + LEWrite> Serialize<LE, W> for &'a ClientValidation
+where
+	u8: Serialize<LE, W>,
+	&'a LuWString33: Serialize<LE, W>,
+{
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		LEWrite::write(writer, &self.username)?;
 		LEWrite::write(writer, &self.session_key)?;
@@ -126,7 +131,7 @@ impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a ClientValidation
 	Respond with [`CharacterCreateResponse`](super::client::CharacterCreateResponse), using the appropriate variant to indicate the result. If the character creation is successful, additionally send a [`CharacterListResponse`](super::client::CharacterListResponse) afterwards with the new character included.
 */
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-#[trailing_padding=1]
+#[trailing_padding = 1]
 pub struct CharacterCreateRequest {
 	/// The custom name, or blank if the predefined name is to be used.
 	pub char_name: LuWString33,
@@ -136,17 +141,17 @@ pub struct CharacterCreateRequest {
 	pub predef_name_id_2: u32, // todo: enum
 	/// Third part of the predefined name.
 	pub predef_name_id_3: u32, // todo: enum
-	#[padding=9]
+	#[padding = 9]
 	/// Chosen torso color.
 	pub torso_color: u32, // todo: enum
-	#[padding=4]
+	#[padding = 4]
 	/// Chosen legs color.
 	pub legs_color: u32, // todo: enum
 	/// Chosen hair style.
 	pub hair_style: u32, // todo: enum
 	/// Chosen hair color.
 	pub hair_color: u32, // todo: enum
-	#[padding=8]
+	#[padding = 8]
 	/// Chosen eyebrow style.
 	pub eyebrows_style: u32, // todo: enum
 	/// Chosen eye style.
@@ -198,25 +203,23 @@ pub struct GeneralChatMessage {
 	pub message: LuVarWString<u32>,
 }
 
-impl<R: Read+LERead> Deserialize<LE, R> for GeneralChatMessage
-	where   u8: Deserialize<LE, R>,
-	  LuWString33: Deserialize<LE, R> {
+impl<R: Read + LERead> Deserialize<LE, R> for GeneralChatMessage
+where
+	u8: Deserialize<LE, R>,
+	LuWString33: Deserialize<LE, R>,
+{
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let chat_channel = LERead::read(reader)?;
-		let source_id    = LERead::read(reader)?;
+		let source_id = LERead::read(reader)?;
 		let mut str_len: u32 = LERead::read(reader)?;
 		str_len -= 1;
 		let message = LuVarWString::deser_content(reader, str_len)?;
-		let _: u16       = LERead::read(reader)?;
-		Ok(Self {
-			chat_channel,
-			source_id,
-			message,
-		})
+		let _: u16 = LERead::read(reader)?;
+		Ok(Self { chat_channel, source_id, message })
 	}
 }
 
-impl<'a, W: Write+LEWrite> Serialize<LE, W> for &'a GeneralChatMessage {
+impl<'a, W: Write + LEWrite> Serialize<LE, W> for &'a GeneralChatMessage {
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		LEWrite::write(writer, &self.chat_channel)?;
 		LEWrite::write(writer, self.source_id)?;
@@ -244,7 +247,7 @@ pub struct LevelLoadComplete {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-#[pre_disc_padding=4]
+#[pre_disc_padding = 4]
 #[repr(u16)]
 pub enum RouteMessage {
 	Chat(ChatMessage) = ServiceId::Chat as u16,

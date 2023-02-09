@@ -32,7 +32,11 @@ impl<L, T> LVec<L, T> {
 		&self.0
 	}
 
-	pub(crate) fn deser_content<R: Read>(reader: &mut R, len: L) -> Res<Self> where L: TryInto<usize>, T: Deserialize<LE, R> {
+	pub(crate) fn deser_content<R: Read>(reader: &mut R, len: L) -> Res<Self>
+	where
+		L: TryInto<usize>,
+		T: Deserialize<LE, R>,
+	{
 		let len = match len.try_into() {
 			Ok(x) => x,
 			_ => panic!(),
@@ -44,7 +48,10 @@ impl<L, T> LVec<L, T> {
 		Ok(Self(vec, PhantomData))
 	}
 
-	pub(crate) fn ser_len<W: LEWrite>(&self, writer: &mut W) -> Res<()> where L: TryFrom<usize> + Serialize<LE, W> {
+	pub(crate) fn ser_len<W: LEWrite>(&self, writer: &mut W) -> Res<()>
+	where
+		L: TryFrom<usize> + Serialize<LE, W>,
+	{
 		let len = self.0.len();
 		let l_len = match L::try_from(len) {
 			Ok(x) => x,
@@ -53,7 +60,10 @@ impl<L, T> LVec<L, T> {
 		writer.write(l_len)
 	}
 
-	pub(crate) fn ser_content<W: Write>(&self, writer: &mut W) -> Res<()> where for<'a> &'a T: Serialize<LE, W> {
+	pub(crate) fn ser_content<W: Write>(&self, writer: &mut W) -> Res<()>
+	where
+		for<'a> &'a T: Serialize<LE, W>,
+	{
 		for e in &self.0 {
 			LEWrite::write(writer, e)?;
 		}
@@ -68,9 +78,10 @@ impl<L, T: Debug> Debug for LVec<L, T> {
 }
 
 impl<L, T, R: Read> Deserialize<LE, R> for LVec<L, T>
-	where L: TryInto<usize> + Deserialize<LE, R>,
-	      T: Deserialize<LE, R>	{
-
+where
+	L: TryInto<usize> + Deserialize<LE, R>,
+	T: Deserialize<LE, R>,
+{
 	fn deserialize(reader: &mut R) -> Res<Self> {
 		let len: L = LERead::read(reader)?;
 		Self::deser_content(reader, len)
@@ -78,9 +89,10 @@ impl<L, T, R: Read> Deserialize<LE, R> for LVec<L, T>
 }
 
 impl<'a, L, T, W: Write> Serialize<LE, W> for &'a LVec<L, T>
-	where L: TryFrom<usize> + Serialize<LE, W>,
-	  for<'b> &'b T: Serialize<LE, W> {
-
+where
+	L: TryFrom<usize> + Serialize<LE, W>,
+	for<'b> &'b T: Serialize<LE, W>,
+{
 	fn serialize(self, writer: &mut W) -> Res<()> {
 		self.ser_len(writer)?;
 		self.ser_content(writer)
@@ -108,7 +120,6 @@ impl<L, T> From<Vec<T>> for LVec<L, T> {
 		Self(vec, PhantomData)
 	}
 }
-
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 #[repr(u16)]

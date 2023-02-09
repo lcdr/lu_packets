@@ -130,7 +130,7 @@ macro_rules! lnv {
 macro_rules! lu {
 	($str_lit:expr) => {
 		::std::convert::TryInto::try_into($str_lit).unwrap()
-	}
+	};
 }
 
 pub mod raknet;

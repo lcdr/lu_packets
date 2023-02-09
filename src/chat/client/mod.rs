@@ -7,7 +7,7 @@ pub use super::{GeneralChatMessage, PrivateChatMessage};
 
 #[derive(Debug, Deserialize, PartialEq, Serialize, MessageFromVariants, VariantTests)]
 #[non_exhaustive]
-#[post_disc_padding=9]
+#[post_disc_padding = 9]
 #[repr(u32)]
 pub enum ChatMessage {
 	GeneralChatMessage(GeneralChatMessage) = 1,
@@ -17,12 +17,12 @@ pub enum ChatMessage {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct AchievementNotify {
-	#[padding=5]
+	#[padding = 5]
 	pub sender_name: LuWString33,
 	pub sender: ObjId,
 	pub source_id: u16,
 	pub sender_gm_level: u8,
-	pub target_group: u32, // todo: type?
+	pub target_group: u32,        // todo: type?
 	pub mission_message_key: u32, // todo: type?
 	pub requesting_player: ObjId,
 	pub recipient_name: LuWString33,
