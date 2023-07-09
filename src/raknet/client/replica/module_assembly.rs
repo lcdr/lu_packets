@@ -25,7 +25,8 @@ impl ComponentConstruction for ModuleAssemblyConstruction {
 	}
 }
 
-pub type ModuleAssemblySerialization = ModuleAssemblyConstruction;
+#[derive(Debug, PartialEq, ReplicaSerde)]
+pub struct ModuleAssemblySerialization {}
 
 impl ComponentSerialization for ModuleAssemblySerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
