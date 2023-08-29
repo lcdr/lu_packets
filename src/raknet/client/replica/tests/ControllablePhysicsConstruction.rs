@@ -17,14 +17,14 @@ ControllablePhysicsConstruction {
 		gravity_scale: 8.0,
 		run_multiplier: 9.0,
 	}),
-	unknown_1: Some(Unknown1 {
+	magnet_and_flying_update: Some(MagnetAndFlyingUpdate {
 		loot_pickup_radius: 10.0,
-		unknown_2: true,
+		is_flying: true,
 	}),
-	unknown_2: Some(Unknown2 {
-		unknown_1: Some(Unknown1 {
-			loot_pickup_radius: 11.0,
-			unknown_2: true,
+	bubble_update_info: Some(BubbleUpdateInfo {
+		bubble_info: Some(BubbleInfo {
+			bubble_type: 1093664768,
+			special_animation: true,
 	}),
 	}),
 	frame_stats: Some(FrameStats {

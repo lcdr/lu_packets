@@ -34,14 +34,21 @@ pub struct CheatInfo {
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
-pub struct Unknown1 {
+pub struct MagnetAndFlyingUpdate {
 	pub loot_pickup_radius: f32,
-	pub unknown_2: bool,
+	pub is_flying: bool,
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
-pub struct Unknown2 {
-	pub unknown_1: Option<Unknown1>,
+pub struct BubbleInfo {
+	pub bubble_type: i32,
+	pub special_animation: bool,
+}
+
+#[derive(Debug, PartialEq, ReplicaSerde)]
+pub struct BubbleUpdateInfo {
+	/// If option is not set, the bubble is removed.
+	pub bubble_info: Option<BubbleInfo>,
 }
 
 #[derive(Debug, PartialEq, ReplicaSerde)]
@@ -50,6 +57,10 @@ pub struct FrameStats {
 	pub rotation: Quaternion,
 	pub is_on_ground: bool,
 	pub is_on_rail: bool,
+
+	/// Default cases of the below `Option`s result in 0 for all fields in that options' struct.
+	/// This means that if `linear_velocity` is non-zero, you must write the struct, even if nothing
+	/// has changed frame over frame.
 	pub linear_velocity: Option<Vector3>,
 	pub angular_velocity: Option<Vector3>,
 	pub local_space_info: Option<LocalSpaceInfo>,
@@ -59,6 +70,8 @@ pub struct FrameStats {
 pub struct LocalSpaceInfo {
 	pub object_id: ObjId,
 	pub position: Vector3,
+
+	/// Defaults to [`Vector3::ZERO`] if not set. Always write if non-zero.
 	pub linear_velocity: Option<Vector3>,
 }
 
@@ -67,8 +80,8 @@ pub struct ControllablePhysicsConstruction {
 	pub jetpack_info: Option<JetpackInfo>,
 	pub stun_immunity_info: Option<StunImmunityInfo>,
 	pub cheat_info: Option<CheatInfo>,
-	pub unknown_1: Option<Unknown1>,
-	pub unknown_2: Option<Unknown2>,
+	pub magnet_and_flying_update: Option<MagnetAndFlyingUpdate>,
+	pub bubble_update_info: Option<BubbleUpdateInfo>,
 	pub frame_stats: Option<FrameStats>,
 }
 
@@ -81,8 +94,8 @@ pub struct FrameStatsTeleportInfo {
 #[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
 pub struct ControllablePhysicsSerialization {
 	pub cheat_info: Option<CheatInfo>,
-	pub unknown_1: Option<Unknown1>,
-	pub unknown_2: Option<Unknown2>,
+	pub magnet_and_flying_update: Option<MagnetAndFlyingUpdate>,
+	pub bubble_update_info: Option<BubbleUpdateInfo>,
 	pub frame_stats_teleport_info: Option<FrameStatsTeleportInfo>,
 }
 
