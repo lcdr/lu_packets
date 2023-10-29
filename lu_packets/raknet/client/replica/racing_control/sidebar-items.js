@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["DuringRacePlayerInfo",""],["PostRacePlayerInfo",""],["PreRacePlayerInfo",""],["RaceInfo",""],["RacingControlConstruction",""],["RacingControlProtocol",""]],"type":[["RacingControlSerialization",""]]};

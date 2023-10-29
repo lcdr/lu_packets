@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["EquippedItemInfo",""],["EquippedModelTransform",""],["InventoryConstruction",""],["InventoryProtocol",""]],"type":[["InventorySerialization",""]]};

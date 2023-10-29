@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["DonationVendorConstruction",""],["DonationVendorInfo",""],["DonationVendorProtocol",""]],"type":[["DonationVendorSerialization",""]]};

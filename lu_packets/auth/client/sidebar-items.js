@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ClientMessage","All client-received auth messages."],["LoginResponse","Responds to a login request."],["LuMessage","All LU messages that can be received by a client from an auth server."]],"struct":[["Stamp",""]],"type":[["Message","All messages that can be received by a client from an auth server."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PhysicsEffectType",""]],"struct":[["ActivePhysicsEffectInfo",""],["DistanceInfo",""],["PhantomPhysicsConstruction",""],["PhantomPhysicsProtocol",""],["PhysicsEffectInfo",""]],"type":[["PhantomPhysicsSerialization",""]]};

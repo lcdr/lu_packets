@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PhysicsBehaviorType",""]],"struct":[["ModelBehaviorInfo",""],["ModelEditingInfo",""],["MutableModelBehaviorConstruction",""],["MutableModelBehaviorConstructionInfo",""],["MutableModelBehaviorProtocol",""],["MutableModelBehaviorSerialization",""],["MutableModelBehaviorSerializationInfo",""]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["BubbleInfo",""],["BubbleUpdateInfo",""],["CheatInfo",""],["ControllablePhysicsConstruction",""],["ControllablePhysicsProtocol",""],["ControllablePhysicsSerialization",""],["FrameStats",""],["FrameStatsTeleportInfo",""],["JetpackInfo",""],["LocalSpaceInfo",""],["MagnetAndFlyingUpdate",""],["StunImmunityInfo",""]]};

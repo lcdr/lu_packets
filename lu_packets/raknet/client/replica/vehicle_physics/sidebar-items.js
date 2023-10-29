@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["EndOfRaceBehaviorType",""]],"struct":[["RemoteInputInfo",""],["VehicleFrameStats",""],["VehicleFrameStatsTeleportInfo",""],["VehiclePhysicsConstruction",""],["VehiclePhysicsProtocol",""],["VehiclePhysicsSerialization",""]]};

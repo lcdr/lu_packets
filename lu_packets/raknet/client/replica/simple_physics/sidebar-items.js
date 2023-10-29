@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ClimbingProperty",""],["MotionType",""]],"struct":[["PositionRotationInfo",""],["SimplePhysicsConstruction",""],["SimplePhysicsProtocol",""],["SimplePhysicsSerialization",""],["VelocityInfo",""]]};

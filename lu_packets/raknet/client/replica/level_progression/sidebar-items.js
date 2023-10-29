@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["LevelProgressionConstruction",""],["LevelProgressionProtocol",""]],"type":[["LevelProgressionSerialization",""]]};

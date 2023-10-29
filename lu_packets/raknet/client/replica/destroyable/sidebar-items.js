@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["DestroyableConstruction",""],["DestroyableProtocol",""],["DestroyableSerialization",""],["SerializationStatsInfo",""],["SmashableInfo",""],["StatsInfo",""],["StatusImmunityInfo",""]]};

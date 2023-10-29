@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"lu_packets":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"lu_packets/world/struct.Vector3.html\" title=\"struct lu_packets::world::Vector3\">Vector3</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"lu_packets/world/struct.Quaternion.html\" title=\"struct lu_packets::world::Quaternion\">Quaternion</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

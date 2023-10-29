@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PossessionType",""]],"struct":[["PossessionControlConstruction",""],["PossessionControlProtocol",""],["PossessionInfo",""]],"type":[["PossessionControlSerialization",""]]};

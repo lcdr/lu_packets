@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ActivityUserInfo",""],["ScriptedActivityConstruction",""],["ScriptedActivityProtocol",""]],"type":[["ScriptedActivitySerialization",""]]};

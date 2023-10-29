@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PlatformSubcomponentInfo",""]],"struct":[["MovingPlatformConstruction",""],["MovingPlatformProtocol",""],["PlatformMoverInfo",""],["PlatformPathInfo",""],["PlatformSimpleMoverExtraInfo",""],["PlatformSimpleMoverInfo",""]],"type":[["MovingPlatformSerialization",""]]};

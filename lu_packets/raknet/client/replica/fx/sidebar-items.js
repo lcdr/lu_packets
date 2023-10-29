@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["EffectInfo",""],["FxConstruction",""],["FxProtocol",""],["FxSerialization",""]]};
