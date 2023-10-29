@@ -45,19 +45,7 @@ impl ComponentConstruction for PetConstruction {
 	}
 }
 
-#[derive(Debug, PartialEq, ReplicaSerde)]
-pub struct PetSerializationInfo {
-	/// todo: bitflag
-	pub pet_state: u32,
-	pub ability_in_use: PetAbilityType,
-	pub interaction_id: Option<ObjId>,
-	pub owner_id: Option<ObjId>,
-}
-
-#[derive(BitVariantTests, Debug, PartialEq, ReplicaSerde)]
-pub struct PetSerialization {
-	pub pet_serialization_info: Option<PetSerializationInfo>,
-}
+pub type PetSerialization = PetConstruction;
 
 impl ComponentSerialization for PetSerialization {
 	fn ser(&self, writer: &mut BEBitWriter<Vec<u8>>) -> Res<()> {
